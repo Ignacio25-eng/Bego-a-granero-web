@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Begoña Granero – Boutique de Belleza</title>
+<meta name="description" content="Begoña Granero, boutique de belleza en Alpedrete: peluquería, coloración, manicura, depilación láser, tratamientos faciales y masajes. Pide tu cita.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Begoña Granero – Boutique de Belleza">
+<meta property="og:description" content="Peluquería, color, uñas, láser, facial y masajes en Alpedrete. Pide tu cita.">
+<!-- PENDIENTE: cuando haya fotos, añadir la imagen de vista previa al compartir:
+<meta property="og:image" content="URL-de-una-foto-del-salon.jpg"> -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23B8827F'/%3E%3Ctext x='32' y='43' font-family='Georgia,serif' font-size='28' font-style='italic' fill='%23fff' text-anchor='middle'%3EBG%3C/text%3E%3C/svg%3E">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BeautySalon",
+  "name": "Begoña Granero Boutique de Belleza",
+  "telephone": "+34665085053",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "C/ Obispo Golfín, 9",
+    "addressLocality": "Alpedrete",
+    "postalCode": "28430",
+    "addressRegion": "Madrid",
+    "addressCountry": "ES"
+  },
+  "openingHoursSpecification": [
+    { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Tuesday","Wednesday","Thursday","Friday"], "opens": "10:00", "closes": "20:00" },
+    { "@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "10:00", "closes": "14:00" }
+  ],
+  "sameAs": ["https://www.instagram.com/begograneroboutique/"]
+}
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rose:      #D4A5A5;
+    --rose-deep: #B8827F;
+    --gold:      #C9A96E;
+    --gold-light:#E8D5B0;
+    --cream:     #FAF7F4;
+    --cream-dark:#F2EDE8;
+    --charcoal:  #2C2C2C;
+    --mid:       #6B6B6B;
+    --light:     #9E9E9E;
+    --white:     #FFFFFF;
+    --error:     #C0504D;
+    --success:   #6B9E7A;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Lato', sans-serif; background: var(--cream); color: var(--charcoal); overflow-x: hidden; }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(250,247,244,0.96); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--gold-light);
+    padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 68px;
+  }
+  .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 600; color: var(--charcoal); letter-spacing: 0.04em; line-height: 1.2; text-decoration: none; }
+  .nav-logo span { color: var(--gold); display: block; font-size: 0.65rem; font-weight: 400; font-style: italic; letter-spacing: 0.15em; text-transform: uppercase; }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a { text-decoration: none; color: var(--mid); font-size: 0.85rem; letter-spacing: 0.06em; text-transform: uppercase; transition: color .2s; }
+  .nav-links a:hover { color: var(--rose-deep); }
+  .nav-cta { background: var(--rose-deep); color: var(--white); padding: 0.55rem 1.4rem; border-radius: 2px; font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; transition: background .2s; }
+  .nav-cta:hover { background: var(--charcoal); }
+
+  /* ── HERO ── */
+  #hero { min-height: 100vh; display: flex; align-items: center; background: linear-gradient(135deg, var(--cream) 55%, var(--rose) 100%); padding: 120px 2rem 4rem; position: relative; overflow: hidden; }
+  #hero::before { content: ''; position: absolute; top: -80px; right: -80px; width: 520px; height: 520px; border-radius: 50%; background: radial-gradient(circle, rgba(201,169,110,0.18) 0%, transparent 70%); pointer-events: none; }
+  .hero-inner { max-width: 1100px; margin: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; width: 100%; }
+  .hero-eyebrow { font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-bottom: 1rem; }
+  .hero-title { font-family: 'Playfair Display', serif; font-size: clamp(2.4rem, 5vw, 3.8rem); line-height: 1.1; font-weight: 700; color: var(--charcoal); margin-bottom: 1.5rem; }
+  .hero-title em { font-style: italic; color: var(--rose-deep); }
+  .hero-body { font-size: 1.05rem; color: var(--mid); line-height: 1.8; margin-bottom: 2.2rem; font-weight: 300; }
+  .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .btn-primary { background: var(--rose-deep); color: var(--white); padding: 0.85rem 2rem; border-radius: 2px; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; transition: background .2s, transform .15s; display: inline-block; }
+  .btn-primary:hover { background: var(--charcoal); transform: translateY(-1px); }
+  .btn-secondary { background: transparent; color: var(--charcoal); padding: 0.85rem 2rem; border-radius: 2px; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; border: 1.5px solid var(--gold); transition: background .2s, color .2s; display: inline-block; }
+  .btn-secondary:hover { background: var(--gold); color: var(--white); }
+  .hero-visual { display: flex; justify-content: center; align-items: center; position: relative; }
+  .hero-card { background: var(--white); border-radius: 4px; box-shadow: 0 20px 60px rgba(180,130,127,0.18); padding: 2.2rem; width: 100%; max-width: 340px; }
+  .hero-card-title { font-family: 'Playfair Display', serif; font-size: 1rem; font-style: italic; color: var(--gold); margin-bottom: 1.2rem; border-bottom: 1px solid var(--cream-dark); padding-bottom: 0.8rem; }
+  .hero-service-list { list-style: none; }
+  .hero-service-list li { display: flex; justify-content: space-between; padding: 0.55rem 0; border-bottom: 1px solid var(--cream-dark); font-size: 0.88rem; color: var(--mid); }
+  .hero-service-list li:last-child { border-bottom: none; }
+  .hero-service-list .price { color: var(--rose-deep); font-weight: 700; font-size: 0.82rem; }
+
+  /* ── SECTIONS COMMON ── */
+  section { padding: 5rem 2rem; }
+  .section-inner { max-width: 1100px; margin: auto; }
+  .section-eyebrow { font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.6rem; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: clamp(1.8rem, 3.5vw, 2.6rem); font-weight: 700; color: var(--charcoal); margin-bottom: 0.8rem; }
+  .section-sub { color: var(--mid); font-size: 1rem; line-height: 1.7; font-weight: 300; max-width: 560px; }
+  .section-header { margin-bottom: 3rem; }
+
+  /* ── SERVICIOS ── */
+  #servicios { background: var(--cream-dark); }
+  .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; }
+  .service-card { background: var(--white); border-radius: 4px; padding: 2rem 1.6rem; border-top: 3px solid var(--rose); transition: box-shadow .2s, transform .2s; cursor: default; }
+  .service-card:hover { box-shadow: 0 12px 35px rgba(180,130,127,0.14); transform: translateY(-3px); }
+  .service-icon { font-size: 2rem; margin-bottom: 1rem; }
+  .service-name { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 600; color: var(--charcoal); margin-bottom: 0.5rem; }
+  .service-desc { font-size: 0.88rem; color: var(--mid); line-height: 1.6; margin-bottom: 1rem; }
+  .service-duration { font-size: 0.78rem; color: var(--light); letter-spacing: 0.06em; }
+
+  /* ── RESERVAS ── */
+  #reservas { background: var(--cream); }
+  .booking-wrapper { display: grid; grid-template-columns: 1fr 1.1fr; gap: 3.5rem; align-items: start; }
+  .booking-info h3 { font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: 1rem; color: var(--charcoal); }
+  .booking-info p { font-size: 0.92rem; color: var(--mid); line-height: 1.7; margin-bottom: 1.5rem; }
+  .info-badge { display: flex; align-items: flex-start; gap: 0.8rem; background: var(--cream-dark); border-radius: 4px; padding: 1rem 1.2rem; margin-bottom: 0.8rem; font-size: 0.85rem; color: var(--mid); }
+  .info-badge .icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+  .info-badge strong { display: block; color: var(--charcoal); font-size: 0.82rem; margin-bottom: 0.15rem; }
+
+  /* FORM */
+  .booking-form { background: var(--white); border-radius: 4px; padding: 2.4rem; box-shadow: 0 8px 35px rgba(44,44,44,0.07); }
+  .form-title { font-family: 'Playfair Display', serif; font-size: 1.25rem; font-style: italic; color: var(--charcoal); margin-bottom: 1.8rem; border-bottom: 1px solid var(--cream-dark); padding-bottom: 1rem; }
+  .form-group { margin-bottom: 1.3rem; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  label { display: block; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); margin-bottom: 0.4rem; }
+  input, select, textarea { width: 100%; padding: 0.75rem 1rem; border: 1.5px solid var(--cream-dark); border-radius: 2px; font-family: 'Lato', sans-serif; font-size: 0.92rem; color: var(--charcoal); background: var(--cream); transition: border-color .2s, background .2s; outline: none; }
+  input:focus, select:focus, textarea:focus { border-color: var(--rose); background: var(--white); }
+  textarea { resize: vertical; min-height: 80px; }
+
+  /* TIME SLOTS */
+  .slots-label { font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); margin-bottom: 0.6rem; display: block; }
+  .slots-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; margin-top: 0.4rem; }
+  .slot {
+    display: block; width: 100%; min-height: 46px;
+    padding: 0; margin: 0; border-radius: 3px;
+    border: 1.5px solid var(--cream-dark);
+    background: var(--white); font-size: 0.78rem;
+    font-family: 'Lato', sans-serif;
+    color: var(--mid); text-align: center; line-height: 46px;
+    cursor: pointer; box-sizing: border-box;
+    -webkit-appearance: none; appearance: none;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    touch-action: manipulation; user-select: none;
+    transition: background 0.1s, border-color 0.1s, color 0.1s;
+  }
+  .slot:active { background: #fdf5f5; }
+  .slot.selected { background: var(--rose-deep) !important; border-color: var(--rose-deep) !important; color: var(--white) !important; font-weight: 700; }
+  .slot.taken { background: var(--cream-dark); border-color: var(--cream-dark); color: var(--light); pointer-events: none; text-decoration: line-through; }
+
+  .btn-book { width: 100%; padding: 1rem; background: var(--rose-deep); color: var(--white); border: none; border-radius: 2px; cursor: pointer; font-family: 'Lato', sans-serif; font-size: 0.88rem; letter-spacing: 0.12em; text-transform: uppercase; transition: background .2s, transform .15s; margin-top: 0.6rem; }
+  .btn-book:hover { background: var(--charcoal); transform: translateY(-1px); }
+  .btn-book:active { transform: translateY(0); }
+  .btn-book:disabled { background: var(--light); cursor: not-allowed; transform: none; }
+
+  /* ALERTS */
+  .alert { padding: 0.85rem 1rem; border-radius: 2px; font-size: 0.88rem; margin-bottom: 1rem; display: none; }
+  .alert.success { background: #edf6ef; color: #3a7a4d; border-left: 3px solid var(--success); }
+  .alert.error   { background: #fdf0f0; color: #a04040; border-left: 3px solid var(--error); }
+  .alert.show { display: block; }
+
+  /* ── CONTACTO ── */
+  #contacto { background: var(--charcoal); }
+  #contacto .section-title { color: var(--white); }
+  #contacto .section-eyebrow { color: var(--gold); }
+  #contacto .section-sub { color: rgba(255,255,255,0.55); }
+  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
+  .contact-item { margin-bottom: 1.5rem; }
+  .contact-item .c-label { font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.3rem; }
+  .contact-item .c-value { font-size: 1rem; color: var(--white); }
+  .contact-item a { color: var(--rose); text-decoration: none; }
+  .contact-item a:hover { color: var(--gold); }
+  .hours-table { width: 100%; border-collapse: collapse; }
+  .hours-table td { padding: 0.5rem 0; font-size: 0.88rem; color: rgba(255,255,255,0.7); border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .hours-table td:first-child { font-weight: 700; color: var(--white); }
+  .hours-table td:last-child { text-align: right; color: var(--gold); }
+
+  /* ── FOOTER ── */
+  footer { background: #1a1a1a; padding: 2rem; text-align: center; font-size: 0.78rem; color: rgba(255,255,255,0.3); letter-spacing: 0.06em; }
+  footer span { color: var(--rose); }
+
+  /* ── MENÚ MÓVIL ── */
+  .nav-toggle { display: none; background: none; border: none; cursor: pointer; padding: 0.5rem; margin-left: auto; margin-right: 0.8rem; }
+  .nav-toggle span { display: block; width: 22px; height: 2px; background: var(--charcoal); margin: 5px 0; transition: transform .2s, opacity .2s; }
+  nav.menu-open .nav-toggle span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  nav.menu-open .nav-toggle span:nth-child(2) { opacity: 0; }
+  nav.menu-open .nav-toggle span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* ── PENDIENTE (huecos para material de Begoña) ── */
+  .pendiente { border: 2px dashed var(--rose); background: repeating-linear-gradient(45deg, var(--cream), var(--cream) 10px, var(--cream-dark) 10px, var(--cream-dark) 20px); color: var(--rose-deep); font-size: 0.8rem; font-style: italic; display: flex; align-items: center; justify-content: center; text-align: center; padding: 1rem; border-radius: 4px; }
+
+  /* ── SOBRE BEGOÑA ── */
+  #sobre { background: var(--cream); }
+  .about-grid { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 3.5rem; align-items: center; }
+  .about-photo { aspect-ratio: 4 / 5; width: 100%; }
+  .about-photo img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; }
+  .about-text p { color: var(--mid); line-height: 1.8; margin-bottom: 1rem; font-weight: 300; }
+
+  /* ── GALERÍA ── */
+  #galeria { background: var(--cream-dark); }
+  .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .gallery-item { aspect-ratio: 1; width: 100%; }
+  .gallery-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; }
+  .gallery-more { text-align: center; margin-top: 2rem; }
+
+  /* ── OPINIONES ── */
+  #opiniones { background: var(--cream-dark); padding-top: 0; }
+  .reviews-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+  .review-card { min-height: 160px; }
+  .reviews-more { text-align: center; margin-top: 2rem; }
+
+  /* ── MAPA ── */
+  .map-wrap { margin-top: 3rem; border-radius: 4px; overflow: hidden; height: 320px; }
+  .map-wrap iframe { width: 100%; height: 100%; border: 0; display: block; filter: grayscale(0.3); }
+
+  /* ── PRIVACIDAD (formulario) ── */
+  .check-group { display: flex; align-items: flex-start; gap: 0.6rem; margin-bottom: 1.3rem; font-size: 0.85rem; color: var(--mid); line-height: 1.5; text-transform: none; letter-spacing: normal; cursor: pointer; }
+  .check-group input { width: auto; margin-top: 3px; accent-color: var(--rose-deep); }
+  .check-group a, .form-note a { color: var(--rose-deep); }
+  .form-note { font-size: 0.78rem; color: var(--light); margin-top: 0.8rem; line-height: 1.5; text-align: center; }
+
+  /* ── WHATSAPP FLOTANTE ── */
+  .wa-float { position: fixed; right: 20px; bottom: 20px; z-index: 90; width: 56px; height: 56px; border-radius: 50%; background: #25D366; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(0,0,0,0.2); transition: transform .2s; }
+  .wa-float:hover { transform: scale(1.08); }
+  .wa-float svg { width: 30px; height: 30px; fill: #fff; }
+
+  /* ── TEXTOS LEGALES ── */
+  footer a { color: rgba(255,255,255,0.5); text-decoration: none; }
+  footer a:hover { color: var(--rose); }
+  .footer-legal { margin-top: 0.6rem; }
+  dialog.legal { border: none; border-radius: 6px; max-width: 680px; width: calc(100vw - 32px); max-height: 85vh; padding: 2.2rem; box-shadow: 0 24px 70px rgba(0,0,0,0.25); color: var(--charcoal); }
+  dialog.legal::backdrop { background: rgba(44,44,44,0.6); }
+  dialog.legal h2 { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 1.2rem; }
+  dialog.legal h3 { font-size: 0.95rem; margin: 1.2rem 0 0.4rem; }
+  dialog.legal p, dialog.legal li { font-size: 0.88rem; color: var(--mid); line-height: 1.7; }
+  dialog.legal ul { padding-left: 1.2rem; }
+  dialog.legal .falta { background: #fdf0f0; color: var(--error); padding: 0 0.3rem; border-radius: 2px; }
+  .btn-close-legal { margin-top: 1.5rem; background: var(--rose-deep); color: var(--white); border: none; padding: 0.7rem 1.6rem; border-radius: 2px; cursor: pointer; font-family: 'Lato', sans-serif; font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    nav { padding: 0 1rem; }
+    .nav-toggle { display: block; }
+    .nav-links { display: none; position: absolute; top: 68px; left: 0; right: 0; flex-direction: column; gap: 0; background: var(--cream); border-bottom: 1px solid var(--gold-light); padding: 0.5rem 0; }
+    nav.menu-open .nav-links { display: flex; }
+    .nav-links a { display: block; padding: 0.9rem 1.5rem; }
+    .about-grid, .reviews-grid { grid-template-columns: 1fr; }
+    .about-photo { max-width: 360px; margin: 0 auto; }
+    .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+    .hero-inner, .booking-wrapper, .contact-grid { grid-template-columns: 1fr; }
+    .hero-visual { display: none; }
+    .form-row { grid-template-columns: 1fr; }
+    .slots-grid { grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+    .slot { font-size: 0.82rem; min-height: 50px; line-height: 50px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-logo">
+    Begoña Granero
+    <span>Boutique de Belleza</span>
+  </a>
+  <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#servicios">Servicios</a></li>
+    <li><a href="#sobre">Sobre Begoña</a></li>
+    <li><a href="#galeria">Galería</a></li>
+    <li><a href="#contacto">Contacto</a></li>
+  </ul>
+  <a href="#reservas" class="nav-cta">Reservar cita</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-inner">
+    <div>
+      <p class="hero-eyebrow">Boutique de Belleza · Alpedrete</p>
+      <h1 class="hero-title">Tu belleza,<br><em>a tu medida</em></h1>
+      <p class="hero-body">En Begoña Granero cuidamos cada detalle. Desde el corte perfecto hasta el tratamiento más exclusivo, aquí tu bienestar es nuestra prioridad.</p>
+      <div class="hero-actions">
+        <a href="#reservas" class="btn-primary">Pedir cita online</a>
+        <a href="#servicios" class="btn-secondary">Ver servicios</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-card">
+        <div class="hero-card-title">Nuestros servicios</div>
+        <ul class="hero-service-list">
+          <li><span>✂️ Corte &amp; Peinado</span><span class="price">desde 25€</span></li>
+          <li><span>💅 Manicura &amp; Uñas</span><span class="price">desde 30€</span></li>
+          <li><span>✨ Depilación Láser</span><span class="price">desde 40€</span></li>
+          <li><span>🌿 Tratamientos faciales</span><span class="price">desde 35€</span></li>
+          <li><span>🎨 Coloración</span><span class="price">desde 45€</span></li>
+          <li><span>💆 Masaje &amp; Bienestar</span><span class="price">desde 50€</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICIOS -->
+<section id="servicios">
+  <div class="section-inner">
+    <div class="section-header">
+      <p class="section-eyebrow">Lo que ofrecemos</p>
+      <h2 class="section-title">Nuestros servicios</h2>
+      <p class="section-sub">Cuidados profesionales para que te sientas extraordinaria en cada visita.</p>
+    </div>
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="service-icon">✂️</div>
+        <div class="service-name">Peluquería</div>
+        <p class="service-desc">Corte, lavado, peinado y styling personalizados. Técnicas modernas y clásicas adaptadas a ti.</p>
+        <div class="service-duration">⏱ 45–90 min · desde 25€</div>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">🎨</div>
+        <div class="service-name">Coloración</div>
+        <p class="service-desc">Tintes, mechas, balayage y técnicas de color avanzadas con productos de primera calidad.</p>
+        <div class="service-duration">⏱ 90–150 min · desde 45€</div>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">💅</div>
+        <div class="service-name">Manicura &amp; Uñas</div>
+        <p class="service-desc">Manicura clásica, semipermanente, uñas de gel, nail art y cuidado completo de manos y pies.</p>
+        <div class="service-duration">⏱ 60–90 min · desde 30€</div>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">✨</div>
+        <div class="service-name">Depilación Láser</div>
+        <p class="service-desc">Tratamiento láser de alta precisión para cualquier zona del cuerpo. Resultados duraderos y sin dolor.</p>
+        <div class="service-duration">⏱ 30–60 min · desde 40€</div>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">🌿</div>
+        <div class="service-name">Facial &amp; Estética</div>
+        <p class="service-desc">Limpiezas faciales, hidratación profunda, radiofrecuencia y tratamientos antiedad personalizados.</p>
+        <div class="service-duration">⏱ 60 min · desde 35€</div>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">💆</div>
+        <div class="service-name">Masaje &amp; Bienestar</div>
+        <p class="service-desc">Masajes relajantes, reafirmantes y tratamientos corporales para tu cuerpo y mente.</p>
+        <div class="service-duration">⏱ 60–90 min · desde 50€</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOBRE BEGOÑA -->
+<section id="sobre">
+  <div class="section-inner about-grid">
+    <!-- PENDIENTE: sustituir por <img src="begona.jpg" alt="Begoña Granero en su salón"> -->
+    <div class="about-photo pendiente">Foto de Begoña pendiente</div>
+    <div class="about-text">
+      <p class="section-eyebrow">Quién está detrás</p>
+      <h2 class="section-title">Sobre Begoña</h2>
+      <!-- PENDIENTE: texto escrito con Begoña -->
+      <p class="pendiente" style="justify-content:flex-start;text-align:left;">Texto pendiente: quién es Begoña, desde cuándo se dedica a esto, su formación y especialidades, y qué hace distinto a su salón.</p>
+      <div class="hero-actions" style="margin-top:1.5rem;">
+        <a href="#reservas" class="btn-primary">Pedir cita</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GALERÍA -->
+<section id="galeria">
+  <div class="section-inner">
+    <div class="section-header">
+      <p class="section-eyebrow">Nuestro trabajo</p>
+      <h2 class="section-title">Galería</h2>
+      <p class="section-sub">Algunos de nuestros trabajos y el salón donde te esperamos.</p>
+    </div>
+    <!-- PENDIENTE: sustituir cada hueco por <div class="gallery-item"><img src="foto.jpg" alt="Descripción"></div> -->
+    <div class="gallery-grid">
+      <div class="gallery-item pendiente">Foto del salón</div>
+      <div class="gallery-item pendiente">Foto de corte / peinado</div>
+      <div class="gallery-item pendiente">Foto de coloración</div>
+      <div class="gallery-item pendiente">Foto de uñas</div>
+      <div class="gallery-item pendiente">Foto de tratamiento facial</div>
+      <div class="gallery-item pendiente">Foto de antes / después</div>
+    </div>
+    <div class="gallery-more">
+      <a href="https://www.instagram.com/begograneroboutique/?hl=es" target="_blank" rel="noopener" class="btn-secondary">Ver más en Instagram</a>
+    </div>
+  </div>
+</section>
+
+<!-- OPINIONES -->
+<section id="opiniones">
+  <div class="section-inner">
+    <div class="section-header">
+      <p class="section-eyebrow">Lo que dicen nuestras clientas</p>
+      <h2 class="section-title">Opiniones</h2>
+    </div>
+    <!-- PENDIENTE: copiar opiniones reales (con permiso) de Google o Instagram -->
+    <div class="reviews-grid">
+      <div class="review-card pendiente">Opinión real de una clienta pendiente</div>
+      <div class="review-card pendiente">Opinión real de una clienta pendiente</div>
+      <div class="review-card pendiente">Opinión real de una clienta pendiente</div>
+    </div>
+    <div class="reviews-more">
+      <a href="https://www.google.com/maps/search/?api=1&query=Bego%C3%B1a+Granero+Boutique+de+Belleza+Alpedrete" target="_blank" rel="noopener" class="btn-secondary">Ver opiniones en Google</a>
+    </div>
+  </div>
+</section>
+
+<!-- RESERVAS -->
+<section id="reservas">
+  <div class="section-inner">
+    <div class="section-header">
+      <p class="section-eyebrow">Reserva online</p>
+      <h2 class="section-title">Pide tu cita</h2>
+      <p class="section-sub">Envíanos tu solicitud en un minuto y te confirmamos la cita lo antes posible.</p>
+    </div>
+    <div class="booking-wrapper">
+      <div class="booking-info">
+        <h3>¿Cómo funciona?</h3>
+        <p>Elige el servicio, el día y la hora que mejor te vengan. Al pulsar el botón se abrirá WhatsApp con tu solicitud ya escrita: solo tienes que enviarla. Te confirmaremos la cita por el mismo WhatsApp.</p>
+        <div class="info-badge">
+          <span class="icon">🕐</span>
+          <div>
+            <strong>Horario de atención</strong>
+            Martes a viernes · 10:00 – 20:00<br>
+            Sábado · 10:00 – 14:00
+          </div>
+        </div>
+        <div class="info-badge">
+          <span class="icon">📞</span>
+          <div>
+            <strong>¿Prefieres llamar?</strong>
+            <a href="tel:+34665085053" style="color:var(--rose-deep);">+34 665 08 50 53</a>
+          </div>
+        </div>
+      </div>
+      <div class="booking-form">
+        <div class="form-title">Solicitar cita</div>
+        <div id="bookingAlert" class="alert"></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="nombre">Nombre *</label>
+            <input type="text" id="nombre" placeholder="Tu nombre" autocomplete="given-name">
+          </div>
+          <div class="form-group">
+            <label for="apellido">Apellido</label>
+            <input type="text" id="apellido" placeholder="Tu apellido" autocomplete="family-name">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="telefono">Teléfono *</label>
+          <input type="tel" id="telefono" placeholder="600 000 000" autocomplete="tel">
+        </div>
+        <div class="form-group">
+          <label for="servicio">Servicio *</label>
+          <select id="servicio">
+            <option value="">– Selecciona un servicio –</option>
+            <option value="Peluquería">✂️ Peluquería (corte, peinado)</option>
+            <option value="Coloración">🎨 Coloración (tinte, mechas)</option>
+            <option value="Manicura & Uñas">💅 Manicura &amp; Uñas</option>
+            <option value="Depilación Láser">✨ Depilación Láser</option>
+            <option value="Facial & Estética">🌿 Facial &amp; Estética</option>
+            <option value="Masaje & Bienestar">💆 Masaje &amp; Bienestar</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="zona">Zona / detalle (opcional)</label>
+          <input type="text" id="zona" placeholder="Ej: depilación piernas completas, mechas rubias…">
+        </div>
+        <div class="form-group">
+          <label for="fecha">Fecha *</label>
+          <input type="date" id="fecha">
+        </div>
+        <div class="form-group">
+          <span class="slots-label">Hora preferida *</span>
+          <div class="slots-grid" id="slotsGrid">
+            <div style="grid-column:1/-1;font-size:0.82rem;color:var(--light);font-style:italic;padding:0.5rem 0;">
+              Selecciona una fecha para ver las horas.
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="notas">Notas adicionales</label>
+          <textarea id="notas" placeholder="Cualquier detalle que debamos saber…"></textarea>
+        </div>
+        <label class="check-group" for="privacidad">
+          <input type="checkbox" id="privacidad">
+          <span>He leído y acepto la <a href="#" onclick="abrirLegal(event,'dlgPrivacidad')">política de privacidad</a>. *</span>
+        </label>
+        <button class="btn-book" id="btnReservar" onclick="reservar()">Enviar solicitud por WhatsApp</button>
+        <p class="form-note">La cita no queda confirmada hasta que te respondamos. ¿Prefieres llamar? <a href="tel:+34665085053">665 08 50 53</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACTO -->
+<section id="contacto">
+  <div class="section-inner">
+    <div class="section-header">
+      <p class="section-eyebrow">Encuéntranos</p>
+      <h2 class="section-title">Contacto</h2>
+      <p class="section-sub">Estamos aquí para cualquier consulta. No dudes en escribirnos o visitarnos.</p>
+    </div>
+    <div class="contact-grid">
+      <div>
+        <div class="contact-item">
+          <div class="c-label">Dirección</div>
+          <div class="c-value">C/ Obispo Golfín, 9 · Alpedrete 28430</div>
+        </div>
+        <div class="contact-item">
+          <div class="c-label">Teléfono</div>
+          <div class="c-value"><a href="tel:+34665085053">+34 665 08 50 53</a></div>
+        </div>
+        <div class="contact-item">
+          <div class="c-label">WhatsApp</div>
+          <div class="c-value"><a href="https://wa.me/34665085053" target="_blank" rel="noopener">Escríbenos por WhatsApp</a></div>
+        </div>
+        <div class="contact-item">
+          <div class="c-label">Redes sociales</div>
+          <div class="c-value" style="margin-top:0.3rem;">
+            <a href="https://www.instagram.com/begograneroboutique/?hl=es" target="_blank" rel="noopener">Instagram</a>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="c-label" style="color:var(--gold);font-size:0.72rem;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:1rem;">Horario de apertura</div>
+        <table class="hours-table">
+          <tr><td>Martes – Viernes</td><td>10:00 – 20:00</td></tr>
+          <tr><td>Sábado</td><td>10:00 – 14:00</td></tr>
+          <tr><td>Domingo &amp; Lunes</td><td style="color:var(--light);">Cerrado</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="map-wrap">
+      <iframe src="https://www.google.com/maps?q=C%2F+Obispo+Golf%C3%ADn+9,+28430+Alpedrete&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Mapa: C/ Obispo Golfín 9, Alpedrete"></iframe>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© <time id="year">2026</time> <span>Begoña Granero Boutique de Belleza</span> · Todos los derechos reservados</p>
+  <p class="footer-legal">
+    <a href="#" onclick="abrirLegal(event,'dlgAviso')">Aviso legal</a>
+    &nbsp;·&nbsp;
+    <a href="#" onclick="abrirLegal(event,'dlgPrivacidad')">Política de privacidad</a>
+  </p>
+</footer>
+
+<!-- WHATSAPP FLOTANTE -->
+<a class="wa-float" href="https://wa.me/34665085053" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.7.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35zM12.05 21.5h-.01a9.4 9.4 0 0 1-4.79-1.31l-.34-.2-3.56.93.95-3.47-.22-.36a9.4 9.4 0 0 1-1.44-5.01c0-5.2 4.23-9.43 9.44-9.43 2.52 0 4.89.98 6.67 2.77a9.37 9.37 0 0 1 2.76 6.67c0 5.2-4.23 9.43-9.43 9.43zm8.03-17.46A11.32 11.32 0 0 0 12.05.7C5.79.7.7 5.79.7 12.04c0 2 .52 3.95 1.52 5.67L.6 23.6l6.03-1.58a11.33 11.33 0 0 0 5.42 1.38h.01c6.25 0 11.34-5.09 11.35-11.34 0-3.03-1.18-5.88-3.33-8.02z"/></svg>
+</a>
+
+<!-- AVISO LEGAL -->
+<!-- PENDIENTE: rellenar los datos marcados en rojo y que lo revise un asesor/gestor -->
+<dialog class="legal" id="dlgAviso">
+  <h2>Aviso legal</h2>
+  <p>En cumplimiento de la Ley 34/2002, de Servicios de la Sociedad de la Información y de Comercio Electrónico (LSSI-CE), se informa de los datos del titular de este sitio web:</p>
+  <ul>
+    <li>Titular: <span class="falta">[nombre completo o razón social]</span></li>
+    <li>NIF: <span class="falta">[NIF]</span></li>
+    <li>Domicilio: C/ Obispo Golfín, 9 · 28430 Alpedrete (Madrid)</li>
+    <li>Teléfono: +34 665 08 50 53</li>
+    <li>Email: <span class="falta">[email de contacto]</span></li>
+  </ul>
+  <h3>Uso del sitio</h3>
+  <p>Este sitio web tiene carácter informativo y permite solicitar cita. Los precios indicados son orientativos («desde») y pueden variar según el servicio concreto.</p>
+  <h3>Propiedad intelectual</h3>
+  <p>Los textos, fotografías y logotipos de esta web pertenecen a su titular o se usan con permiso. No está permitida su reproducción sin autorización.</p>
+  <button class="btn-close-legal" onclick="this.closest('dialog').close()">Cerrar</button>
+</dialog>
+
+<!-- POLÍTICA DE PRIVACIDAD -->
+<dialog class="legal" id="dlgPrivacidad">
+  <h2>Política de privacidad</h2>
+  <h3>Responsable</h3>
+  <p><span class="falta">[nombre completo o razón social]</span> · NIF <span class="falta">[NIF]</span> · C/ Obispo Golfín, 9 · 28430 Alpedrete · <span class="falta">[email de contacto]</span></p>
+  <h3>Qué datos tratamos y para qué</h3>
+  <p>Los datos que nos envías al pedir cita (nombre, apellido, teléfono, servicio, fecha y notas) se usan únicamente para gestionar tu cita y contactarte sobre ella.</p>
+  <h3>Base legal</h3>
+  <p>Tu consentimiento, que das al marcar la casilla del formulario, y la gestión de la cita que solicitas.</p>
+  <h3>Cuánto tiempo los guardamos</h3>
+  <p>Mientras seas clienta o hasta que pidas que los borremos, y después el tiempo que exija la ley.</p>
+  <h3>Con quién se comparten</h3>
+  <p>No se ceden a terceros. La solicitud se envía por WhatsApp, servicio de WhatsApp LLC / Meta, sujeto a su propia política de privacidad.</p>
+  <h3>Tus derechos</h3>
+  <p>Puedes pedir acceder, rectificar o suprimir tus datos, oponerte a su uso o limitarlo, escribiendo a <span class="falta">[email de contacto]</span> o en el propio salón. También puedes reclamar ante la Agencia Española de Protección de Datos (aepd.es).</p>
+  <button class="btn-close-legal" onclick="this.closest('dialog').close()">Cerrar</button>
+</dialog>
+
+<script>
+// ══════════════════════════════════════════════════
+//  CONFIGURACIÓN
+// ══════════════════════════════════════════════════
+// Número de WhatsApp al que llegan las solicitudes de cita (con prefijo 34, sin + ni espacios).
+// Provisional hasta conectar la web con la app.
+const WHATSAPP_NUMERO = '34665085053';
+
+// ══════════════════════════════════════════════════
+//  HORARIO
+//  Martes(2)–Viernes(5): 10:00–19:30
+//  Sábado(6): 10:00–13:30
+//  Lunes(1) y Domingo(0): cerrado
+// ══════════════════════════════════════════════════
+function getDaySlots(dayOfWeek) {
+  if (dayOfWeek === 0 || dayOfWeek === 1) return null; // cerrado
+  const slots = [];
+  const endH = (dayOfWeek === 6) ? 14 : 20; // sábado hasta 14, resto hasta 20
+  for (let h = 10; h < endH; h++) {
+    slots.push(`${String(h).padStart(2,'0')}:00`);
+    if (h < endH - 1) slots.push(`${String(h).padStart(2,'0')}:30`);
+  }
+  // El último slot es HH:00 del penúltimo ciclo (no HH:30 de la última hora)
+  return slots;
+}
+
+// ══════════════════════════════════════════════════
+//  SLOTS — RENDER
+// ══════════════════════════════════════════════════
+let selectedSlot = null;
+
+function renderSlots() {
+  const fecha = document.getElementById('fecha').value;
+  const grid  = document.getElementById('slotsGrid');
+  if (!fecha) {
+    grid.innerHTML = '<p style="grid-column:1/-1;font-size:0.82rem;color:var(--light);font-style:italic;padding:0.5rem 0;">Selecciona una fecha para ver las horas.</p>';
+    selectedSlot = null; return;
+  }
+  const d   = new Date(fecha + 'T12:00:00');
+  const slots = getDaySlots(d.getDay());
+  if (!slots) {
+    grid.innerHTML = '<p style="grid-column:1/-1;font-size:0.82rem;color:var(--error);padding:0.5rem 0;">Cerramos los lunes y domingos. Por favor elige otro día.</p>';
+    selectedSlot = null; return;
+  }
+  grid.innerHTML = '';
+  slots.forEach(slot => {
+    const isSelected = slot === selectedSlot;
+    // Usar <div> con tabindex en vez de <button> para evitar problemas de iOS con botones en grid
+    const el = document.createElement('div');
+    el.className   = 'slot' + (isSelected ? ' selected' : '');
+    el.textContent = slot;
+    el.setAttribute('role', 'button');
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('aria-label', slot);
+    el.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+    const pick = () => { selectedSlot = slot; renderSlots(); };
+    el.addEventListener('click',   pick);
+    el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
+    grid.appendChild(el);
+  });
+}
+
+document.getElementById('fecha').addEventListener('change', () => { selectedSlot = null; renderSlots(); });
+
+// Min date = today
+(function() {
+  const t = new Date();
+  document.getElementById('fecha').min = `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+})();
+
+// ══════════════════════════════════════════════════
+//  MOSTRAR ALERTA
+// ══════════════════════════════════════════════════
+function showAlert(id, type, msg) {
+  const el = document.getElementById(id);
+  el.className = `alert ${type} show`;
+  el.textContent = msg;
+  setTimeout(() => { el.className = 'alert'; el.textContent = ''; }, 9000);
+}
+
+// ══════════════════════════════════════════════════
+//  SOLICITAR CITA (por WhatsApp)
+// ══════════════════════════════════════════════════
+function reservar() {
+  const nombre   = document.getElementById('nombre').value.trim();
+  const apellido = document.getElementById('apellido').value.trim();
+  const telefono = document.getElementById('telefono').value.trim();
+  const servicio = document.getElementById('servicio').value;
+  const zona     = document.getElementById('zona').value.trim();
+  const fecha    = document.getElementById('fecha').value;
+  const notas    = document.getElementById('notas').value.trim();
+
+  if (!nombre)   return showAlert('bookingAlert', 'error', 'Por favor introduce tu nombre.');
+  if (telefono.replace(/\D/g, '').length < 9) return showAlert('bookingAlert', 'error', 'Introduce un teléfono válido para poder contactarte.');
+  if (!servicio) return showAlert('bookingAlert', 'error', 'Selecciona un servicio.');
+  if (!fecha)    return showAlert('bookingAlert', 'error', 'Elige una fecha para la cita.');
+  if (!getDaySlots(new Date(fecha + 'T12:00:00').getDay())) return showAlert('bookingAlert', 'error', 'Cerramos los lunes y domingos. Por favor elige otro día.');
+  if (!selectedSlot) return showAlert('bookingAlert', 'error', 'Selecciona una hora.');
+  if (!document.getElementById('privacidad').checked) return showAlert('bookingAlert', 'error', 'Debes aceptar la política de privacidad para enviar la solicitud.');
+
+  const lineas = [
+    'Hola Begoña, me gustaría pedir cita:',
+    `• Nombre: ${nombre}${apellido ? ' ' + apellido : ''}`,
+    `• Teléfono: ${telefono}`,
+    `• Servicio: ${servicio}`,
+    zona  ? `• Detalle: ${zona}` : null,
+    `• Día: ${formatDate(fecha)}`,
+    `• Hora: ${selectedSlot}`,
+    notas ? `• Notas: ${notas}` : null,
+  ].filter(Boolean);
+
+  window.open(`https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(lineas.join('\n'))}`, '_blank', 'noopener');
+  showAlert('bookingAlert', 'success', '✅ Se ha abierto WhatsApp con tu solicitud. Envía el mensaje y te confirmaremos la cita lo antes posible.');
+}
+
+function formatDate(fechaStr) {
+  const d = new Date(fechaStr + 'T12:00:00');
+  const dias  = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  return `${dias[d.getDay()]} ${d.getDate()} de ${meses[d.getMonth()]}`;
+}
+
+// ══════════════════════════════════════════════════
+//  MENÚ MÓVIL
+// ══════════════════════════════════════════════════
+(function() {
+  const nav    = document.querySelector('nav');
+  const toggle = document.getElementById('navToggle');
+  const setOpen = (open) => {
+    nav.classList.toggle('menu-open', open);
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    toggle.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+  };
+  toggle.addEventListener('click', () => setOpen(!nav.classList.contains('menu-open')));
+  document.querySelectorAll('#navLinks a').forEach(a => a.addEventListener('click', () => setOpen(false)));
+})();
+
+// ══════════════════════════════════════════════════
+//  TEXTOS LEGALES
+// ══════════════════════════════════════════════════
+function abrirLegal(e, id) {
+  if (e) e.preventDefault();
+  document.getElementById(id).showModal();
+}
+// Cerrar al hacer click fuera
+document.querySelectorAll('dialog.legal').forEach(dlg => {
+  dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+});
+
+// Año del pie de página
+document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>

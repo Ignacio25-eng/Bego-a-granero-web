@@ -10,7 +10,7 @@
 <meta property="og:description" content="Peluquería, color, uñas, láser, facial y masajes en Alpedrete. Pide tu cita.">
 <!-- PENDIENTE: cuando haya fotos, añadir la imagen de vista previa al compartir:
 <meta property="og:image" content="URL-de-una-foto-del-salon.jpg"> -->
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23B8827F'/%3E%3Ctext x='32' y='43' font-family='Georgia,serif' font-size='28' font-style='italic' fill='%23fff' text-anchor='middle'%3EBG%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-60 -60 120 120'%3E%3Crect x='-60' y='-60' width='120' height='120' rx='22' fill='%231F2A3C'/%3E%3Cg fill='none' stroke='%23D9BF86' stroke-width='5'%3E%3Cpolygon points='0,-48 41.6,-24 41.6,24 0,48 -41.6,24 -41.6,-24'/%3E%3Ccircle r='24'/%3E%3Ccircle cy='-24' r='24'/%3E%3Ccircle cy='24' r='24'/%3E%3C/g%3E%3C/svg%3E">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -32,7 +32,7 @@
   "sameAs": ["https://www.instagram.com/begograneroboutique/"]
 }
 </script>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Quicksand:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
     --rose:      #D4A5A5;
@@ -60,11 +60,18 @@
     border-bottom: 1px solid var(--gold-light);
     padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 68px;
   }
-  .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 600; color: var(--charcoal); letter-spacing: 0.04em; line-height: 1.2; text-decoration: none; }
-  .nav-logo span { color: var(--gold); display: block; font-size: 0.65rem; font-weight: 400; font-style: italic; letter-spacing: 0.15em; text-transform: uppercase; }
+  /* LOGO (hexágono + nombre en Quicksand, como el rótulo del salón) */
+  .nav-logo { display: flex; align-items: center; gap: 0.65rem; text-decoration: none; color: var(--charcoal); }
+  .logo-mark { width: 38px; height: 38px; color: var(--gold); flex-shrink: 0; }
+  .logo-text { font-family: 'Quicksand', sans-serif; font-size: 1.15rem; font-weight: 500; letter-spacing: 0.02em; line-height: 1.15; }
+  .logo-text small { display: block; font-size: 0.56rem; font-weight: 500; letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold); }
+  .footer-logo { display: inline-flex; flex-direction: column; align-items: center; gap: 0.5rem; margin-bottom: 1.2rem; color: var(--gold); }
+  .footer-logo .logo-mark { width: 48px; height: 48px; }
+  .footer-logo .logo-text { color: rgba(255,255,255,0.85); text-align: center; }
   .nav-links { display: flex; gap: 2rem; list-style: none; }
   .nav-links a { text-decoration: none; color: var(--mid); font-size: 0.85rem; letter-spacing: 0.06em; text-transform: uppercase; transition: color .2s; }
   .nav-links a:hover { color: var(--rose-deep); }
+  .nav-links .solo-movil { display: none; }
   .nav-cta { background: var(--rose-deep); color: var(--white); padding: 0.55rem 1.4rem; border-radius: 2px; font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; transition: background .2s; }
   .nav-cta:hover { background: var(--charcoal); }
 
@@ -203,9 +210,21 @@
 
   /* ── OPINIONES ── */
   #opiniones { background: var(--cream-dark); padding-top: 0; }
-  .reviews-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
-  .review-card { min-height: 160px; }
   .reviews-more { text-align: center; margin-top: 2rem; }
+
+  /* ── COOKIES ── */
+  .consent-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; text-align: center; padding: 2.5rem 1.5rem; background: var(--white); border: 1px dashed var(--rose); border-radius: 4px; font-size: 0.88rem; color: var(--mid); height: 100%; }
+  .consent-placeholder button { border: none; cursor: pointer; font-family: 'Lato', sans-serif; }
+  .consent-placeholder a { color: var(--rose-deep); font-size: 0.82rem; }
+  .consent-dark { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.7); }
+  .consent-dark a { color: var(--rose); }
+  .cookie-banner { position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 200; max-width: 760px; margin: 0 auto; background: var(--charcoal); color: rgba(255,255,255,0.85); border-radius: 6px; padding: 1.2rem 1.4rem; box-shadow: 0 12px 40px rgba(0,0,0,0.3); display: flex; gap: 1.2rem; align-items: center; font-size: 0.85rem; line-height: 1.5; }
+  .cookie-banner[hidden] { display: none; }
+  .cookie-banner a { color: var(--rose); }
+  .cookie-actions { display: flex; gap: 0.6rem; flex-shrink: 0; }
+  /* Mismo peso visual para aceptar y rechazar, como pide la AEPD */
+  .btn-cookie { background: var(--white); color: var(--charcoal); border: none; padding: 0.65rem 1.3rem; border-radius: 2px; cursor: pointer; font-family: 'Lato', sans-serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+  .btn-cookie:hover { background: var(--rose); color: var(--white); }
 
   /* ── MAPA ── */
   .map-wrap { margin-top: 3rem; border-radius: 4px; overflow: hidden; height: 320px; }
@@ -242,7 +261,10 @@
     .nav-links { display: none; position: absolute; top: 68px; left: 0; right: 0; flex-direction: column; gap: 0; background: var(--cream); border-bottom: 1px solid var(--gold-light); padding: 0.5rem 0; }
     nav.menu-open .nav-links { display: flex; }
     .nav-links a { display: block; padding: 0.9rem 1.5rem; }
-    .about-grid, .reviews-grid { grid-template-columns: 1fr; }
+    .logo-text { white-space: nowrap; }
+    .about-grid { grid-template-columns: 1fr; }
+    .cookie-banner { flex-direction: column; align-items: stretch; }
+    .cookie-actions .btn-cookie { flex: 1; }
     .about-photo { max-width: 360px; margin: 0 auto; }
     .gallery-grid { grid-template-columns: repeat(2, 1fr); }
     .hero-inner, .booking-wrapper, .contact-grid { grid-template-columns: 1fr; }
@@ -251,15 +273,37 @@
     .slots-grid { grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
     .slot { font-size: 0.82rem; min-height: 50px; line-height: 50px; }
   }
+  @media (max-width: 520px) {
+    .nav-cta { display: none; }
+    .nav-links .solo-movil { display: list-item; }
+    .nav-links .solo-movil a { color: var(--rose-deep); font-weight: 700; }
+  }
 </style>
 </head>
 <body>
 
+<!-- LOGO: hexágono con flor de la vida (recreación del rótulo del salón).
+     PENDIENTE: sustituir por el archivo original del logo si Begoña lo tiene. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="logo-hex" viewBox="-54 -54 108 108">
+    <defs><clipPath id="logo-clip"><polygon points="0,-50 43.3,-25 43.3,25 0,50 -43.3,25 -43.3,-25"/></clipPath></defs>
+    <g fill="none" stroke="currentColor" stroke-width="1.6">
+      <polygon points="0,-50 43.3,-25 43.3,25 0,50 -43.3,25 -43.3,-25" stroke-width="2.4"/>
+      <g clip-path="url(#logo-clip)">
+        <circle r="25"/>
+        <circle cx="0" cy="-25" r="25"/><circle cx="21.65" cy="-12.5" r="25"/><circle cx="21.65" cy="12.5" r="25"/>
+        <circle cx="0" cy="25" r="25"/><circle cx="-21.65" cy="12.5" r="25"/><circle cx="-21.65" cy="-12.5" r="25"/>
+      </g>
+      <path d="M0,-50 V50 M-43.3,-25 L43.3,25 M-43.3,25 L43.3,-25" stroke-width="1"/>
+    </g>
+  </symbol>
+</svg>
+
 <!-- NAV -->
 <nav>
-  <a href="#hero" class="nav-logo">
-    Begoña Granero
-    <span>Boutique de Belleza</span>
+  <a href="#hero" class="nav-logo" aria-label="Begoña Granero, Boutique de Belleza">
+    <svg class="logo-mark" aria-hidden="true"><use href="#logo-hex"/></svg>
+    <span class="logo-text">Begoña Granero<small>Boutique de Belleza</small></span>
   </a>
   <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false">
     <span></span><span></span><span></span>
@@ -269,6 +313,7 @@
     <li><a href="#sobre">Sobre Begoña</a></li>
     <li><a href="#galeria">Galería</a></li>
     <li><a href="#contacto">Contacto</a></li>
+    <li class="solo-movil"><a href="#reservas">Reservar cita</a></li>
   </ul>
   <a href="#reservas" class="nav-cta">Reservar cita</a>
 </nav>
@@ -346,6 +391,19 @@
         <p class="service-desc">Masajes relajantes, reafirmantes y tratamientos corporales para tu cuerpo y mente.</p>
         <div class="service-duration">⏱ 60–90 min · desde 50€</div>
       </div>
+      <!-- PENDIENTE: confirmar con Begoña qué incluye, duración y precio -->
+      <div class="service-card">
+        <div class="service-icon">👁️</div>
+        <div class="service-name">Pestañas</div>
+        <p class="service-desc">Tratamientos de pestañas para realzar tu mirada y lucir unas pestañas más definidas.</p>
+        <div class="service-duration">Precio a consultar</div>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">🖌️</div>
+        <div class="service-name">Microblading &amp; Micropigmentación</div>
+        <p class="service-desc">Maquillaje semipermanente para dar forma, color y volumen a las cejas y realzar tus facciones de forma natural.</p>
+        <div class="service-duration">Precio a consultar</div>
+      </div>
     </div>
   </div>
 </section>
@@ -358,8 +416,10 @@
     <div class="about-text">
       <p class="section-eyebrow">Quién está detrás</p>
       <h2 class="section-title">Sobre Begoña</h2>
-      <!-- PENDIENTE: texto escrito con Begoña -->
-      <p class="pendiente" style="justify-content:flex-start;text-align:left;">Texto pendiente: quién es Begoña, desde cuándo se dedica a esto, su formación y especialidades, y qué hace distinto a su salón.</p>
+      <!-- BORRADOR a partir de información pública del salón: que Begoña lo revise -->
+      <p>Begoña lleva <strong>más de 30 años</strong> dedicada al mundo de la belleza y la estética. En 2018 decidió dar un paso más y abrir su propio espacio en Alpedrete: <strong>Begoña Granero Boutique de Belleza</strong>, un salón pensado para la belleza saludable del cabello, el rostro y el cuerpo.</p>
+      <p>Trabaja de la mano de <strong>Secretos del Agua</strong>, una marca de cosmética profesional, para que cada tratamiento dé resultados visibles y duraderos cuidando siempre la salud de tu piel y tu pelo.</p>
+      <p>Aquí no hay tratamientos en serie: cada clienta recibe un asesoramiento personalizado para encontrar lo que mejor le va, en un ambiente cercano y familiar en el que sentirte como en casa.</p>
       <div class="hero-actions" style="margin-top:1.5rem;">
         <a href="#reservas" class="btn-primary">Pedir cita</a>
       </div>
@@ -397,11 +457,12 @@
       <p class="section-eyebrow">Lo que dicen nuestras clientas</p>
       <h2 class="section-title">Opiniones</h2>
     </div>
-    <!-- PENDIENTE: copiar opiniones reales (con permiso) de Google o Instagram -->
-    <div class="reviews-grid">
-      <div class="review-card pendiente">Opinión real de una clienta pendiente</div>
-      <div class="review-card pendiente">Opinión real de una clienta pendiente</div>
-      <div class="review-card pendiente">Opinión real de una clienta pendiente</div>
+    <!-- Reseñas de Google mediante el widget de Trustindex. Solo se carga si se aceptan las cookies. -->
+    <div id="reviewsWidget" data-consent="terceros">
+      <div class="consent-placeholder">
+        <p>Las reseñas se muestran con un servicio externo (Trustindex) que usa cookies.</p>
+        <button type="button" class="btn-primary" onclick="aceptarCookies()">Aceptar cookies y ver reseñas</button>
+      </div>
     </div>
     <div class="reviews-more">
       <a href="https://www.google.com/maps/search/?api=1&query=Bego%C3%B1a+Granero+Boutique+de+Belleza+Alpedrete" target="_blank" rel="noopener" class="btn-secondary">Ver opiniones en Google</a>
@@ -464,6 +525,8 @@
             <option value="Depilación Láser">✨ Depilación Láser</option>
             <option value="Facial & Estética">🌿 Facial &amp; Estética</option>
             <option value="Masaje & Bienestar">💆 Masaje &amp; Bienestar</option>
+            <option value="Pestañas">👁️ Pestañas</option>
+            <option value="Microblading & Micropigmentación">🖌️ Microblading &amp; Micropigmentación</option>
           </select>
         </div>
         <div class="form-group">
@@ -535,20 +598,42 @@
         </table>
       </div>
     </div>
-    <div class="map-wrap">
-      <iframe src="https://www.google.com/maps?q=C%2F+Obispo+Golf%C3%ADn+9,+28430+Alpedrete&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Mapa: C/ Obispo Golfín 9, Alpedrete"></iframe>
+    <!-- El mapa de Google pone cookies: solo se carga si se aceptan -->
+    <div class="map-wrap" id="mapWidget" data-consent="terceros">
+      <div class="consent-placeholder consent-dark">
+        <p>El mapa de Google Maps usa cookies.</p>
+        <button type="button" class="btn-primary" onclick="aceptarCookies()">Aceptar cookies y ver el mapa</button>
+        <a href="https://www.google.com/maps/search/?api=1&query=C%2F+Obispo+Golf%C3%ADn+9,+28430+Alpedrete" target="_blank" rel="noopener">o abrir en Google Maps</a>
+      </div>
     </div>
   </div>
 </section>
 
 <footer>
+  <div class="footer-logo">
+    <svg class="logo-mark" aria-hidden="true"><use href="#logo-hex"/></svg>
+    <span class="logo-text">Begoña Granero<small>Boutique de Belleza</small></span>
+  </div>
   <p>© <time id="year">2026</time> <span>Begoña Granero Boutique de Belleza</span> · Todos los derechos reservados</p>
   <p class="footer-legal">
     <a href="#" onclick="abrirLegal(event,'dlgAviso')">Aviso legal</a>
     &nbsp;·&nbsp;
     <a href="#" onclick="abrirLegal(event,'dlgPrivacidad')">Política de privacidad</a>
+    &nbsp;·&nbsp;
+    <a href="#" onclick="abrirLegal(event,'dlgCookies')">Política de cookies</a>
+    &nbsp;·&nbsp;
+    <a href="#" onclick="mostrarBannerCookies(event)">Configurar cookies</a>
   </p>
 </footer>
+
+<!-- AVISO DE COOKIES -->
+<div class="cookie-banner" id="cookieBanner" role="dialog" aria-live="polite" aria-label="Aviso de cookies" hidden>
+  <p>Usamos cookies de terceros (Google Maps y Trustindex) para mostrarte el mapa y las reseñas de Google. Si las rechazas, la web funciona igual, pero sin esos dos elementos. <a href="#" onclick="abrirLegal(event,'dlgCookies')">Más información</a></p>
+  <div class="cookie-actions">
+    <button type="button" class="btn-cookie" onclick="rechazarCookies()">Rechazar</button>
+    <button type="button" class="btn-cookie" onclick="aceptarCookies()">Aceptar</button>
+  </div>
+</div>
 
 <!-- WHATSAPP FLOTANTE -->
 <a class="wa-float" href="https://wa.me/34665085053" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp">
@@ -592,13 +677,31 @@
   <button class="btn-close-legal" onclick="this.closest('dialog').close()">Cerrar</button>
 </dialog>
 
+<!-- POLÍTICA DE COOKIES -->
+<dialog class="legal" id="dlgCookies">
+  <h2>Política de cookies</h2>
+  <p>Las cookies son pequeños archivos que algunas webs guardan en tu navegador. Esta web no usa cookies propias de análisis ni de publicidad.</p>
+  <h3>Cookies de terceros (solo si las aceptas)</h3>
+  <ul>
+    <li><strong>Google Maps</strong> (Google Ireland Ltd.): para mostrar el mapa de cómo llegar al salón. <a href="https://policies.google.com/technologies/cookies?hl=es" target="_blank" rel="noopener">Política de Google</a></li>
+    <li><strong>Trustindex</strong> (Trustindex Kft.): para mostrar las reseñas que nos han dejado en Google. <a href="https://www.trustindex.io/privacy-policy/" target="_blank" rel="noopener">Política de Trustindex</a></li>
+  </ul>
+  <p>Si las rechazas, el mapa y las reseñas no se cargan, pero puedes verlos directamente en Google Maps.</p>
+  <h3>Almacenamiento técnico</h3>
+  <p>Guardamos en tu navegador si has aceptado o rechazado las cookies (clave <code>bg_cookies</code>), para no volver a preguntarte. Es necesario para respetar tu elección y no requiere consentimiento.</p>
+  <h3>Cambiar tu elección</h3>
+  <p>Puedes cambiarla cuando quieras desde el enlace «Configurar cookies» del pie de página, o borrar las cookies desde la configuración de tu navegador.</p>
+  <button class="btn-close-legal" onclick="this.closest('dialog').close()">Cerrar</button>
+</dialog>
+
 <script>
 // ══════════════════════════════════════════════════
 //  CONFIGURACIÓN
 // ══════════════════════════════════════════════════
 // Número de WhatsApp al que llegan las solicitudes de cita (con prefijo 34, sin + ni espacios).
 // Provisional hasta conectar la web con la app.
-const WHATSAPP_NUMERO = '34665085053';
+// ⚠️ PRUEBAS: número de pruebas, no es el del salón. Antes de publicar, volver a poner el de Begoña: '34665085053'
+const WHATSAPP_NUMERO = '34640169734';
 
 // ══════════════════════════════════════════════════
 //  HORARIO
@@ -740,6 +843,69 @@ function abrirLegal(e, id) {
 document.querySelectorAll('dialog.legal').forEach(dlg => {
   dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
 });
+
+// ══════════════════════════════════════════════════
+//  COOKIES (mapa de Google y reseñas de Trustindex)
+// ══════════════════════════════════════════════════
+// ID del widget de Trustindex (cuenta creada el 14/10/2026). Al crear el widget te dan un código con una
+// dirección como https://cdn.trustindex.io/loader.js?a1b2c3d4e5f6
+// y el ID es lo que va después del "?" (en el ejemplo: a1b2c3d4e5f6).
+const TRUSTINDEX_ID = '20ecede836c46362f98695e6564';
+const MAPA_URL   = 'https://www.google.com/maps?q=C%2F+Obispo+Golf%C3%ADn+9,+28430+Alpedrete&output=embed';
+const COOKIE_KEY = 'bg_cookies';
+
+function leerConsentimiento() {
+  try { return localStorage.getItem(COOKIE_KEY); } catch { return null; }
+}
+function guardarConsentimiento(valor) {
+  try { localStorage.setItem(COOKIE_KEY, valor); } catch {}
+}
+
+function cargarTerceros() {
+  const mapa = document.getElementById('mapWidget');
+  if (mapa && !mapa.dataset.cargado) {
+    mapa.dataset.cargado = '1';
+    mapa.innerHTML = `<iframe src="${MAPA_URL}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Mapa: C/ Obispo Golfín 9, Alpedrete"></iframe>`;
+  }
+  const resenas = document.getElementById('reviewsWidget');
+  if (resenas && !resenas.dataset.cargado) {
+    resenas.dataset.cargado = '1';
+    if (TRUSTINDEX_ID) {
+      resenas.innerHTML = '';
+      const s = document.createElement('script');
+      s.src = `https://cdn.trustindex.io/loader.js?${TRUSTINDEX_ID}`;
+      s.defer = true; s.async = true;
+      resenas.appendChild(s);
+    } else {
+      resenas.innerHTML = '<div class="consent-placeholder pendiente">Widget de reseñas pendiente de configurar (falta TRUSTINDEX_ID en el código).</div>';
+    }
+  }
+}
+
+function aceptarCookies() {
+  guardarConsentimiento('aceptadas');
+  document.getElementById('cookieBanner').hidden = true;
+  cargarTerceros();
+}
+
+function rechazarCookies() {
+  const antes = leerConsentimiento();
+  guardarConsentimiento('rechazadas');
+  document.getElementById('cookieBanner').hidden = true;
+  // Si antes las había aceptado, recargar para quitar el mapa y las reseñas ya cargados
+  if (antes === 'aceptadas') location.reload();
+}
+
+function mostrarBannerCookies(e) {
+  if (e) e.preventDefault();
+  document.getElementById('cookieBanner').hidden = false;
+}
+
+(function() {
+  const c = leerConsentimiento();
+  if (c === 'aceptadas') cargarTerceros();
+  else if (c !== 'rechazadas') mostrarBannerCookies();
+})();
 
 // Año del pie de página
 document.getElementById('year').textContent = new Date().getFullYear();

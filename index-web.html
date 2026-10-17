@@ -203,7 +203,7 @@
 
   /* ── GALERÍA ── */
   #galeria { background: var(--cream-dark); }
-  .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .gallery-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
   .gallery-item { aspect-ratio: 1; width: 100%; }
   .gallery-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; }
   .gallery-more { text-align: center; margin-top: 2rem; }
@@ -435,14 +435,12 @@
       <h2 class="section-title">Galería</h2>
       <p class="section-sub">Algunos de nuestros trabajos y el salón donde te esperamos.</p>
     </div>
-    <!-- PENDIENTE: sustituir cada hueco por <div class="gallery-item"><img src="foto.jpg" alt="Descripción"></div> -->
+    <!-- Para añadir una foto: copiarla a la carpeta "fotos" y añadir una línea como estas. Se ve mejor en múltiplos de 4. -->
     <div class="gallery-grid">
-      <div class="gallery-item pendiente">Foto del salón</div>
-      <div class="gallery-item pendiente">Foto de corte / peinado</div>
-      <div class="gallery-item pendiente">Foto de coloración</div>
-      <div class="gallery-item pendiente">Foto de uñas</div>
-      <div class="gallery-item pendiente">Foto de tratamiento facial</div>
-      <div class="gallery-item pendiente">Foto de antes / después</div>
+      <div class="gallery-item"><img src="fotos/salon.jpg" alt="Interior del salón Begoña Granero en Alpedrete" loading="lazy"></div>
+      <div class="gallery-item"><img src="fotos/mechas-ondas.jpg" alt="Melena larga con mechas rubias y ondas" loading="lazy"></div>
+      <div class="gallery-item"><img src="fotos/unas-francesa.jpg" alt="Manicura francesa en uñas cuadradas" loading="lazy"></div>
+      <div class="gallery-item"><img src="fotos/unas-plata.jpg" alt="Uñas almendradas con diseño de líneas plateadas" loading="lazy"></div>
     </div>
     <div class="gallery-more">
       <a href="https://www.instagram.com/begograneroboutique/?hl=es" target="_blank" rel="noopener" class="btn-secondary">Ver más en Instagram</a>
@@ -700,8 +698,7 @@
 // ══════════════════════════════════════════════════
 // Número de WhatsApp al que llegan las solicitudes de cita (con prefijo 34, sin + ni espacios).
 // Provisional hasta conectar la web con la app.
-// ⚠️ PRUEBAS: número de pruebas, no es el del salón. Antes de publicar, volver a poner el de Begoña: '34665085053'
-const WHATSAPP_NUMERO = '34640169734';
+const WHATSAPP_NUMERO = '34665085053';
 
 // ══════════════════════════════════════════════════
 //  HORARIO

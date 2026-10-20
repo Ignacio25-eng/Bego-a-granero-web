@@ -251,7 +251,6 @@
   dialog.legal h3 { font-size: 0.95rem; margin: 1.2rem 0 0.4rem; }
   dialog.legal p, dialog.legal li { font-size: 0.88rem; color: var(--mid); line-height: 1.7; }
   dialog.legal ul { padding-left: 1.2rem; }
-  dialog.legal .falta { background: #fdf0f0; color: var(--error); padding: 0 0.3rem; border-radius: 2px; }
   .btn-close-legal { margin-top: 1.5rem; background: var(--rose-deep); color: var(--white); border: none; padding: 0.7rem 1.6rem; border-radius: 2px; cursor: pointer; font-family: 'Lato', sans-serif; font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; }
 
   /* RESPONSIVE */
@@ -639,16 +638,15 @@
 </a>
 
 <!-- AVISO LEGAL -->
-<!-- PENDIENTE: rellenar los datos marcados en rojo y que lo revise un asesor/gestor -->
+<!-- Solo datos públicos del negocio. Nombre de la titular, NIF y email se dejan fuera a propósito
+     (el repositorio es público); añadirlos solo si Begoña lo decide. -->
 <dialog class="legal" id="dlgAviso">
   <h2>Aviso legal</h2>
-  <p>En cumplimiento de la Ley 34/2002, de Servicios de la Sociedad de la Información y de Comercio Electrónico (LSSI-CE), se informa de los datos del titular de este sitio web:</p>
+  <p>En cumplimiento de la Ley 34/2002, de Servicios de la Sociedad de la Información y de Comercio Electrónico (LSSI-CE), se informa de los datos de este sitio web:</p>
   <ul>
-    <li>Titular: <span class="falta">[nombre completo o razón social]</span></li>
-    <li>NIF: <span class="falta">[NIF]</span></li>
+    <li>Nombre comercial: Begoña Granero Boutique de Belleza</li>
     <li>Domicilio: C/ Obispo Golfín, 9 · 28430 Alpedrete (Madrid)</li>
-    <li>Teléfono: +34 665 08 50 53</li>
-    <li>Email: <span class="falta">[email de contacto]</span></li>
+    <li>Teléfono y WhatsApp: +34 665 08 50 53</li>
   </ul>
   <h3>Uso del sitio</h3>
   <p>Este sitio web tiene carácter informativo y permite solicitar cita. Los precios indicados son orientativos («desde») y pueden variar según el servicio concreto.</p>
@@ -661,7 +659,7 @@
 <dialog class="legal" id="dlgPrivacidad">
   <h2>Política de privacidad</h2>
   <h3>Responsable</h3>
-  <p><span class="falta">[nombre completo o razón social]</span> · NIF <span class="falta">[NIF]</span> · C/ Obispo Golfín, 9 · 28430 Alpedrete · <span class="falta">[email de contacto]</span></p>
+  <p>Begoña Granero Boutique de Belleza · C/ Obispo Golfín, 9 · 28430 Alpedrete (Madrid) · +34 665 08 50 53</p>
   <h3>Qué datos tratamos y para qué</h3>
   <p>Los datos que nos envías al pedir cita (nombre, apellido, teléfono, servicio, fecha y notas) se usan únicamente para gestionar tu cita y contactarte sobre ella.</p>
   <h3>Base legal</h3>
@@ -671,7 +669,7 @@
   <h3>Con quién se comparten</h3>
   <p>No se ceden a terceros. La solicitud se envía por WhatsApp, servicio de WhatsApp LLC / Meta, sujeto a su propia política de privacidad.</p>
   <h3>Tus derechos</h3>
-  <p>Puedes pedir acceder, rectificar o suprimir tus datos, oponerte a su uso o limitarlo, escribiendo a <span class="falta">[email de contacto]</span> o en el propio salón. También puedes reclamar ante la Agencia Española de Protección de Datos (aepd.es).</p>
+  <p>Puedes pedir acceder, rectificar o suprimir tus datos, oponerte a su uso o limitarlo, por teléfono o WhatsApp al +34 665 08 50 53 o en el propio salón. También puedes reclamar ante la Agencia Española de Protección de Datos (aepd.es).</p>
   <button class="btn-close-legal" onclick="this.closest('dialog').close()">Cerrar</button>
 </dialog>
 

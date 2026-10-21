@@ -184,6 +184,18 @@
   .slots-msg { grid-column: 1 / -1; font-size: 0.82rem; color: var(--light); font-style: italic; padding: 0.5rem 0; }
   .slots-msg.error { color: var(--error); font-style: normal; }
   select:disabled { opacity: 0.6; cursor: not-allowed; }
+  .label-nota { text-transform: none; letter-spacing: 0; color: var(--light); }
+  .srv-lista { display: flex; flex-direction: column; gap: 0.5rem; }
+  .srv-fila { display: flex; gap: 0.5rem; align-items: center; }
+  .srv-fila select { flex: 1; min-width: 0; }
+  .srv-quitar { flex-shrink: 0; width: 40px; height: 44px; border: 1.5px solid var(--cream-dark); background: var(--white); border-radius: 2px; color: var(--light); font-size: 1.3rem; line-height: 1; cursor: pointer; transition: color .15s, border-color .15s; }
+  .srv-quitar:hover { color: var(--error); border-color: var(--error); }
+  .srv-quitar[hidden] { display: none; }
+  .btn-anadir { background: none; border: none; padding: 0.55rem 0 0; cursor: pointer; font-family: 'Lato', sans-serif; font-size: 0.85rem; font-weight: 700; color: var(--rose-deep); }
+  .btn-anadir:hover { color: var(--charcoal); }
+  .btn-anadir[hidden] { display: none; }
+  .srv-resumen { font-size: 0.82rem; color: var(--mid); margin-top: 0.45rem; min-height: 1em; }
+  .carta-list .dur { display: block; font-size: 0.75rem; color: var(--light); margin-top: 0.1rem; }
   .booking-ok { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.4rem; }
   .booking-ok[hidden] { display: none; }
   .booking-ok .form-title { border: none; margin-bottom: 0.4rem; padding-bottom: 0; }
@@ -545,11 +557,11 @@
         <div class="form-title">Reservar cita</div>
         <div id="bookingAlert" class="alert" role="status"></div>
         <div class="form-group">
-          <label for="servicio">Servicio *</label>
-          <select id="servicio">
-            <option value="">Cargando servicios…</option>
-            <!-- Las opciones salen de la app del salón (Supabase) -->
-          </select>
+          <label>Servicios * <span class="label-nota">(hasta 3 en la misma cita)</span></label>
+          <!-- Los servicios salen de la app del salón (Supabase) -->
+          <div class="srv-lista" id="serviciosElegidos"><select disabled><option>Cargando servicios…</option></select></div>
+          <button type="button" class="btn-anadir" id="btnOtroServicio" onclick="anadirServicio()" hidden>+ Añadir otro servicio</button>
+          <p class="srv-resumen" id="resumenServicios"></p>
         </div>
         <div class="form-group">
           <label for="trabajadora">¿Con quién? *</label>
@@ -879,7 +891,7 @@ function renderCarta(i) {
     b.tabIndex = j === i ? 0 : -1;
   });
   const lista = (items, cls) => `<ul class="carta-list${cls ? ' ' + cls : ''}">` +
-    items.map(([n, p]) => `<li><span class="nombre">${esc(n)}</span><span class="precio">${euros(p)}</span></li>`).join('') + '</ul>';
+    items.map(([n, p, , dur]) => `<li><span class="nombre">${esc(n)}${dur ? `<small class="dur">${duracionTexto(dur)}</small>` : ''}</span><span class="precio">${euros(p)}</span></li>`).join('') + '</ul>';
   document.getElementById('cartaPanel').innerHTML = `
     <div class="carta-panel">
       <div class="carta-intro"><div class="carta-intro-inner">
@@ -927,10 +939,9 @@ document.getElementById('cartaTabs').addEventListener('keydown', (e) => {
 
 // Al pulsar "Pedir cita" desde una sección, el formulario se abre con el primer servicio de esa sección
 function elegirSeccion(i) {
-  if (!EN_LINEA) return;
-  const sel = document.getElementById('servicio');
-  const grupo = sel.querySelectorAll('optgroup')[i];
-  if (grupo && grupo.firstElementChild) { sel.value = grupo.firstElementChild.value; alCambiarServicio(); }
+  if (!EN_LINEA || !CATALOGO[i]) return;
+  document.getElementById('serviciosElegidos').innerHTML = '';
+  anadirServicio(CATALOGO[i].servicios[0][2]);
 }
 
 // ══════════════════════════════════════════════════
@@ -969,82 +980,134 @@ function pintarHorario() {
 // ══════════════════════════════════════════════════
 let selectedSlot = null;
 let peticionHoras = 0;
+const MAX_SERVICIOS = 3;
 
-const servicioElegido = () => {
-  const id = Number(document.getElementById('servicio').value);
+// "1 h 30 min", "45 min"
+const duracionTexto = (min) => min < 60 ? `${min} min` : `${Math.floor(min / 60)} h${min % 60 ? ` ${min % 60} min` : ''}`;
+
+const buscarServicio = (id) => {
   for (const s of CATALOGO) for (const x of s.servicios) if (x[2] === id) return { id, nombre: x[0], precio: x[1], duracion: x[3], seccion: x[4] };
   return null;
 };
+const selectsServicio = () => [...document.querySelectorAll('#serviciosElegidos .srv-select')];
+const serviciosElegidos = () => selectsServicio().map(s => buscarServicio(Number(s.value))).filter(Boolean);
 
 function mensajeHoras(texto, error) {
   document.getElementById('slotsGrid').innerHTML = `<p class="slots-msg${error ? ' error' : ''}">${texto}</p>`;
 }
 
-function prepararFormulario() {
-  const sel = document.getElementById('servicio');
-  const btn = document.getElementById('btnReservar');
-  if (!EN_LINEA) {
-    sel.innerHTML = '<option value="">Reserva online no disponible ahora mismo</option>';
-    sel.disabled = true; btn.disabled = true;
-    mensajeHoras('Ahora mismo no podemos enseñarte las horas libres. Llámanos o escríbenos por WhatsApp al 665 08 50 53 y te damos cita.', true);
-    return;
-  }
-  sel.disabled = false; btn.disabled = false;
-  sel.innerHTML = '<option value="">– Elige un servicio –</option>';
+// Un desplegable de servicio (agrupado por secciones) con su botón de quitar
+function anadirServicio(id) {
+  const lista = document.getElementById('serviciosElegidos');
+  if (lista.children.length >= MAX_SERVICIOS) return;
+  const fila = document.createElement('div');
+  fila.className = 'srv-fila';
+  const sel = document.createElement('select');
+  sel.className = 'srv-select';
+  sel.setAttribute('aria-label', `Servicio ${lista.children.length + 1}`);
+  sel.innerHTML = `<option value="">${lista.children.length ? '– Elige otro servicio –' : '– Elige un servicio –'}</option>`;
   CATALOGO.forEach(s => {
     const g = document.createElement('optgroup');
     g.label = s.menu;
-    s.servicios.forEach(([n, p, id]) => {
+    s.servicios.forEach(([n, p, sid, dur]) => {
       const o = document.createElement('option');
-      o.value = id; o.textContent = `${n} · ${euros(p)}`;
+      o.value = sid; o.textContent = `${n} · ${duracionTexto(dur)} · ${euros(p)}`;
       g.appendChild(o);
     });
     sel.appendChild(g);
   });
+  if (id) sel.value = id;
+  sel.addEventListener('change', alCambiarServicios);
+  const quitar = document.createElement('button');
+  quitar.type = 'button'; quitar.className = 'srv-quitar'; quitar.textContent = '×';
+  quitar.setAttribute('aria-label', 'Quitar este servicio');
+  quitar.addEventListener('click', () => { fila.remove(); if (!lista.children.length) anadirServicio(); alCambiarServicios(); });
+  fila.append(sel, quitar);
+  lista.appendChild(fila);
+  alCambiarServicios();
+  if (!id && lista.children.length > 1) sel.focus();
+}
+
+function prepararFormulario() {
+  const btn = document.getElementById('btnReservar');
+  const lista = document.getElementById('serviciosElegidos');
+  lista.innerHTML = '';
+  if (!EN_LINEA) {
+    lista.innerHTML = '<select disabled><option>Reserva online no disponible ahora mismo</option></select>';
+    btn.disabled = true;
+    document.getElementById('btnOtroServicio').hidden = true;
+    mensajeHoras('Ahora mismo no podemos enseñarte las horas libres. Llámanos o escríbenos por WhatsApp al 665 08 50 53 y te damos cita.', true);
+    return;
+  }
+  btn.disabled = false;
+  anadirServicio();
   const hoy = new Date(), max = new Date(); max.setDate(max.getDate() + 90);
   const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   document.getElementById('fecha').min = iso(hoy);
   document.getElementById('fecha').max = iso(max);
 }
 
-// Las trabajadoras que hacen la sección del servicio, más «Sin preferencia»
-function alCambiarServicio() {
-  const srv = servicioElegido();
+// Al cambiar los servicios: no repetir ninguno, resumen con la duración total y
+// solo las trabajadoras que hacen TODOS los apartados elegidos (más «Sin preferencia»)
+function alCambiarServicios() {
+  const sels = selectsServicio();
+  const elegidos = serviciosElegidos();
+  sels.forEach(s => [...s.options].forEach(o => { o.disabled = !!o.value && o.value !== s.value && sels.some(x => x.value === o.value); }));
+  sels.forEach(s => { s.parentElement.querySelector('.srv-quitar').hidden = sels.length === 1 && !s.value; });
+
+  const btnOtro = document.getElementById('btnOtroServicio');
+  btnOtro.hidden = sels.length >= MAX_SERVICIOS || sels.some(s => !s.value);
+
+  const total = elegidos.reduce((a, s) => a + s.duracion, 0);
+  const precio = elegidos.reduce((a, s) => a + s.precio, 0);
+  document.getElementById('resumenServicios').textContent = elegidos.length > 1
+    ? `${elegidos.length} servicios · ${duracionTexto(total)} en total · ${euros(Math.round(precio * 100) / 100)}`
+    : elegidos.length ? `Dura ${duracionTexto(total)}` : '';
+
+  const secciones = [...new Set(elegidos.map(s => s.seccion))];
   const sel = document.getElementById('trabajadora');
   const antes = sel.value;
   sel.innerHTML = '<option value="">Sin preferencia</option>';
-  const posibles = srv ? TRABAJADORAS.filter(t => (t.secciones || []).includes(srv.seccion)) : [];
+  const posibles = elegidos.length ? TRABAJADORAS.filter(t => secciones.every(sec => (t.secciones || []).includes(sec))) : [];
   posibles.forEach(t => {
     const o = document.createElement('option');
     o.value = t.id; o.textContent = t.nombre;
     sel.appendChild(o);
   });
-  sel.disabled = !srv || posibles.length === 0;
+  sel.disabled = !elegidos.length || posibles.length === 0;
   if (posibles.some(t => String(t.id) === antes)) sel.value = antes;
   selectedSlot = null;
   cargarHoras();
 }
 
 async function cargarHoras() {
-  const srv   = servicioElegido();
+  const n = ++peticionHoras;   // cualquier búsqueda anterior que llegue tarde se descarta
+  const elegidos = serviciosElegidos();
   const fecha = document.getElementById('fecha').value;
-  if (!srv || !fecha) { selectedSlot = null; return mensajeHoras('Elige un servicio y un día para ver las horas libres.'); }
-  if (document.getElementById('trabajadora').disabled && srv) { selectedSlot = null; return mensajeHoras('Este servicio no se puede reservar online ahora mismo. Llámanos o escríbenos por WhatsApp y te damos cita.', true); }
+  if (!elegidos.length || !fecha) { selectedSlot = null; return mensajeHoras('Elige un servicio y un día para ver las horas libres.'); }
+  if (document.getElementById('trabajadora').disabled) {
+    selectedSlot = null;
+    return mensajeHoras(elegidos.length > 1
+      ? 'Nadie del equipo hace todos estos servicios juntos. Resérvalos en citas separadas o llámanos y te lo organizamos.'
+      : 'Este servicio no se puede reservar online ahora mismo. Llámanos o escríbenos por WhatsApp y te damos cita.', true);
+  }
   const dia = HORARIO.find(d => d.dia === new Date(fecha + 'T12:00:00').getDay());
   if (!dia || !dia.abierto || CERRADOS.has(fecha)) { selectedSlot = null; return mensajeHoras('Ese día el salón está cerrado. Elige otro día, por favor.', true); }
 
   const trabajadora = document.getElementById('trabajadora').value;
-  const n = ++peticionHoras;
   mensajeHoras('Buscando horas libres…');
   let horas;
   try {
-    horas = await api('rpc/disponibilidad', { p_servicio_id: srv.id, p_trabajadora_id: trabajadora ? Number(trabajadora) : null, p_fecha: fecha });
+    horas = await api('rpc/disponibilidad', { p_servicio_ids: elegidos.map(s => s.id), p_trabajadora_id: trabajadora ? Number(trabajadora) : null, p_fecha: fecha });
   } catch {
     if (n === peticionHoras) mensajeHoras('No hemos podido consultar las horas. Revisa tu conexión e inténtalo de nuevo.', true);
     return;
   }
-  if (n !== peticionHoras) return;   // ya se ha pedido otro día u otro servicio
-  if (!horas.length) { selectedSlot = null; return mensajeHoras('No quedan horas libres ese día para este servicio. Prueba con otro día' + (trabajadora ? ' o con «Sin preferencia».' : '.'), true); }
+  if (n !== peticionHoras) return;   // ya se ha pedido otro día u otros servicios
+  if (!horas.length) {
+    selectedSlot = null;
+    return mensajeHoras(`No quedan horas libres ese día para ${elegidos.length > 1 ? 'todos estos servicios' : 'este servicio'}. Prueba con otro día` + (trabajadora ? ' o con «Sin preferencia».' : '.'), true);
+  }
   if (!horas.includes(selectedSlot)) selectedSlot = null;
   pintarHoras(horas);
 }
@@ -1069,7 +1132,6 @@ function pintarHoras(horas) {
   });
 }
 
-document.getElementById('servicio').addEventListener('change', alCambiarServicio);
 document.getElementById('trabajadora').addEventListener('change', () => { selectedSlot = null; cargarHoras(); });
 document.getElementById('fecha').addEventListener('change', () => { selectedSlot = null; cargarHoras(); });
 
@@ -1088,7 +1150,7 @@ function showAlert(id, type, msg) {
 //  RESERVAR (la cita queda confirmada al momento)
 // ══════════════════════════════════════════════════
 async function reservar() {
-  const srv      = servicioElegido();
+  const elegidos = serviciosElegidos();
   const fecha    = document.getElementById('fecha').value;
   const nombre   = document.getElementById('nombre').value.trim();
   const apellido = document.getElementById('apellido').value.trim();
@@ -1096,7 +1158,7 @@ async function reservar() {
   const notas    = document.getElementById('notas').value.trim();
   const trabajadora = document.getElementById('trabajadora').value;
 
-  if (!srv)          return showAlert('bookingAlert', 'error', 'Elige un servicio.');
+  if (!elegidos.length) return showAlert('bookingAlert', 'error', 'Elige un servicio.');
   if (!fecha)        return showAlert('bookingAlert', 'error', 'Elige un día para la cita.');
   if (!selectedSlot) return showAlert('bookingAlert', 'error', 'Elige una hora.');
   if (!nombre)       return showAlert('bookingAlert', 'error', 'Escribe tu nombre.');
@@ -1108,7 +1170,7 @@ async function reservar() {
   let r;
   try {
     r = await api('rpc/reservar', {
-      p_nombre: nombre, p_apellido: apellido, p_telefono: telefono, p_servicio_id: srv.id,
+      p_nombre: nombre, p_apellido: apellido, p_telefono: telefono, p_servicio_ids: elegidos.map(s => s.id),
       p_trabajadora_id: trabajadora ? Number(trabajadora) : null, p_fecha: fecha, p_hora: selectedSlot, p_notas: notas,
     });
   } catch {
@@ -1122,7 +1184,7 @@ async function reservar() {
     return;
   }
   document.getElementById('bookingOkTexto').innerHTML =
-    `<strong>${esc(r.servicio)}</strong><br>${formatDate(fecha)} a las ${esc(r.hora)}<br>con ${esc(r.trabajadora)}`;
+    `<strong>${esc(r.servicio)}</strong><br>${formatDate(fecha)} a las ${esc(r.hora)} · ${duracionTexto(r.duracion)}<br>con ${esc(r.trabajadora)}`;
   document.getElementById('bookingForm').hidden = true;
   document.getElementById('bookingOk').hidden = false;
   document.getElementById('bookingOk').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1130,8 +1192,8 @@ async function reservar() {
 
 function otraCita() {
   ['fecha', 'notas'].forEach(id => { document.getElementById(id).value = ''; });
-  document.getElementById('servicio').value = '';
-  alCambiarServicio();
+  document.getElementById('serviciosElegidos').innerHTML = '';
+  anadirServicio();
   document.getElementById('bookingOk').hidden = true;
   document.getElementById('bookingForm').hidden = false;
 }

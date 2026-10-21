@@ -188,6 +188,10 @@
   .srv-lista { display: flex; flex-direction: column; gap: 0.5rem; }
   .srv-fila { display: flex; gap: 0.5rem; align-items: center; }
   .srv-fila select { flex: 1; min-width: 0; }
+  /* Cada servicio en dos líneas: el servicio y, debajo, con quién + quitar */
+  .srv-fila { flex-wrap: wrap; }
+  .srv-fila .srv-select { flex: 1 1 100%; }
+  .srv-lista .srv-fila + .srv-fila { padding-top: 0.6rem; border-top: 1px dashed var(--cream-dark); }
   .srv-quitar { flex-shrink: 0; width: 40px; height: 44px; border: 1.5px solid var(--cream-dark); background: var(--white); border-radius: 2px; color: var(--light); font-size: 1.3rem; line-height: 1; cursor: pointer; transition: color .15s, border-color .15s; }
   .srv-quitar:hover { color: var(--error); border-color: var(--error); }
   .srv-quitar[hidden] { display: none; }
@@ -557,17 +561,11 @@
         <div class="form-title">Reservar cita</div>
         <div id="bookingAlert" class="alert" role="status"></div>
         <div class="form-group">
-          <label>Servicios * <span class="label-nota">(hasta 3 en la misma cita)</span></label>
+          <label>Servicios * <span class="label-nota">(hasta 3 seguidos, cada uno con quien quieras)</span></label>
           <!-- Los servicios salen de la app del salón (Supabase) -->
           <div class="srv-lista" id="serviciosElegidos"><select disabled><option>Cargando servicios…</option></select></div>
           <button type="button" class="btn-anadir" id="btnOtroServicio" onclick="anadirServicio()" hidden>+ Añadir otro servicio</button>
           <p class="srv-resumen" id="resumenServicios"></p>
-        </div>
-        <div class="form-group">
-          <label for="trabajadora">¿Con quién? *</label>
-          <select id="trabajadora" disabled>
-            <option value="">Sin preferencia</option>
-          </select>
         </div>
         <div class="form-group">
           <label for="fecha">Día *</label>
@@ -989,23 +987,28 @@ const buscarServicio = (id) => {
   for (const s of CATALOGO) for (const x of s.servicios) if (x[2] === id) return { id, nombre: x[0], precio: x[1], duracion: x[3], seccion: x[4] };
   return null;
 };
-const selectsServicio = () => [...document.querySelectorAll('#serviciosElegidos .srv-select')];
-const serviciosElegidos = () => selectsServicio().map(s => buscarServicio(Number(s.value))).filter(Boolean);
+const filasServicio = () => [...document.querySelectorAll('#serviciosElegidos .srv-fila')];
+// [{ servicio, trabajadora (id o null), sel, quien }] de las filas con servicio elegido
+const serviciosElegidos = () => filasServicio().map(f => ({
+  servicio: buscarServicio(Number(f.querySelector('.srv-select').value)),
+  trabajadora: Number(f.querySelector('.srv-quien').value) || null,
+})).filter(x => x.servicio);
 
 function mensajeHoras(texto, error) {
   document.getElementById('slotsGrid').innerHTML = `<p class="slots-msg${error ? ' error' : ''}">${texto}</p>`;
 }
 
-// Un desplegable de servicio (agrupado por secciones) con su botón de quitar
+// Una fila: servicio (agrupado por secciones) + con quién + botón de quitar
 function anadirServicio(id) {
   const lista = document.getElementById('serviciosElegidos');
   if (lista.children.length >= MAX_SERVICIOS) return;
+  const num = lista.children.length + 1;
   const fila = document.createElement('div');
   fila.className = 'srv-fila';
   const sel = document.createElement('select');
   sel.className = 'srv-select';
-  sel.setAttribute('aria-label', `Servicio ${lista.children.length + 1}`);
-  sel.innerHTML = `<option value="">${lista.children.length ? '– Elige otro servicio –' : '– Elige un servicio –'}</option>`;
+  sel.setAttribute('aria-label', `Servicio ${num}`);
+  sel.innerHTML = `<option value="">${num > 1 ? '– Elige otro servicio –' : '– Elige un servicio –'}</option>`;
   CATALOGO.forEach(s => {
     const g = document.createElement('optgroup');
     g.label = s.menu;
@@ -1017,15 +1020,20 @@ function anadirServicio(id) {
     sel.appendChild(g);
   });
   if (id) sel.value = id;
-  sel.addEventListener('change', alCambiarServicios);
+  const quien = document.createElement('select');
+  quien.className = 'srv-quien';
+  quien.setAttribute('aria-label', `Con quién (servicio ${num})`);
+  quien.innerHTML = '<option value="">Sin preferencia</option>';
   const quitar = document.createElement('button');
   quitar.type = 'button'; quitar.className = 'srv-quitar'; quitar.textContent = '×';
   quitar.setAttribute('aria-label', 'Quitar este servicio');
   quitar.addEventListener('click', () => { fila.remove(); if (!lista.children.length) anadirServicio(); alCambiarServicios(); });
-  fila.append(sel, quitar);
+  sel.addEventListener('change', alCambiarServicios);
+  quien.addEventListener('change', () => { selectedSlot = null; cargarHoras(); });
+  fila.append(sel, quien, quitar);
   lista.appendChild(fila);
   alCambiarServicios();
-  if (!id && lista.children.length > 1) sel.focus();
+  if (!id && num > 1) sel.focus();
 }
 
 function prepararFormulario() {
@@ -1047,35 +1055,38 @@ function prepararFormulario() {
   document.getElementById('fecha').max = iso(max);
 }
 
-// Al cambiar los servicios: no repetir ninguno, resumen con la duración total y
-// solo las trabajadoras que hacen TODOS los apartados elegidos (más «Sin preferencia»)
+// Al cambiar los servicios: no repetir ninguno, resumen con la duración total y, en cada fila,
+// solo las trabajadoras que hacen el apartado de ese servicio (más «Sin preferencia»)
 function alCambiarServicios() {
-  const sels = selectsServicio();
-  const elegidos = serviciosElegidos();
+  const filas = filasServicio();
+  const sels  = filas.map(f => f.querySelector('.srv-select'));
   sels.forEach(s => [...s.options].forEach(o => { o.disabled = !!o.value && o.value !== s.value && sels.some(x => x.value === o.value); }));
-  sels.forEach(s => { s.parentElement.querySelector('.srv-quitar').hidden = sels.length === 1 && !s.value; });
 
-  const btnOtro = document.getElementById('btnOtroServicio');
-  btnOtro.hidden = sels.length >= MAX_SERVICIOS || sels.some(s => !s.value);
-
-  const total = elegidos.reduce((a, s) => a + s.duracion, 0);
-  const precio = elegidos.reduce((a, s) => a + s.precio, 0);
-  document.getElementById('resumenServicios').textContent = elegidos.length > 1
-    ? `${elegidos.length} servicios · ${duracionTexto(total)} en total · ${euros(Math.round(precio * 100) / 100)}`
-    : elegidos.length ? `Dura ${duracionTexto(total)}` : '';
-
-  const secciones = [...new Set(elegidos.map(s => s.seccion))];
-  const sel = document.getElementById('trabajadora');
-  const antes = sel.value;
-  sel.innerHTML = '<option value="">Sin preferencia</option>';
-  const posibles = elegidos.length ? TRABAJADORAS.filter(t => secciones.every(sec => (t.secciones || []).includes(sec))) : [];
-  posibles.forEach(t => {
-    const o = document.createElement('option');
-    o.value = t.id; o.textContent = t.nombre;
-    sel.appendChild(o);
+  filas.forEach(f => {
+    const srv   = buscarServicio(Number(f.querySelector('.srv-select').value));
+    const quien = f.querySelector('.srv-quien');
+    const antes = quien.value;
+    quien.innerHTML = '<option value="">Sin preferencia</option>';
+    const posibles = srv ? TRABAJADORAS.filter(t => (t.secciones || []).includes(srv.seccion)) : [];
+    posibles.forEach(t => {
+      const o = document.createElement('option');
+      o.value = t.id; o.textContent = `Con ${t.nombre}`;
+      quien.appendChild(o);
+    });
+    quien.disabled = !srv || posibles.length === 0;
+    if (posibles.some(t => String(t.id) === antes)) quien.value = antes;
+    f.querySelector('.srv-quitar').hidden = filas.length === 1 && !srv;
+    f.classList.toggle('sin-equipo', !!srv && posibles.length === 0);
   });
-  sel.disabled = !elegidos.length || posibles.length === 0;
-  if (posibles.some(t => String(t.id) === antes)) sel.value = antes;
+
+  document.getElementById('btnOtroServicio').hidden = filas.length >= MAX_SERVICIOS || sels.some(s => !s.value);
+
+  const elegidos = serviciosElegidos();
+  const total  = elegidos.reduce((a, x) => a + x.servicio.duracion, 0);
+  const precio = elegidos.reduce((a, x) => a + x.servicio.precio, 0);
+  document.getElementById('resumenServicios').textContent = elegidos.length > 1
+    ? `${elegidos.length} servicios seguidos, en este orden · ${duracionTexto(total)} en total · ${euros(Math.round(precio * 100) / 100)}`
+    : elegidos.length ? `Dura ${duracionTexto(total)}` : '';
   selectedSlot = null;
   cargarHoras();
 }
@@ -1085,20 +1096,22 @@ async function cargarHoras() {
   const elegidos = serviciosElegidos();
   const fecha = document.getElementById('fecha').value;
   if (!elegidos.length || !fecha) { selectedSlot = null; return mensajeHoras('Elige un servicio y un día para ver las horas libres.'); }
-  if (document.getElementById('trabajadora').disabled) {
+  const sinEquipo = filasServicio().find(f => f.classList.contains('sin-equipo'));
+  if (sinEquipo) {
     selectedSlot = null;
-    return mensajeHoras(elegidos.length > 1
-      ? 'Nadie del equipo hace todos estos servicios juntos. Resérvalos en citas separadas o llámanos y te lo organizamos.'
-      : 'Este servicio no se puede reservar online ahora mismo. Llámanos o escríbenos por WhatsApp y te damos cita.', true);
+    const nombre = buscarServicio(Number(sinEquipo.querySelector('.srv-select').value)).nombre;
+    return mensajeHoras(`«${esc(nombre)}» no se puede reservar online ahora mismo. Quítalo o llámanos y te damos cita.`, true);
   }
   const dia = HORARIO.find(d => d.dia === new Date(fecha + 'T12:00:00').getDay());
   if (!dia || !dia.abierto || CERRADOS.has(fecha)) { selectedSlot = null; return mensajeHoras('Ese día el salón está cerrado. Elige otro día, por favor.', true); }
 
-  const trabajadora = document.getElementById('trabajadora').value;
   mensajeHoras('Buscando horas libres…');
   let horas;
   try {
-    horas = await api('rpc/disponibilidad', { p_servicio_ids: elegidos.map(s => s.id), p_trabajadora_id: trabajadora ? Number(trabajadora) : null, p_fecha: fecha });
+    horas = await api('rpc/disponibilidad_cita', {
+      p_servicios: elegidos.map(x => ({ servicio_id: x.servicio.id, trabajadora_id: x.trabajadora })),
+      p_fecha: fecha,
+    });
   } catch {
     if (n === peticionHoras) mensajeHoras('No hemos podido consultar las horas. Revisa tu conexión e inténtalo de nuevo.', true);
     return;
@@ -1106,7 +1119,8 @@ async function cargarHoras() {
   if (n !== peticionHoras) return;   // ya se ha pedido otro día u otros servicios
   if (!horas.length) {
     selectedSlot = null;
-    return mensajeHoras(`No quedan horas libres ese día para ${elegidos.length > 1 ? 'todos estos servicios' : 'este servicio'}. Prueba con otro día` + (trabajadora ? ' o con «Sin preferencia».' : '.'), true);
+    const conAlguien = elegidos.some(x => x.trabajadora);
+    return mensajeHoras(`No quedan horas libres ese día para ${elegidos.length > 1 ? 'todos estos servicios seguidos' : 'este servicio'}. Prueba con otro día` + (conAlguien ? ' o con «Sin preferencia».' : '.'), true);
   }
   if (!horas.includes(selectedSlot)) selectedSlot = null;
   pintarHoras(horas);
@@ -1132,7 +1146,6 @@ function pintarHoras(horas) {
   });
 }
 
-document.getElementById('trabajadora').addEventListener('change', () => { selectedSlot = null; cargarHoras(); });
 document.getElementById('fecha').addEventListener('change', () => { selectedSlot = null; cargarHoras(); });
 
 // ══════════════════════════════════════════════════
@@ -1156,7 +1169,6 @@ async function reservar() {
   const apellido = document.getElementById('apellido').value.trim();
   const telefono = document.getElementById('telefono').value.trim();
   const notas    = document.getElementById('notas').value.trim();
-  const trabajadora = document.getElementById('trabajadora').value;
 
   if (!elegidos.length) return showAlert('bookingAlert', 'error', 'Elige un servicio.');
   if (!fecha)        return showAlert('bookingAlert', 'error', 'Elige un día para la cita.');
@@ -1169,9 +1181,10 @@ async function reservar() {
   btn.disabled = true; btn.textContent = 'Reservando…';
   let r;
   try {
-    r = await api('rpc/reservar', {
-      p_nombre: nombre, p_apellido: apellido, p_telefono: telefono, p_servicio_ids: elegidos.map(s => s.id),
-      p_trabajadora_id: trabajadora ? Number(trabajadora) : null, p_fecha: fecha, p_hora: selectedSlot, p_notas: notas,
+    r = await api('rpc/reservar_cita', {
+      p_nombre: nombre, p_apellido: apellido, p_telefono: telefono,
+      p_servicios: elegidos.map(x => ({ servicio_id: x.servicio.id, trabajadora_id: x.trabajadora })),
+      p_fecha: fecha, p_hora: selectedSlot, p_notas: notas,
     });
   } catch {
     r = { ok: false, error: 'No hemos podido conectar. Inténtalo de nuevo o llámanos al 665 08 50 53.' };
@@ -1183,8 +1196,9 @@ async function reservar() {
     cargarHoras();
     return;
   }
+  const lista = (r.servicios || []).map(s => `${esc(s.hora)} · <strong>${esc(s.nombre)}</strong> con ${esc(s.trabajadora)}`).join('<br>');
   document.getElementById('bookingOkTexto').innerHTML =
-    `<strong>${esc(r.servicio)}</strong><br>${formatDate(fecha)} a las ${esc(r.hora)} · ${duracionTexto(r.duracion)}<br>con ${esc(r.trabajadora)}`;
+    `${formatDate(fecha)} a las ${esc(r.hora)} (${duracionTexto(r.duracion)})<br><br>${lista}`;
   document.getElementById('bookingForm').hidden = true;
   document.getElementById('bookingOk').hidden = false;
   document.getElementById('bookingOk').scrollIntoView({ behavior: 'smooth', block: 'center' });

@@ -229,6 +229,30 @@
   /* ── OPINIONES ── */
   #opiniones { background: var(--cream-dark); padding-top: 0; }
   .reviews-more { text-align: center; margin-top: 2rem; }
+  .reviews-summary { display: flex; align-items: center; flex-wrap: wrap; gap: 0.7rem 0.9rem; background: var(--white); border-radius: 10px; padding: 1.1rem 1.5rem; margin-bottom: 1.2rem; box-shadow: 0 6px 24px rgba(44,44,44,0.05); }
+  .g-logo { width: 74px; height: 24px; }
+  .reviews-nota { font-size: 1.15rem; font-weight: 700; color: var(--charcoal); }
+  .reviews-texto { font-size: 0.9rem; color: var(--mid); }
+  .stars { color: #FBBC04; letter-spacing: 0.08em; font-size: 1.05rem; line-height: 1; }
+  .reviews-carrusel { position: relative; }
+  .reviews-track { display: grid; grid-auto-flow: column; grid-auto-columns: calc((100% - 2rem) / 3); gap: 1rem; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; padding: 0.3rem 0.1rem 0.8rem; }
+  .reviews-track::-webkit-scrollbar { display: none; }
+  .review { scroll-snap-align: start; background: var(--white); border-radius: 10px; padding: 1.4rem 1.4rem 1.2rem; box-shadow: 0 6px 24px rgba(44,44,44,0.05); display: flex; flex-direction: column; gap: 0.75rem; }
+  .review header { display: flex; align-items: center; gap: 0.75rem; }
+  .review header div { flex: 1; min-width: 0; }
+  .review strong { display: block; font-size: 0.95rem; color: var(--charcoal); }
+  .review small { font-size: 0.78rem; color: var(--light); }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; flex-shrink: 0; }
+  .g-mini { font-family: Arial, Helvetica, sans-serif; font-weight: 700; font-size: 1.15rem; background: conic-gradient(from -45deg, #EA4335 0 25%, #4285F4 0 50%, #34A853 0 75%, #FBBC05 0); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .review p { font-size: 0.92rem; line-height: 1.6; color: var(--charcoal); display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+  .review.abierta p { -webkit-line-clamp: unset; display: block; }
+  .leer-mas { align-self: flex-start; background: none; border: none; padding: 0; cursor: pointer; font-family: 'Lato', sans-serif; font-size: 0.82rem; color: var(--light); }
+  .leer-mas:hover { color: var(--rose-deep); }
+  .reviews-flecha { position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; width: 38px; height: 38px; border-radius: 50%; border: none; background: var(--white); box-shadow: 0 4px 14px rgba(44,44,44,0.15); cursor: pointer; font-size: 1.4rem; line-height: 1; color: var(--charcoal); display: flex; align-items: center; justify-content: center; padding-bottom: 3px; }
+  .reviews-flecha:hover { color: var(--rose-deep); }
+  .reviews-flecha.prev { left: -18px; }
+  .reviews-flecha.next { right: -18px; }
+  .reviews-flecha:disabled { opacity: 0; pointer-events: none; }
 
   /* ── COOKIES ── */
   .consent-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; text-align: center; padding: 2.5rem 1.5rem; background: var(--white); border: 1px dashed var(--rose); border-radius: 4px; font-size: 0.88rem; color: var(--mid); height: 100%; }
@@ -283,6 +307,8 @@
     .carta-tabs { flex-wrap: nowrap; overflow-x: auto; margin: 0 -1rem 1.5rem; padding: 0 1rem 0.4rem; scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); }
     .carta-tabs::-webkit-scrollbar { display: none; }
     .carta-panel { grid-template-columns: 1fr; }
+    .reviews-track { grid-auto-columns: 86%; }
+    .reviews-flecha { display: none; }
     .carta-intro { padding: 2rem 1.5rem; border-right: none; border-bottom: 1px solid var(--cream-dark); }
     .carta-intro-inner { position: static; }
     .carta-desde strong { margin-bottom: 1.2rem; }
@@ -426,11 +452,51 @@
       <p class="section-eyebrow">Lo que dicen nuestras clientas</p>
       <h2 class="section-title">Opiniones</h2>
     </div>
-    <!-- Reseñas de Google mediante el widget de Trustindex. Solo se carga si se aceptan las cookies. -->
-    <div id="reviewsWidget" data-consent="terceros">
-      <div class="consent-placeholder">
-        <p>Las reseñas se muestran con un servicio externo (Trustindex) que usa cookies.</p>
-        <button type="button" class="btn-primary" onclick="aceptarCookies()">Aceptar cookies y ver reseñas</button>
+    <!-- Reseñas reales de Google copiadas a mano (21/10/2026). Solo nombre e inicial del apellido.
+         Para añadir una: copiar un <article class="review"> y cambiar inicial, nombre y texto. -->
+    <div class="reviews">
+      <div class="reviews-summary">
+        <svg class="g-logo" viewBox="0 0 74 24" aria-label="Google" role="img"><text x="0" y="19" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="500"><tspan fill="#4285F4">G</tspan><tspan fill="#EA4335">o</tspan><tspan fill="#FBBC05">o</tspan><tspan fill="#4285F4">g</tspan><tspan fill="#34A853">l</tspan><tspan fill="#EA4335">e</tspan></text></svg>
+        <span class="reviews-nota">4,8</span>
+        <span class="stars" aria-label="4,8 de 5 estrellas">★★★★★</span>
+        <span class="reviews-texto">Valoración de nuestras clientas en Google</span>
+      </div>
+
+      <div class="reviews-carrusel">
+        <button type="button" class="reviews-flecha prev" aria-label="Reseñas anteriores" onclick="moverResenas(-1)">‹</button>
+        <div class="reviews-track" id="reviewsTrack">
+          <article class="review">
+            <header><span class="avatar" style="background:#7B3FA0">L</span><div><strong>Laura R.</strong><small>Reseña de Google</small></div><span class="g-mini" aria-hidden="true">G</span></header>
+            <span class="stars" aria-label="5 de 5 estrellas">★★★★★</span>
+            <p>Muy recomendable, durante mucho tiempo no quise hacerme la permanente de uñas porque mis uñas se rompían y volvían débiles, desde que voy a Begoña me crecen mucho más fuertes y no se me han vuelto a romper. Además la delicadeza con la que las chicas hacen adornos en las uñas ha hecho que me vuelva adicta!!! En la parte de peluquería he encontrado un sitio donde siempre aciertan con el estilo que quiero y utilizan productos naturales para el cabello, lo cual para mi es importante Muchas gracias a todo el equipo!</p>
+          </article>
+          <article class="review">
+            <header><span class="avatar" style="background:#B8827F">G</span><div><strong>García</strong><small>Reseña de Google</small></div><span class="g-mini" aria-hidden="true">G</span></header>
+            <span class="stars" aria-label="5 de 5 estrellas">★★★★★</span>
+            <p>Encantada llevo poco tiempo realizándome las uñas de pies y manos, estoy encantada con Lorena, las demás compañeras y la dueña encantadora, siempre atentas con las clientas te sientes como en casa, lo recomiendo 100%. Gracias</p>
+          </article>
+          <article class="review">
+            <header><span class="avatar" style="background:#5F6B7A">E</span><div><strong>Eva</strong><small>Reseña de Google</small></div><span class="g-mini" aria-hidden="true">G</span></header>
+            <span class="stars" aria-label="5 de 5 estrellas">★★★★★</span>
+            <p>He quedado encantada, con Pableta que me hizo la manicura y con Begoña, me cortó el pelo y me peinó, además de el resultado ser fantástico, el trato y la cercanía ha sido lo mejor, te hacen sentir como en casa. Es un lujo dar con personas así, que se nota que cuidan todo detalle para hacerte sentir bien. Ya tengo mi peluquería de confianza.Recomiendo 💯 x 💯. Gracias!!</p>
+          </article>
+          <article class="review">
+            <header><span class="avatar" style="background:#C9A96E">N</span><div><strong>Noelia J.</strong><small>Reseña de Google</small></div><span class="g-mini" aria-hidden="true">G</span></header>
+            <span class="stars" aria-label="5 de 5 estrellas">★★★★★</span>
+            <p>Soy clienta habitual de manicura y pedicura. También me he peinado y maquillado para sesiones fotográficas y he disfrutado de sus bioterapias faciales. Ahora estoy probando la depilación láser y el laminado de cejas... y estoy muy contenta con todo ello. El trato es excelente y la relación calidad-precio, magnífica.</p>
+          </article>
+          <article class="review">
+            <header><span class="avatar" style="background:#1E88C8">V</span><div><strong>Virginia L.</strong><small>Reseña de Google</small></div><span class="g-mini" aria-hidden="true">G</span></header>
+            <span class="stars" aria-label="5 de 5 estrellas">★★★★★</span>
+            <p>Atención personalizada y barros de alta calidad, que combinado con reflejos me dejaron un color muy natural y alegre. Muy recomendable, volveré sin duda</p>
+          </article>
+          <article class="review">
+            <header><span class="avatar" style="background:#8E5BC4">C</span><div><strong>Carla S.</strong><small>Reseña de Google</small></div><span class="g-mini" aria-hidden="true">G</span></header>
+            <span class="stars" aria-label="5 de 5 estrellas">★★★★★</span>
+            <p>Muy profesionales con un trato personalizado. Se aseguran de que tengas todo lo que necesites y que la experiencia sea inolvidable. Adriana valora a sus clientes y es muy amable. Nos ofreció una infusión y nos hizo una manicura y pedicura de lo más bonitas. Sin duda es muy recomendable!</p>
+          </article>
+        </div>
+        <button type="button" class="reviews-flecha next" aria-label="Más reseñas" onclick="moverResenas(1)">›</button>
       </div>
     </div>
     <div class="reviews-more">
@@ -590,7 +656,7 @@
 
 <!-- AVISO DE COOKIES -->
 <div class="cookie-banner" id="cookieBanner" role="dialog" aria-live="polite" aria-label="Aviso de cookies" hidden>
-  <p>Usamos cookies de terceros (Google Maps y Trustindex) para mostrarte el mapa y las reseñas de Google. Si las rechazas, la web funciona igual, pero sin esos dos elementos. <a href="#" onclick="abrirLegal(event,'dlgCookies')">Más información</a></p>
+  <p>El mapa de Google Maps usa cookies de Google. Si las rechazas, la web funciona igual, pero sin el mapa. <a href="#" onclick="abrirLegal(event,'dlgCookies')">Más información</a></p>
   <div class="cookie-actions">
     <button type="button" class="btn-cookie" onclick="rechazarCookies()">Rechazar</button>
     <button type="button" class="btn-cookie" onclick="aceptarCookies()">Aceptar</button>
@@ -645,9 +711,8 @@
   <h3>Cookies de terceros (solo si las aceptas)</h3>
   <ul>
     <li><strong>Google Maps</strong> (Google Ireland Ltd.): para mostrar el mapa de cómo llegar al salón. <a href="https://policies.google.com/technologies/cookies?hl=es" target="_blank" rel="noopener">Política de Google</a></li>
-    <li><strong>Trustindex</strong> (Trustindex Kft.): para mostrar las reseñas que nos han dejado en Google. <a href="https://www.trustindex.io/privacy-policy/" target="_blank" rel="noopener">Política de Trustindex</a></li>
   </ul>
-  <p>Si las rechazas, el mapa y las reseñas no se cargan, pero puedes verlos directamente en Google Maps.</p>
+  <p>Si las rechazas, el mapa no se carga, pero puedes abrirlo directamente en Google Maps.</p>
   <h3>Almacenamiento técnico</h3>
   <p>Guardamos en tu navegador si has aceptado o rechazado las cookies (clave <code>bg_cookies</code>), para no volver a preguntarte. Es necesario para respetar tu elección y no requiere consentimiento.</p>
   <h3>Cambiar tu elección</h3>
@@ -738,6 +803,13 @@ const CATALOGO = [
       ['Bono drenaje linfático (7 sesiones + 2 presoterapias de regalo)', 351], ['Bono corposhape (7 sesiones)', 426],
     ] },
 ];
+
+// Servicios y extras de cada sección en orden alfabético (en español: Á junto a A, Ñ después de N)
+const alfabetico = new Intl.Collator('es', { sensitivity: 'base', numeric: true });
+CATALOGO.forEach(s => {
+  s.servicios.sort((a, b) => alfabetico.compare(a[0], b[0]));
+  if (s.extras) s.extras.sort((a, b) => alfabetico.compare(a[0], b[0]));
+});
 
 const euros = (n) => `${n} €`;
 const desde = (s) => Math.min(...s.servicios.map(x => x[1]));
@@ -960,12 +1032,8 @@ document.querySelectorAll('dialog.legal').forEach(dlg => {
 });
 
 // ══════════════════════════════════════════════════
-//  COOKIES (mapa de Google y reseñas de Trustindex)
+//  COOKIES (solo el mapa de Google)
 // ══════════════════════════════════════════════════
-// ID del widget de Trustindex (cuenta creada el 14/10/2026). Al crear el widget te dan un código con una
-// dirección como https://cdn.trustindex.io/loader.js?a1b2c3d4e5f6
-// y el ID es lo que va después del "?" (en el ejemplo: a1b2c3d4e5f6).
-const TRUSTINDEX_ID = '20ecede836c46362f98695e6564';
 const MAPA_URL   = 'https://www.google.com/maps?q=C%2F+Obispo+Golf%C3%ADn+9,+28430+Alpedrete&output=embed';
 const COOKIE_KEY = 'bg_cookies';
 
@@ -982,20 +1050,44 @@ function cargarTerceros() {
     mapa.dataset.cargado = '1';
     mapa.innerHTML = `<iframe src="${MAPA_URL}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Mapa: C/ Obispo Golfín 9, Alpedrete"></iframe>`;
   }
-  const resenas = document.getElementById('reviewsWidget');
-  if (resenas && !resenas.dataset.cargado) {
-    resenas.dataset.cargado = '1';
-    if (TRUSTINDEX_ID) {
-      resenas.innerHTML = '';
-      const s = document.createElement('script');
-      s.src = `https://cdn.trustindex.io/loader.js?${TRUSTINDEX_ID}`;
-      s.defer = true; s.async = true;
-      resenas.appendChild(s);
-    } else {
-      resenas.innerHTML = '<div class="consent-placeholder pendiente">Widget de reseñas pendiente de configurar (falta TRUSTINDEX_ID en el código).</div>';
-    }
-  }
 }
+
+// ══════════════════════════════════════════════════
+//  RESEÑAS (carrusel)
+// ══════════════════════════════════════════════════
+function moverResenas(dir) {
+  const track = document.getElementById('reviewsTrack');
+  const paso = track.querySelector('.review').offsetWidth + 16; // ancho de una tarjeta + hueco
+  track.scrollBy({ left: dir * paso, behavior: 'smooth' });
+}
+
+(function() {
+  const track = document.getElementById('reviewsTrack');
+  const prev  = document.querySelector('.reviews-flecha.prev');
+  const next  = document.querySelector('.reviews-flecha.next');
+  const actualizarFlechas = () => {
+    prev.disabled = track.scrollLeft < 5;
+    next.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 5;
+  };
+  track.addEventListener('scroll', actualizarFlechas, { passive: true });
+  window.addEventListener('resize', actualizarFlechas);
+
+  // "Leer más" solo en las reseñas cuyo texto no cabe entero
+  const ponerLeerMas = () => track.querySelectorAll('.review').forEach(r => {
+    const p = r.querySelector('p');
+    if (r.querySelector('.leer-mas') || r.classList.contains('abierta') || p.scrollHeight <= p.clientHeight + 2) return;
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'leer-mas'; b.textContent = 'Leer más';
+    b.addEventListener('click', () => {
+      const abierta = r.classList.toggle('abierta');
+      b.textContent = abierta ? 'Leer menos' : 'Leer más';
+    });
+    r.appendChild(b);
+  });
+  // Esperar a las fuentes para medir bien el texto
+  (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => { ponerLeerMas(); actualizarFlechas(); });
+  actualizarFlechas();
+})();
 
 function aceptarCookies() {
   guardarConsentimiento('aceptadas');

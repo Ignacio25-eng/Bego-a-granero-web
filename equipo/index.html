@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#FAF7F4">
+<meta name="color-scheme" content="light">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Equipo Begoña">
+<title>Agenda del equipo · Begoña Granero</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icono-192.png">
+<link rel="apple-touch-icon" href="icono-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rose:      #D4A5A5;
+    --rose-deep: #B8827F;
+    --gold:      #C9A96E;
+    --gold-light:#E8D5B0;
+    --cream:     #FAF7F4;
+    --cream-dark:#F2EDE8;
+    --charcoal:  #2C2C2C;
+    --mid:       #6B6B6B;
+    --light:     #9E9E9E;
+    --white:     #FFFFFF;
+    --error:     #C0504D;
+    --success:   #6B9E7A;
+    --aviso:     #9A7B3F;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { font-family: 'Lato', sans-serif; background: var(--cream); color: var(--charcoal); font-size: 16px; line-height: 1.4;
+         min-height: 100vh; padding-bottom: env(safe-area-inset-bottom); }
+  button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+  [hidden] { display: none !important; }
+  .serif { font-family: 'Playfair Display', serif; }
+
+  /* ── Entrada ── */
+  .login { max-width: 400px; margin: 0 auto; padding: calc(48px + env(safe-area-inset-top)) 16px 32px; }
+  .login-logo { width: 72px; height: 72px; border-radius: 16px; display: block; margin: 0 auto 20px; }
+  .login h1 { font-family: 'Playfair Display', serif; font-size: 1.7rem; text-align: center; margin-bottom: 6px; }
+  .login .sub { text-align: center; color: var(--mid); font-size: .95rem; margin-bottom: 28px; }
+  .campo { margin-bottom: 14px; }
+  .campo label { display: block; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--mid); margin-bottom: 6px; }
+  .campo input { width: 100%; padding: 13px 14px; border: 1.5px solid var(--cream-dark); border-radius: 6px; font: inherit; font-size: 16px;
+                 background: var(--white); color: var(--charcoal); outline: none; }
+  .campo input:focus { border-color: var(--rose); }
+  .btn { width: 100%; padding: 14px; border-radius: 6px; background: var(--rose-deep); color: var(--white); font-weight: 700;
+         letter-spacing: .1em; text-transform: uppercase; font-size: .85rem; }
+  .btn:disabled { opacity: .6; }
+  .error { color: var(--error); font-size: .9rem; margin-top: 12px; }
+  .nota { color: var(--light); font-size: .82rem; margin-top: 18px; text-align: center; }
+
+  /* ── Cabecera ── */
+  header { position: sticky; top: 0; z-index: 5; background: var(--cream); border-bottom: 1px solid var(--cream-dark);
+           padding: calc(10px + env(safe-area-inset-top)) 16px 10px; }
+  .fila { display: flex; align-items: center; gap: 10px; }
+  .hola { flex: 1; min-width: 0; font-family: 'Playfair Display', serif; font-size: 1.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .salir { font-size: .82rem; color: var(--mid); padding: 8px 4px; }
+  .vistas { display: grid; grid-template-columns: 1fr 1fr; background: var(--cream-dark); border-radius: 8px; padding: 3px; margin-top: 10px; }
+  .vistas button { padding: 8px; border-radius: 6px; font-size: .9rem; color: var(--mid); }
+  .vistas button[aria-pressed="true"] { background: var(--white); color: var(--charcoal); font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+  .fechas { margin-top: 10px; }
+  .flecha { width: 44px; height: 44px; border-radius: 50%; font-size: 1.4rem; color: var(--rose-deep); flex: none; }
+  .flecha:active, .chip:active, .dia-cab:active { background: var(--cream-dark); }
+  .titulo-fecha { flex: 1; min-width: 0; text-align: center; font-weight: 700; font-size: 1rem; }
+  .titulo-fecha small { display: block; font-weight: 400; color: var(--mid); font-size: .8rem; }
+  .hoy { font-size: .8rem; font-weight: 700; color: var(--rose-deep); border: 1px solid var(--rose); border-radius: 999px; padding: 6px 12px; flex: none; }
+  .chips { display: flex; gap: 8px; overflow-x: auto; margin: 10px -16px 0; padding: 0 16px 2px; scrollbar-width: none; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip { flex: none; display: flex; align-items: center; gap: 6px; border: 1px solid var(--gold-light); border-radius: 999px;
+          padding: 7px 13px; font-size: .88rem; color: var(--mid); background: var(--white); }
+  .chip[aria-pressed="true"] { background: var(--charcoal); border-color: var(--charcoal); color: var(--white); }
+  .punto { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+
+  /* ── Contenido ── */
+  main { padding: 14px 16px 24px; max-width: 640px; margin: 0 auto; }
+  .estado-dia { background: var(--white); border: 1px solid var(--cream-dark); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; font-size: .92rem; }
+  .estado-dia strong { display: block; margin-bottom: 2px; }
+  .estado-dia .linea { color: var(--mid); }
+  .estado-dia.libre { background: #F6F1E7; border-color: var(--gold-light); }
+  .estado-dia.cerrado { background: #F7ECEB; border-color: #EBCFCD; }
+  .cita { display: flex; background: var(--white); border: 1px solid var(--cream-dark); border-radius: 10px; overflow: hidden; margin-bottom: 10px; }
+  .cita .barra { width: 5px; flex: none; }
+  .cita .cuerpo { flex: 1; min-width: 0; padding: 10px 12px; }
+  .cita .arriba { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .cita .hora { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .cita .nombre { font-size: 1.02rem; font-weight: 700; margin-top: 2px; overflow-wrap: anywhere; }
+  .cita .servicios { color: var(--mid); font-size: .9rem; margin-top: 2px; overflow-wrap: anywhere; }
+  .cita .abajo { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; font-size: .88rem; }
+  .cita .quien { display: flex; align-items: center; gap: 6px; color: var(--mid); }
+  .tel { color: var(--rose-deep); font-weight: 700; text-decoration: none; padding: 4px 0; }
+  .etiqueta { font-size: .7rem; letter-spacing: .06em; text-transform: uppercase; border-radius: 999px; padding: 2px 8px; font-weight: 700; }
+  .etq-web { background: #EEF1F6; color: #43577A; }
+  .etq-pend { background: #F6F1E7; color: var(--aviso); }
+  .etq-conf { background: #EAF2EC; color: #4F7A5B; }
+  .etq-hecha { background: var(--cream-dark); color: var(--mid); }
+  .etq-anul { background: #F7ECEB; color: var(--error); }
+  .cita.anulada { opacity: .6; }
+  .cita.anulada .nombre, .cita.anulada .hora { text-decoration: line-through; }
+  .vacio { text-align: center; color: var(--light); padding: 28px 0; }
+
+  /* Semana */
+  .dia { margin-bottom: 12px; background: var(--white); border: 1px solid var(--cream-dark); border-radius: 10px; overflow: hidden; }
+  .dia.es-hoy { border-color: var(--rose); }
+  .dia-cab { width: 100%; display: flex; align-items: center; gap: 8px; padding: 11px 14px; text-align: left; }
+  .dia-cab .nom { font-weight: 700; flex: 1; min-width: 0; }
+  .dia-cab .nom small { font-weight: 400; color: var(--mid); margin-left: 6px; }
+  .dia-cab .cuenta { color: var(--mid); font-size: .85rem; }
+  .dia-cab .ir { color: var(--rose-deep); font-size: 1.1rem; }
+  .fila-cita { display: flex; gap: 10px; padding: 8px 14px; border-top: 1px solid var(--cream-dark); font-size: .9rem; align-items: baseline; }
+  .fila-cita .h { font-weight: 700; font-variant-numeric: tabular-nums; flex: none; width: 44px; }
+  .fila-cita .t { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .fila-cita .t span { color: var(--mid); }
+  .fila-cita.anulada { opacity: .55; text-decoration: line-through; }
+
+  footer { text-align: center; color: var(--light); font-size: .8rem; padding: 4px 16px 28px; max-width: 640px; margin: 0 auto; }
+  footer .aviso { color: var(--aviso); }
+  footer button { color: var(--rose-deep); font-weight: 700; padding: 8px; font-size: .85rem; }
+  .cargando { opacity: .55; transition: opacity .2s; }
+</style>
+</head>
+<body>
+
+<!-- ── Entrada ── -->
+<section class="login" id="pantallaLogin" hidden>
+  <img class="login-logo" src="icono-192.png" alt="">
+  <h1>Agenda del equipo</h1>
+  <p class="sub">Begoña Granero · Peluquería y Estética</p>
+  <form id="formLogin" novalidate>
+    <div class="campo">
+      <label for="email">Email</label>
+      <input id="email" type="email" autocomplete="username" inputmode="email" autocapitalize="none" required>
+    </div>
+    <div class="campo">
+      <label for="contrasena">Contraseña</label>
+      <input id="contrasena" type="password" autocomplete="current-password" required>
+    </div>
+    <button class="btn" id="btnEntrar" type="submit">Entrar</button>
+    <p class="error" id="errorLogin" role="alert" hidden></p>
+  </form>
+  <p class="nota">¿No tienes usuario o has olvidado la contraseña? Pídeselo a Begoña.</p>
+</section>
+
+<!-- ── Agenda ── -->
+<div id="pantallaAgenda" hidden>
+  <header>
+    <div class="fila">
+      <div class="hola" id="hola"></div>
+      <button class="salir" id="btnSalir" type="button">Salir</button>
+    </div>
+    <div class="vistas" role="group" aria-label="Vista">
+      <button type="button" data-vista="dia">Día</button>
+      <button type="button" data-vista="semana">Semana</button>
+    </div>
+    <div class="fila fechas">
+      <button class="flecha" id="btnAntes" type="button" aria-label="Anterior">‹</button>
+      <div class="titulo-fecha" id="tituloFecha"></div>
+      <button class="flecha" id="btnDespues" type="button" aria-label="Siguiente">›</button>
+      <button class="hoy" id="btnHoy" type="button">Hoy</button>
+    </div>
+    <div class="chips" id="chips" role="group" aria-label="Trabajadora"></div>
+  </header>
+  <main id="contenido" aria-live="polite"></main>
+  <footer>
+    <div id="pie"></div>
+    <button type="button" id="btnRecargar">Actualizar</button>
+  </footer>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+//  AGENDA DEL EQUIPO (web-app para el móvil de las trabajadoras)
+//  Lee la agenda que sube la app del salón a Supabase. Cada trabajadora entra con su usuario;
+//  las reglas de quién puede ver qué están en el repositorio de la app (supabase/esquema.sql).
+//  No se guardan datos de clientas en el móvil: solo la sesión y la vista elegida.
+// ══════════════════════════════════════════════════
+const SUPABASE_URL = 'https://jazzbriexlsmmotuxzit.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_KzFizhKF6XEmbGk3l7zLcw_BZO0Br0K';
+const LS_SESION = 'equipo_sesion';
+const LS_VISTA  = 'equipo_vista';
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function leer(clave) { try { return JSON.parse(localStorage.getItem(clave)); } catch { return null; } }
+function escribir(clave, valor) { try { valor == null ? localStorage.removeItem(clave) : localStorage.setItem(clave, JSON.stringify(valor)); } catch { } }
+
+// ── Fechas (siempre en la hora del móvil) ──
+const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const deIso = s => { const [a, m, d] = s.split('-').map(Number); return new Date(a, m - 1, d); };
+const masDias = (s, n) => { const d = deIso(s); d.setDate(d.getDate() + n); return iso(d); };
+const lunesDe = s => { const d = deIso(s); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return iso(d); };
+const hoy = () => iso(new Date());
+const hm = t => String(t || '').slice(0, 5);
+const finDe = horas => { const [h, m] = hm(horas[horas.length - 1]).split(':').map(Number); const t = h * 60 + m + 30; return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`; };
+const enMinutos = t => { const [h, m] = hm(t).split(':').map(Number); return h * 60 + m; };
+const fmt = (s, op) => deIso(s).toLocaleDateString('es-ES', op);
+const may = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+// ══════════════════════════════════════════════════
+//  SESIÓN Y LLAMADAS A SUPABASE
+// ══════════════════════════════════════════════════
+class SinSesion extends Error {}
+let sesion = leer(LS_SESION);
+let refrescando = null;
+
+async function pedirToken(tipo, cuerpo) {
+  const r = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=${tipo}`, {
+    method: 'POST', headers: { apikey: SUPABASE_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(cuerpo),
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw Object.assign(new Error(j.error_description || j.msg || j.message || 'Error al entrar'), { status: r.status });
+  sesion = { access_token: j.access_token, refresh_token: j.refresh_token, expira: Date.now() + (j.expires_in || 3600) * 1000 - 120000 };
+  escribir(LS_SESION, sesion);
+}
+
+async function token() {
+  if (!sesion) throw new SinSesion();
+  if (Date.now() < sesion.expira) return sesion.access_token;
+  // Un solo refresco a la vez: el token de refresco solo vale una vez
+  refrescando ??= pedirToken('refresh_token', { refresh_token: sesion.refresh_token }).finally(() => { refrescando = null; });
+  try { await refrescando; }
+  catch (e) { if (e.status >= 400 && e.status < 500) { olvidarSesion(); throw new SinSesion(); } throw e; }
+  return sesion.access_token;
+}
+
+async function rpc(funcion, args = {}) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${funcion}`, {
+    method: 'POST',
+    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${await token()}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(args),
+  });
+  const texto = await r.text();
+  if (!r.ok) {
+    let j = {}; try { j = JSON.parse(texto); } catch { }
+    if (r.status === 401) { olvidarSesion(); throw new SinSesion(); }
+    throw Object.assign(new Error(j.message || texto), { code: j.code, status: r.status });
+  }
+  return texto ? JSON.parse(texto) : null;
+}
+
+function olvidarSesion() { sesion = null; escribir(LS_SESION, null); }
+
+async function salir() {
+  const t = sesion?.access_token;
+  olvidarSesion();
+  datos = null; semanaCargada = '';
+  mostrarLogin();
+  if (t) fetch(`${SUPABASE_URL}/auth/v1/logout`, { method: 'POST', headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${t}` } }).catch(() => { });
+}
+
+// ══════════════════════════════════════════════════
+//  ESTADO DE LA PANTALLA
+// ══════════════════════════════════════════════════
+let yo = null;                 // { trabajadora_id, nombre, salon }
+let datos = null;              // lo que devuelve agenda_equipo para la semana cargada
+let semanaCargada = '';        // lunes de la semana de «datos»
+const pref = leer(LS_VISTA) || {};
+const vista = { modo: pref.modo === 'semana' ? 'semana' : 'dia', fecha: hoy(), filtro: pref.filtro ?? null };
+
+function guardarVista() { escribir(LS_VISTA, { modo: vista.modo, filtro: vista.filtro }); }
+
+// ── Entrada ──
+function mostrarLogin(mensaje) {
+  $('pantallaAgenda').hidden = true;
+  $('pantallaLogin').hidden = false;
+  $('errorLogin').hidden = !mensaje;
+  $('errorLogin').textContent = mensaje || '';
+}
+
+$('formLogin').addEventListener('submit', async e => {
+  e.preventDefault();
+  const email = $('email').value.trim(), contrasena = $('contrasena').value;
+  if (!email || !contrasena) { mostrarLogin('Escribe tu email y tu contraseña.'); return; }
+  $('btnEntrar').disabled = true; $('btnEntrar').textContent = 'Entrando…';
+  try {
+    try { await pedirToken('password', { email, password: contrasena }); }
+    catch (err) { mostrarLogin(err.status === 400 ? 'El email o la contraseña no son correctos.' : textoError(err)); return; }
+    $('contrasena').value = '';
+    try { await empezar(); }
+    catch (err) { olvidarSesion(); mostrarLogin(mensajeInicio(err)); }
+  } finally {
+    $('btnEntrar').disabled = false; $('btnEntrar').textContent = 'Entrar';
+  }
+});
+
+const mensajeInicio = err => err.sinAcceso ? err.message : err instanceof SinSesion ? '' : textoError(err);
+
+function textoError(err) {
+  if (err instanceof SinSesion) return 'La sesión ha caducado. Vuelve a entrar.';
+  if (err.code === 'PGRST202') return 'La agenda todavía no está preparada en el servidor (falta ejecutar el SQL nuevo en Supabase).';
+  if (err instanceof TypeError) return 'No hay conexión a internet.';
+  return 'No se ha podido cargar la agenda. ' + (err.message || '');
+}
+
+// Comprueba quién ha entrado y abre la agenda
+async function empezar() {
+  const r = await rpc('equipo_yo');
+  if (!r?.ok) {
+    olvidarSesion();
+    throw Object.assign(new Error('Este usuario no tiene acceso a la agenda. Pide a Begoña que ponga tu email en tu ficha de la app del salón.'), { sinAcceso: true });
+  }
+  yo = r;
+  if (vista.filtro == null) vista.filtro = yo.trabajadora_id ?? 'todas';
+  $('hola').textContent = yo.trabajadora_id ? `Hola, ${yo.nombre}` : 'Agenda del salón';
+  $('pantallaLogin').hidden = true;
+  $('pantallaAgenda').hidden = false;
+  await cargar(true);
+}
+
+// ── Carga de la semana que se está viendo ──
+async function cargar(forzar = false) {
+  const lunes = lunesDe(vista.fecha);
+  if (!forzar && lunes === semanaCargada && datos) { pintar(); return; }
+  $('contenido').classList.add('cargando');
+  try {
+    const d = await rpc('agenda_equipo', { p_desde: lunes, p_hasta: masDias(lunes, 6) });
+    // Si mientras tanto se ha cambiado de semana, esta respuesta ya no vale
+    if (lunesDe(vista.fecha) !== lunes) return;
+    datos = d; semanaCargada = lunes;
+    pintar();
+  } catch (err) {
+    if (err instanceof SinSesion) { mostrarLogin(textoError(err)); return; }
+    if (!datos || semanaCargada !== lunes) { datos = null; pintar(); }
+    $('pie').innerHTML = `<span class="aviso">${esc(textoError(err))}</span>`;
+  } finally {
+    $('contenido').classList.remove('cargando');
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  QUIÉN TRABAJA Y CUÁNDO
+// ══════════════════════════════════════════════════
+const persona = id => datos?.personal.find(p => p.id === id);
+const colorDe = id => persona(id)?.color || '#B8827F';
+
+function horarioDe(fecha) {
+  if (!datos) return null;
+  if (datos.dias_cerrados.includes(fecha)) return { cerrado: true, motivo: 'El salón cierra este día' };
+  const h = datos.horario.find(x => x.dia === deIso(fecha).getDay());
+  if (!h || !h.abierto) return { cerrado: true, motivo: 'El salón no abre este día' };
+  return h;
+}
+
+function textoHorario(h) {
+  return h.tiene_descanso
+    ? `de ${hm(h.apertura)} a ${hm(h.descanso_desde)} y de ${hm(h.descanso_hasta)} a ${hm(h.cierre)}`
+    : `de ${hm(h.apertura)} a ${hm(h.cierre)}`;
+}
+
+// Cómo tiene el día una trabajadora: { tipo: 'trabaja' | 'libre' | 'ausente' | 'cerrado', texto }
+function diaDe(id, fecha) {
+  const h = horarioDe(fecha);
+  if (!h) return null;
+  if (h.cerrado) return { tipo: 'cerrado', texto: h.motivo };
+  const p = persona(id);
+  if (p?.dias_libres.includes(deIso(fecha).getDay())) return { tipo: 'libre', texto: 'Día libre' };
+  const aus = datos.ausencias.filter(a => a.trabajadora_id === id && a.desde <= fecha && a.hasta >= fecha);
+  if (aus.some(a => a.todo_el_dia)) return { tipo: 'ausente', texto: 'Ausencia todo el día' };
+  const horas = aus.map(a => `no está de ${hm(a.hora_desde)} a ${hm(a.hora_hasta)}`);
+  return { tipo: 'trabaja', texto: `Trabaja ${textoHorario(h)}` + (horas.length ? ` · ${horas.join(', ')}` : '') };
+}
+
+// ══════════════════════════════════════════════════
+//  PINTAR
+// ══════════════════════════════════════════════════
+const ESTADOS = {
+  pendiente:     ['Pendiente', 'etq-pend'],
+  confirmada:    ['Confirmada', 'etq-conf'],
+  realizada:     ['Realizada', 'etq-hecha'],
+  cancelada:     ['Cancelada', 'etq-anul'],
+  no_presentada: ['No vino', 'etq-anul'],
+};
+const anulada = c => c.estado === 'cancelada' || c.estado === 'no_presentada';
+
+function citasDe(fecha) {
+  return (datos?.citas || [])
+    .filter(c => c.fecha === fecha && (vista.filtro === 'todas' || c.trabajadora_id === vista.filtro))
+    .sort((a, b) => enMinutos(a.horas[0]) - enMinutos(b.horas[0]) || (persona(a.trabajadora_id)?.nombre || '').localeCompare(persona(b.trabajadora_id)?.nombre || ''));
+}
+
+function pintar() {
+  // Vista y fecha
+  document.querySelectorAll('[data-vista]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.vista === vista.modo)));
+  if (vista.modo === 'dia') {
+    const rel = vista.fecha === hoy() ? 'Hoy' : vista.fecha === masDias(hoy(), 1) ? 'Mañana' : vista.fecha === masDias(hoy(), -1) ? 'Ayer' : '';
+    $('tituloFecha').innerHTML = `${esc(may(fmt(vista.fecha, { weekday: 'long', day: 'numeric', month: 'long' })))}${rel ? `<small>${rel}</small>` : ''}`;
+  } else {
+    const l = lunesDe(vista.fecha), d = masDias(l, 6);
+    $('tituloFecha').innerHTML = `${esc(fmt(l, { day: 'numeric', month: 'short' }))} – ${esc(fmt(d, { day: 'numeric', month: 'short' }))}<small>Semana</small>`;
+  }
+  $('btnHoy').hidden = vista.modo === 'dia' ? vista.fecha === hoy() : lunesDe(vista.fecha) === lunesDe(hoy());
+
+  // Filtro por trabajadora (las fichas vienen del salón)
+  const personal = datos?.personal || [];
+  if (vista.filtro !== 'todas' && datos && !persona(vista.filtro)) vista.filtro = 'todas';
+  $('chips').innerHTML = [`<button class="chip" type="button" data-filtro="todas" aria-pressed="${vista.filtro === 'todas'}">Todas</button>`]
+    .concat(personal.map(p => `<button class="chip" type="button" data-filtro="${p.id}" aria-pressed="${vista.filtro === p.id}">` +
+      `<span class="punto" style="background:${esc(p.color)}"></span>${esc(p.nombre)}${p.id === yo?.trabajadora_id ? ' (tú)' : ''}</button>`)).join('');
+
+  if (!datos) { $('contenido').innerHTML = '<p class="vacio">No se ha podido cargar la agenda.</p>'; return; }
+  $('contenido').innerHTML = vista.modo === 'dia' ? pintarDia(vista.fecha) : pintarSemana();
+  pintarPie();
+}
+
+function tarjetaDia(fecha) {
+  const h = horarioDe(fecha);
+  if (vista.filtro !== 'todas') {
+    const d = diaDe(vista.filtro, fecha);
+    const clase = d.tipo === 'cerrado' ? 'cerrado' : d.tipo === 'trabaja' ? '' : 'libre';
+    return `<div class="estado-dia ${clase}"><strong>${esc(persona(vista.filtro)?.nombre || '')}</strong><span class="linea">${esc(d.texto)}</span></div>`;
+  }
+  if (h.cerrado) return `<div class="estado-dia cerrado"><strong>Salón cerrado</strong><span class="linea">${esc(h.motivo)}</span></div>`;
+  const fuera = (datos.personal || []).map(p => ({ p, d: diaDe(p.id, fecha) })).filter(x => x.d.tipo !== 'trabaja' || x.d.texto.includes('no está'));
+  return `<div class="estado-dia"><strong>Abierto ${esc(textoHorario(h))}</strong>` +
+    (fuera.length ? `<span class="linea">${fuera.map(x => `${esc(x.p.nombre)}: ${esc(x.d.tipo === 'trabaja' ? x.d.texto.split(' · ')[1] : x.d.texto.toLowerCase())}`).join(' · ')}</span>` : '') +
+    `</div>`;
+}
+
+function pintarDia(fecha) {
+  const citas = citasDe(fecha);
+  const lista = citas.length ? citas.map(tarjetaCita).join('') : '<p class="vacio">No hay citas.</p>';
+  return tarjetaDia(fecha) + lista;
+}
+
+function tarjetaCita(c) {
+  const [txt, cls] = ESTADOS[c.estado] || ESTADOS.pendiente;
+  const p = persona(c.trabajadora_id);
+  const tel = String(c.cliente_telefono || '').replace(/[^0-9+]/g, '');
+  const nombre = `${c.cliente_nombre} ${c.cliente_apellido}`.trim() || 'Sin nombre';
+  return `<article class="cita${anulada(c) ? ' anulada' : ''}">
+    <div class="barra" style="background:${esc(colorDe(c.trabajadora_id))}"></div>
+    <div class="cuerpo">
+      <div class="arriba">
+        <span class="hora">${hm(c.horas[0])} – ${finDe(c.horas)}</span>
+        <span class="etiqueta ${cls}">${txt}</span>
+        ${c.origen === 'web' ? '<span class="etiqueta etq-web">Web</span>' : ''}
+      </div>
+      <div class="nombre">${esc(nombre)}</div>
+      ${c.servicios ? `<div class="servicios">${esc(c.servicios)}</div>` : ''}
+      <div class="abajo">
+        ${vista.filtro === 'todas' ? `<span class="quien"><span class="punto" style="background:${esc(colorDe(c.trabajadora_id))}"></span>${esc(p?.nombre || '¿?')}</span>` : ''}
+        ${tel ? `<a class="tel" href="tel:${esc(tel)}">☎ ${esc(c.cliente_telefono)}</a>` : ''}
+      </div>
+      ${c.pendiente ? '<div class="servicios">Reservada en la web: el ordenador del salón aún no la ha pasado a su agenda.</div>' : ''}
+    </div>
+  </article>`;
+}
+
+function pintarSemana() {
+  const lunes = lunesDe(vista.fecha);
+  let html = '';
+  for (let i = 0; i < 7; i++) {
+    const f = masDias(lunes, i);
+    const citas = citasDe(f);
+    const activas = citas.filter(c => !anulada(c)).length;
+    const h = horarioDe(f);
+    const sub = vista.filtro !== 'todas' ? diaDe(vista.filtro, f).texto : h.cerrado ? 'Cerrado' : '';
+    html += `<section class="dia${f === hoy() ? ' es-hoy' : ''}">
+      <button class="dia-cab" type="button" data-dia="${f}">
+        <span class="nom">${esc(may(fmt(f, { weekday: 'long', day: 'numeric' })))}${sub ? `<small>${esc(sub)}</small>` : ''}</span>
+        <span class="cuenta">${activas ? `${activas} cita${activas === 1 ? '' : 's'}` : ''}</span>
+        <span class="ir" aria-hidden="true">›</span>
+      </button>
+      ${citas.map(c => `<div class="fila-cita${anulada(c) ? ' anulada' : ''}">
+          <span class="h">${hm(c.horas[0])}</span>
+          <span class="t">${esc(`${c.cliente_nombre} ${c.cliente_apellido}`.trim() || 'Sin nombre')}${c.servicios ? ` <span>· ${esc(c.servicios)}</span>` : ''}${vista.filtro === 'todas' ? ` <span>· ${esc(persona(c.trabajadora_id)?.nombre || '')}</span>` : ''}</span>
+          <span class="punto" style="background:${esc(colorDe(c.trabajadora_id))}"></span>
+        </div>`).join('')}
+    </section>`;
+  }
+  return html;
+}
+
+// Cuándo envió datos el ordenador del salón por última vez (lo hace cada minuto si está encendido)
+function pintarPie() {
+  const f = datos?.publicada ? new Date(datos.publicada) : null;
+  if (!f) { $('pie').textContent = 'El ordenador del salón todavía no ha enviado la agenda.'; return; }
+  const min = Math.round((Date.now() - f) / 60000);
+  const cuando = f.toDateString() === new Date().toDateString()
+    ? `hoy a las ${f.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`
+    : f.toLocaleString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  $('pie').innerHTML = min > 15
+    ? `<span class="aviso">El ordenador del salón no envía cambios desde ${esc(cuando)}: puede que falten las citas más recientes.</span>`
+    : `Agenda al día (ordenador del salón: ${esc(cuando)}).`;
+}
+
+// ══════════════════════════════════════════════════
+//  EVENTOS
+// ══════════════════════════════════════════════════
+document.querySelectorAll('[data-vista]').forEach(b => b.addEventListener('click', () => {
+  vista.modo = b.dataset.vista; guardarVista(); pintar();
+}));
+$('btnAntes').addEventListener('click', () => { vista.fecha = masDias(vista.fecha, vista.modo === 'dia' ? -1 : -7); cargar(); });
+$('btnDespues').addEventListener('click', () => { vista.fecha = masDias(vista.fecha, vista.modo === 'dia' ? 1 : 7); cargar(); });
+$('btnHoy').addEventListener('click', () => { vista.fecha = hoy(); cargar(); });
+$('btnRecargar').addEventListener('click', () => cargar(true));
+$('btnSalir').addEventListener('click', salir);
+$('chips').addEventListener('click', e => {
+  const b = e.target.closest('[data-filtro]'); if (!b) return;
+  vista.filtro = b.dataset.filtro === 'todas' ? 'todas' : Number(b.dataset.filtro);
+  guardarVista(); pintar();
+});
+$('contenido').addEventListener('click', e => {
+  const b = e.target.closest('[data-dia]'); if (!b) return;
+  vista.fecha = b.dataset.dia; vista.modo = 'dia'; guardarVista(); pintar(); window.scrollTo(0, 0);
+});
+
+// Se pone al día al volver a la app y cada minuto mientras está abierta
+document.addEventListener('visibilitychange', () => { if (!document.hidden && yo && sesion) cargar(true); });
+setInterval(() => { if (!document.hidden && yo && sesion) cargar(true); }, 60000);
+
+// ── Arranque ──
+(async () => {
+  if (!sesion) { mostrarLogin(); return; }
+  try { await empezar(); }
+  catch (err) { mostrarLogin(mensajeInicio(err)); }
+})();
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => { });
+</script>
+</body>
+</html>

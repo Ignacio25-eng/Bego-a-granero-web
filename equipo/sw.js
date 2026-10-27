@@ -1,7 +1,7 @@
 // Service worker de la agenda del equipo: permite instalarla en el móvil y abrirla sin conexión.
 // Solo guarda la propia página (siempre se intenta primero la versión nueva). Nunca guarda
 // las respuestas de Supabase: los datos de las clientas no se quedan en el móvil.
-const CACHE = 'equipo-v1';
+const CACHE = 'equipo-v2';
 const PAGINA = ['./', './index.html', './manifest.webmanifest', './icono-180.png', './icono-192.png', './icono-512.png'];
 
 self.addEventListener('install', e => {

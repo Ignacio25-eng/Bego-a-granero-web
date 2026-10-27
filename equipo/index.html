@@ -30,16 +30,16 @@
     --light:     #9E9E9E;
     --white:     #FFFFFF;
     --error:     #C0504D;
-    --success:   #6B9E7A;
+    --success:   #5F8A6B;
     --aviso:     #9A7B3F;
+    --tabs:      calc(60px + env(safe-area-inset-bottom));
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { -webkit-text-size-adjust: 100%; }
-  body { font-family: 'Lato', sans-serif; background: var(--cream); color: var(--charcoal); font-size: 16px; line-height: 1.4;
-         min-height: 100vh; padding-bottom: env(safe-area-inset-bottom); }
-  button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+  body { font-family: 'Lato', sans-serif; background: var(--cream); color: var(--charcoal); font-size: 16px; line-height: 1.4; min-height: 100vh; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { background: none; border: none; cursor: pointer; }
   [hidden] { display: none !important; }
-  .serif { font-family: 'Playfair Display', serif; }
 
   /* ── Entrada ── */
   .login { max-width: 400px; margin: 0 auto; padding: calc(48px + env(safe-area-inset-top)) 16px 32px; }
@@ -47,13 +47,17 @@
   .login h1 { font-family: 'Playfair Display', serif; font-size: 1.7rem; text-align: center; margin-bottom: 6px; }
   .login .sub { text-align: center; color: var(--mid); font-size: .95rem; margin-bottom: 28px; }
   .campo { margin-bottom: 14px; }
-  .campo label { display: block; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--mid); margin-bottom: 6px; }
-  .campo input { width: 100%; padding: 13px 14px; border: 1.5px solid var(--cream-dark); border-radius: 6px; font: inherit; font-size: 16px;
+  .campo label, .rotulo { display: block; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--mid); margin-bottom: 6px; }
+  .campo input, .campo select, .campo textarea { width: 100%; padding: 12px 13px; border: 1.5px solid var(--cream-dark); border-radius: 6px; font-size: 16px;
                  background: var(--white); color: var(--charcoal); outline: none; }
-  .campo input:focus { border-color: var(--rose); }
+  .campo input:focus, .campo select:focus, .campo textarea:focus { border-color: var(--rose); }
+  .campo textarea { min-height: 70px; resize: vertical; }
+  .dos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .btn { width: 100%; padding: 14px; border-radius: 6px; background: var(--rose-deep); color: var(--white); font-weight: 700;
          letter-spacing: .1em; text-transform: uppercase; font-size: .85rem; }
-  .btn:disabled { opacity: .6; }
+  .btn:disabled { opacity: .55; }
+  .btn-sec { width: 100%; padding: 13px; border-radius: 6px; border: 1.5px solid var(--rose); color: var(--rose-deep); font-weight: 700; font-size: .9rem; background: var(--white); }
+  .btn-peligro { width: 100%; padding: 13px; border-radius: 6px; border: 1.5px solid #E2B8B6; color: var(--error); font-weight: 700; font-size: .9rem; background: var(--white); }
   .error { color: var(--error); font-size: .9rem; margin-top: 12px; }
   .nota { color: var(--light); font-size: .82rem; margin-top: 18px; text-align: center; }
 
@@ -68,7 +72,7 @@
   .vistas button[aria-pressed="true"] { background: var(--white); color: var(--charcoal); font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
   .fechas { margin-top: 10px; }
   .flecha { width: 44px; height: 44px; border-radius: 50%; font-size: 1.4rem; color: var(--rose-deep); flex: none; }
-  .flecha:active, .chip:active, .dia-cab:active { background: var(--cream-dark); }
+  .flecha:active, .chip:active, .dia-cab:active, .cita.tocable:active { background: var(--cream-dark); }
   .titulo-fecha { flex: 1; min-width: 0; text-align: center; font-weight: 700; font-size: 1rem; }
   .titulo-fecha small { display: block; font-weight: 400; color: var(--mid); font-size: .8rem; }
   .hoy { font-size: .8rem; font-weight: 700; color: var(--rose-deep); border: 1px solid var(--rose); border-radius: 999px; padding: 6px 12px; flex: none; }
@@ -80,19 +84,21 @@
   .punto { width: 9px; height: 9px; border-radius: 50%; flex: none; }
 
   /* ── Contenido ── */
-  main { padding: 14px 16px 24px; max-width: 640px; margin: 0 auto; }
+  main { padding: 14px 16px calc(var(--tabs) + 84px); max-width: 640px; margin: 0 auto; }
   .estado-dia { background: var(--white); border: 1px solid var(--cream-dark); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; font-size: .92rem; }
   .estado-dia strong { display: block; margin-bottom: 2px; }
   .estado-dia .linea { color: var(--mid); }
   .estado-dia.libre { background: #F6F1E7; border-color: var(--gold-light); }
   .estado-dia.cerrado { background: #F7ECEB; border-color: #EBCFCD; }
-  .cita { display: flex; background: var(--white); border: 1px solid var(--cream-dark); border-radius: 10px; overflow: hidden; margin-bottom: 10px; }
+  .cita { display: flex; background: var(--white); border: 1px solid var(--cream-dark); border-radius: 10px; overflow: hidden; margin-bottom: 10px; width: 100%; text-align: left; }
   .cita .barra { width: 5px; flex: none; }
   .cita .cuerpo { flex: 1; min-width: 0; padding: 10px 12px; }
   .cita .arriba { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
   .cita .hora { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .cita .mas { margin-left: auto; color: var(--rose-deep); font-size: 1.2rem; line-height: 1; }
   .cita .nombre { font-size: 1.02rem; font-weight: 700; margin-top: 2px; overflow-wrap: anywhere; }
-  .cita .servicios { color: var(--mid); font-size: .9rem; margin-top: 2px; overflow-wrap: anywhere; }
+  .cita .servicios, .cita .aviso { color: var(--mid); font-size: .9rem; margin-top: 2px; overflow-wrap: anywhere; }
+  .cita .aviso { color: var(--aviso); font-size: .85rem; margin-top: 6px; }
   .cita .abajo { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; font-size: .88rem; }
   .cita .quien { display: flex; align-items: center; gap: 6px; color: var(--mid); }
   .tel { color: var(--rose-deep); font-weight: 700; text-decoration: none; padding: 4px 0; }
@@ -106,7 +112,6 @@
   .cita.anulada .nombre, .cita.anulada .hora { text-decoration: line-through; }
   .vacio { text-align: center; color: var(--light); padding: 28px 0; }
 
-  /* Semana */
   .dia { margin-bottom: 12px; background: var(--white); border: 1px solid var(--cream-dark); border-radius: 10px; overflow: hidden; }
   .dia.es-hoy { border-color: var(--rose); }
   .dia-cab { width: 100%; display: flex; align-items: center; gap: 8px; padding: 11px 14px; text-align: left; }
@@ -120,10 +125,74 @@
   .fila-cita .t span { color: var(--mid); }
   .fila-cita.anulada { opacity: .55; text-decoration: line-through; }
 
-  footer { text-align: center; color: var(--light); font-size: .8rem; padding: 4px 16px 28px; max-width: 640px; margin: 0 auto; }
-  footer .aviso { color: var(--aviso); }
-  footer button { color: var(--rose-deep); font-weight: 700; padding: 8px; font-size: .85rem; }
+  .pie { color: var(--light); font-size: .8rem; margin: -4px 0 10px; }
+  .pie:empty { display: none; }
+  .pie .aviso { display: block; color: var(--aviso); background: #F6F1E7; border: 1px solid var(--gold-light); border-radius: 8px; padding: 8px 10px; font-size: .85rem; }
+  .recargar { width: 40px; height: 40px; border-radius: 50%; font-size: 1.25rem; color: var(--rose-deep); flex: none; }
+  .recargar:active { background: var(--cream-dark); }
   .cargando { opacity: .55; transition: opacity .2s; }
+
+  .fab { position: fixed; right: 16px; bottom: calc(var(--tabs) + 16px); z-index: 6; background: var(--rose-deep); color: var(--white);
+         border-radius: 999px; padding: 14px 20px; font-weight: 700; box-shadow: 0 4px 14px rgba(0,0,0,.18); }
+
+  /* ── Pestañas de abajo ── */
+  .tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 7; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+          background: var(--white); border-top: 1px solid var(--cream-dark); padding-bottom: env(safe-area-inset-bottom); }
+  .tabs button { padding: 10px 0 12px; font-size: .78rem; color: var(--light); display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .tabs button span { font-size: 1.25rem; line-height: 1; }
+  .tabs button[aria-pressed="true"] { color: var(--rose-deep); font-weight: 700; }
+
+  /* ── Fichar ── */
+  .reloj { text-align: center; padding: 10px 0 18px; }
+  .reloj .ahora { font-family: 'Playfair Display', serif; font-size: 2.6rem; font-variant-numeric: tabular-nums; }
+  .reloj .estado { color: var(--mid); margin-top: 2px; }
+  .reloj .estado.dentro { color: var(--success); font-weight: 700; }
+  .boton-fichar { width: 100%; padding: 22px; border-radius: 14px; font-size: 1.15rem; font-weight: 700; letter-spacing: .04em; color: var(--white); }
+  .boton-fichar.entrada { background: var(--success); }
+  .boton-fichar.salida { background: var(--rose-deep); }
+  .bloque { background: var(--white); border: 1px solid var(--cream-dark); border-radius: 10px; padding: 12px 14px; margin-top: 16px; }
+  .bloque h3 { font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; color: var(--mid); font-weight: 700; margin-bottom: 8px; }
+  .linea-f { display: flex; gap: 10px; padding: 7px 0; border-top: 1px solid var(--cream-dark); font-size: .92rem; align-items: baseline; }
+  .linea-f:first-of-type { border-top: none; }
+  .linea-f .d { flex: none; width: 64px; font-weight: 700; }
+  .linea-f .t { flex: 1; min-width: 0; color: var(--mid); overflow-wrap: anywhere; }
+  .linea-f .n { flex: none; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .linea-f.mal .t { color: var(--error); }
+  .tachado { text-decoration: line-through; color: var(--light); }
+
+  /* ── Hoja (formularios) ── */
+  .hoja { position: fixed; inset: 0; z-index: 20; background: var(--cream); overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .hoja-cab { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: 10px; background: var(--cream);
+              border-bottom: 1px solid var(--cream-dark); padding: calc(10px + env(safe-area-inset-top)) 8px 10px 16px; }
+  .hoja-cab h2 { flex: 1; font-family: 'Playfair Display', serif; font-size: 1.2rem; }
+  .cerrar { width: 44px; height: 44px; font-size: 1.3rem; color: var(--mid); }
+  .hoja-cuerpo { padding: 16px 16px calc(32px + env(safe-area-inset-bottom)); max-width: 640px; margin: 0 auto; }
+  .resultados { margin-top: 6px; }
+  .resultados button { display: block; width: 100%; text-align: left; padding: 10px 12px; background: var(--white); border: 1px solid var(--cream-dark);
+                       border-radius: 6px; margin-bottom: 6px; font-size: .92rem; }
+  .elegida { color: var(--success); font-weight: 700; font-size: .9rem; margin-top: 6px; }
+  details.grupo { background: var(--white); border: 1px solid var(--cream-dark); border-radius: 8px; margin-bottom: 8px; }
+  details.grupo summary { padding: 11px 12px; font-weight: 700; font-size: .92rem; cursor: pointer; list-style: none; display: flex; gap: 8px; }
+  details.grupo summary::-webkit-details-marker { display: none; }
+  details.grupo summary::after { content: '▾'; margin-left: auto; color: var(--light); }
+  details.grupo[open] summary::after { content: '▴'; }
+  details.grupo summary .cuantos { color: var(--rose-deep); }
+  .servicio { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-top: 1px solid var(--cream-dark); font-size: .92rem; }
+  .servicio input { width: 20px; height: 20px; accent-color: var(--rose-deep); flex: none; }
+  .servicio span { flex: 1; }
+  .servicio small { color: var(--light); }
+  .resumen { color: var(--rose-deep); font-weight: 700; font-size: .9rem; margin: 4px 0 14px; }
+  .horas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .horas button { padding: 11px 0; border: 1.5px solid var(--cream-dark); border-radius: 6px; background: var(--white); font-variant-numeric: tabular-nums; font-size: .95rem; }
+  .horas button[aria-pressed="true"] { background: var(--rose-deep); border-color: var(--rose-deep); color: var(--white); font-weight: 700; }
+  .ayuda { color: var(--mid); font-size: .88rem; }
+  .ficha { background: var(--white); border: 1px solid var(--cream-dark); border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; }
+  .ficha strong { display: block; font-size: 1.05rem; }
+  .ficha span { color: var(--mid); font-size: .9rem; display: block; }
+  .acciones { display: grid; gap: 10px; margin-top: 4px; }
+
+  .toast { position: fixed; left: 16px; right: 16px; bottom: calc(var(--tabs) + 16px); z-index: 30; background: var(--charcoal); color: var(--white);
+           border-radius: 8px; padding: 12px 14px; font-size: .92rem; text-align: center; box-shadow: 0 4px 14px rgba(0,0,0,.2); }
 </style>
 </head>
 <body>
@@ -148,37 +217,60 @@
   <p class="nota">¿No tienes usuario o has olvidado la contraseña? Pídeselo a Begoña.</p>
 </section>
 
-<!-- ── Agenda ── -->
-<div id="pantallaAgenda" hidden>
+<!-- ── App ── -->
+<div id="pantallaApp" hidden>
   <header>
     <div class="fila">
       <div class="hola" id="hola"></div>
+      <button class="recargar" id="btnRecargar" type="button" aria-label="Actualizar">↻</button>
       <button class="salir" id="btnSalir" type="button">Salir</button>
     </div>
-    <div class="vistas" role="group" aria-label="Vista">
-      <button type="button" data-vista="dia">Día</button>
-      <button type="button" data-vista="semana">Semana</button>
+    <div id="controlesAgenda">
+      <div class="vistas" role="group" aria-label="Vista">
+        <button type="button" data-vista="dia">Día</button>
+        <button type="button" data-vista="semana">Semana</button>
+      </div>
+      <div class="fila fechas">
+        <button class="flecha" id="btnAntes" type="button" aria-label="Anterior">‹</button>
+        <div class="titulo-fecha" id="tituloFecha"></div>
+        <button class="flecha" id="btnDespues" type="button" aria-label="Siguiente">›</button>
+        <button class="hoy" id="btnHoy" type="button">Hoy</button>
+      </div>
+      <div class="chips" id="chips" role="group" aria-label="Trabajadora"></div>
     </div>
-    <div class="fila fechas">
-      <button class="flecha" id="btnAntes" type="button" aria-label="Anterior">‹</button>
-      <div class="titulo-fecha" id="tituloFecha"></div>
-      <button class="flecha" id="btnDespues" type="button" aria-label="Siguiente">›</button>
-      <button class="hoy" id="btnHoy" type="button">Hoy</button>
-    </div>
-    <div class="chips" id="chips" role="group" aria-label="Trabajadora"></div>
   </header>
-  <main id="contenido" aria-live="polite"></main>
-  <footer>
-    <div id="pie"></div>
-    <button type="button" id="btnRecargar">Actualizar</button>
-  </footer>
+
+  <main id="vistaAgenda">
+    <div class="pie" id="pie"></div>
+    <div id="contenido" aria-live="polite"></div>
+  </main>
+  <button class="fab" id="btnNueva" type="button">+ Nueva cita</button>
+
+  <main id="vistaFichar" hidden></main>
+
+  <nav class="tabs" id="tabs" aria-label="Secciones">
+    <button type="button" data-tab="agenda" aria-pressed="true"><span aria-hidden="true">📅</span>Agenda</button>
+    <button type="button" data-tab="fichar" aria-pressed="false"><span aria-hidden="true">⏱</span>Fichar</button>
+  </nav>
 </div>
+
+<!-- ── Hoja para formularios (nueva cita, mover, cancelar) ── -->
+<section class="hoja" id="hoja" role="dialog" aria-modal="true" aria-labelledby="hojaTitulo" hidden>
+  <div class="hoja-cab">
+    <h2 id="hojaTitulo"></h2>
+    <button class="cerrar" id="btnCerrarHoja" type="button" aria-label="Cerrar">✕</button>
+  </div>
+  <div class="hoja-cuerpo" id="hojaCuerpo"></div>
+</section>
+
+<div class="toast" id="toast" role="status" hidden></div>
 
 <script>
 // ══════════════════════════════════════════════════
 //  AGENDA DEL EQUIPO (web-app para el móvil de las trabajadoras)
-//  Lee la agenda que sube la app del salón a Supabase. Cada trabajadora entra con su usuario;
-//  las reglas de quién puede ver qué están en el repositorio de la app (supabase/esquema.sql).
+//  Lee la agenda que sube la app del salón a Supabase, permite dar, mover y cancelar citas (la app del
+//  salón las recoge en menos de un minuto) y fichar la entrada y la salida. Cada trabajadora entra con
+//  su usuario; las reglas de quién puede hacer qué están en el repositorio de la app (supabase/esquema.sql).
 //  No se guardan datos de clientas en el móvil: solo la sesión y la vista elegida.
 // ══════════════════════════════════════════════════
 const SUPABASE_URL = 'https://jazzbriexlsmmotuxzit.supabase.co';
@@ -203,6 +295,13 @@ const finDe = horas => { const [h, m] = hm(horas[horas.length - 1]).split(':').m
 const enMinutos = t => { const [h, m] = hm(t).split(':').map(Number); return h * 60 + m; };
 const fmt = (s, op) => deIso(s).toLocaleDateString('es-ES', op);
 const may = s => s.charAt(0).toUpperCase() + s.slice(1);
+const horaDe = d => d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+const duracion = min => `${Math.floor(min / 60)}:${String(Math.round(min % 60)).padStart(2, '0')}`;
+
+function aviso(texto) {
+  const t = $('toast'); t.textContent = texto; t.hidden = false;
+  clearTimeout(aviso.temp); aviso.temp = setTimeout(() => { t.hidden = true; }, 3500);
+}
 
 // ══════════════════════════════════════════════════
 //  SESIÓN Y LLAMADAS A SUPABASE
@@ -251,29 +350,40 @@ function olvidarSesion() { sesion = null; escribir(LS_SESION, null); }
 async function salir() {
   const t = sesion?.access_token;
   olvidarSesion();
-  datos = null; semanaCargada = '';
+  datos = null; semanaCargada = ''; servicios = null; yo = null;
+  cerrarHoja();
   mostrarLogin();
   if (t) fetch(`${SUPABASE_URL}/auth/v1/logout`, { method: 'POST', headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${t}` } }).catch(() => { });
 }
 
+function textoError(err) {
+  if (err instanceof SinSesion) return 'La sesión ha caducado. Vuelve a entrar.';
+  if (err.code === 'PGRST202') return 'La app todavía no está preparada en el servidor (falta ejecutar el SQL nuevo en Supabase).';
+  if (err instanceof TypeError) return 'No hay conexión a internet.';
+  return 'No se ha podido completar. ' + (err.message || '');
+}
+
 // ══════════════════════════════════════════════════
-//  ESTADO DE LA PANTALLA
+//  ESTADO
 // ══════════════════════════════════════════════════
 let yo = null;                 // { trabajadora_id, nombre, salon }
 let datos = null;              // lo que devuelve agenda_equipo para la semana cargada
 let semanaCargada = '';        // lunes de la semana de «datos»
+let servicios = null;          // todos los servicios (se piden la primera vez que hacen falta)
 const pref = leer(LS_VISTA) || {};
-const vista = { modo: pref.modo === 'semana' ? 'semana' : 'dia', fecha: hoy(), filtro: pref.filtro ?? null };
+const vista = { tab: 'agenda', modo: pref.modo === 'semana' ? 'semana' : 'dia', fecha: hoy(), filtro: pref.filtro ?? null };
 
 function guardarVista() { escribir(LS_VISTA, { modo: vista.modo, filtro: vista.filtro }); }
 
 // ── Entrada ──
 function mostrarLogin(mensaje) {
-  $('pantallaAgenda').hidden = true;
+  $('pantallaApp').hidden = true;
   $('pantallaLogin').hidden = false;
   $('errorLogin').hidden = !mensaje;
   $('errorLogin').textContent = mensaje || '';
 }
+
+const mensajeInicio = err => err.sinAcceso ? err.message : err instanceof SinSesion ? '' : textoError(err);
 
 $('formLogin').addEventListener('submit', async e => {
   e.preventDefault();
@@ -291,15 +401,6 @@ $('formLogin').addEventListener('submit', async e => {
   }
 });
 
-const mensajeInicio = err => err.sinAcceso ? err.message : err instanceof SinSesion ? '' : textoError(err);
-
-function textoError(err) {
-  if (err instanceof SinSesion) return 'La sesión ha caducado. Vuelve a entrar.';
-  if (err.code === 'PGRST202') return 'La agenda todavía no está preparada en el servidor (falta ejecutar el SQL nuevo en Supabase).';
-  if (err instanceof TypeError) return 'No hay conexión a internet.';
-  return 'No se ha podido cargar la agenda. ' + (err.message || '');
-}
-
 // Comprueba quién ha entrado y abre la agenda
 async function empezar() {
   const r = await rpc('equipo_yo');
@@ -310,9 +411,22 @@ async function empezar() {
   yo = r;
   if (vista.filtro == null) vista.filtro = yo.trabajadora_id ?? 'todas';
   $('hola').textContent = yo.trabajadora_id ? `Hola, ${yo.nombre}` : 'Agenda del salón';
+  $('tabs').hidden = !yo.trabajadora_id;   // solo las trabajadoras fichan
   $('pantallaLogin').hidden = true;
-  $('pantallaAgenda').hidden = false;
+  $('pantallaApp').hidden = false;
+  cambiarTab('agenda');
   await cargar(true);
+}
+
+function cambiarTab(tab) {
+  vista.tab = tab;
+  document.querySelectorAll('[data-tab]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tab === tab)));
+  $('controlesAgenda').hidden = tab !== 'agenda';
+  $('vistaAgenda').hidden = tab !== 'agenda';
+  $('btnNueva').hidden = tab !== 'agenda';
+  $('vistaFichar').hidden = tab !== 'fichar';
+  window.scrollTo(0, 0);
+  if (tab === 'fichar') cargarFichajes();
 }
 
 // ── Carga de la semana que se está viendo ──
@@ -322,8 +436,7 @@ async function cargar(forzar = false) {
   $('contenido').classList.add('cargando');
   try {
     const d = await rpc('agenda_equipo', { p_desde: lunes, p_hasta: masDias(lunes, 6) });
-    // Si mientras tanto se ha cambiado de semana, esta respuesta ya no vale
-    if (lunesDe(vista.fecha) !== lunes) return;
+    if (lunesDe(vista.fecha) !== lunes) return;   // mientras tanto se ha cambiado de semana
     datos = d; semanaCargada = lunes;
     pintar();
   } catch (err) {
@@ -369,7 +482,7 @@ function diaDe(id, fecha) {
 }
 
 // ══════════════════════════════════════════════════
-//  PINTAR
+//  PINTAR LA AGENDA
 // ══════════════════════════════════════════════════
 const ESTADOS = {
   pendiente:     ['Pendiente', 'etq-pend'],
@@ -379,6 +492,7 @@ const ESTADOS = {
   no_presentada: ['No vino', 'etq-anul'],
 };
 const anulada = c => c.estado === 'cancelada' || c.estado === 'no_presentada';
+const editable = c => c.cita_id != null && (c.estado === 'pendiente' || c.estado === 'confirmada') && c.fecha >= hoy();
 
 function citasDe(fecha) {
   return (datos?.citas || [])
@@ -387,7 +501,6 @@ function citasDe(fecha) {
 }
 
 function pintar() {
-  // Vista y fecha
   document.querySelectorAll('[data-vista]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.vista === vista.modo)));
   if (vista.modo === 'dia') {
     const rel = vista.fecha === hoy() ? 'Hoy' : vista.fecha === masDias(hoy(), 1) ? 'Mañana' : vista.fecha === masDias(hoy(), -1) ? 'Ayer' : '';
@@ -398,7 +511,6 @@ function pintar() {
   }
   $('btnHoy').hidden = vista.modo === 'dia' ? vista.fecha === hoy() : lunesDe(vista.fecha) === lunesDe(hoy());
 
-  // Filtro por trabajadora (las fichas vienen del salón)
   const personal = datos?.personal || [];
   if (vista.filtro !== 'todas' && datos && !persona(vista.filtro)) vista.filtro = 'todas';
   $('chips').innerHTML = [`<button class="chip" type="button" data-filtro="todas" aria-pressed="${vista.filtro === 'todas'}">Todas</button>`]
@@ -426,8 +538,14 @@ function tarjetaDia(fecha) {
 
 function pintarDia(fecha) {
   const citas = citasDe(fecha);
-  const lista = citas.length ? citas.map(tarjetaCita).join('') : '<p class="vacio">No hay citas.</p>';
-  return tarjetaDia(fecha) + lista;
+  return tarjetaDia(fecha) + (citas.length ? citas.map(tarjetaCita).join('') : '<p class="vacio">No hay citas.</p>');
+}
+
+function textoPendiente(c) {
+  if (!c.pendiente) return '';
+  if (c.origen === 'web' && c.cita_id == null) return 'Reservada en la web: el ordenador del salón aún no la ha pasado a su agenda.';
+  if (c.cita_id == null) return `Dada desde el móvil por ${c.cambiada_por}: el ordenador del salón aún no la ha recogido.`;
+  return `${anulada(c) ? 'Cancelada' : 'Cambiada'} desde el móvil por ${c.cambiada_por}: el ordenador del salón aún no lo ha recogido.`;
 }
 
 function tarjetaCita(c) {
@@ -435,13 +553,16 @@ function tarjetaCita(c) {
   const p = persona(c.trabajadora_id);
   const tel = String(c.cliente_telefono || '').replace(/[^0-9+]/g, '');
   const nombre = `${c.cliente_nombre} ${c.cliente_apellido}`.trim() || 'Sin nombre';
-  return `<article class="cita${anulada(c) ? ' anulada' : ''}">
+  const tocable = editable(c);
+  const pend = textoPendiente(c);
+  return `<article class="cita${anulada(c) ? ' anulada' : ''}${tocable ? ' tocable' : ''}" ${tocable ? `data-cita="${esc(c.id)}" role="button" tabindex="0"` : ''}>
     <div class="barra" style="background:${esc(colorDe(c.trabajadora_id))}"></div>
     <div class="cuerpo">
       <div class="arriba">
         <span class="hora">${hm(c.horas[0])} – ${finDe(c.horas)}</span>
         <span class="etiqueta ${cls}">${txt}</span>
         ${c.origen === 'web' ? '<span class="etiqueta etq-web">Web</span>' : ''}
+        ${tocable ? '<span class="mas" aria-hidden="true">⋯</span>' : ''}
       </div>
       <div class="nombre">${esc(nombre)}</div>
       ${c.servicios ? `<div class="servicios">${esc(c.servicios)}</div>` : ''}
@@ -449,7 +570,7 @@ function tarjetaCita(c) {
         ${vista.filtro === 'todas' ? `<span class="quien"><span class="punto" style="background:${esc(colorDe(c.trabajadora_id))}"></span>${esc(p?.nombre || '¿?')}</span>` : ''}
         ${tel ? `<a class="tel" href="tel:${esc(tel)}">☎ ${esc(c.cliente_telefono)}</a>` : ''}
       </div>
-      ${c.pendiente ? '<div class="servicios">Reservada en la web: el ordenador del salón aún no la ha pasado a su agenda.</div>' : ''}
+      ${pend ? `<div class="aviso">${esc(pend)}</div>` : ''}
     </div>
   </article>`;
 }
@@ -485,11 +606,362 @@ function pintarPie() {
   if (!f) { $('pie').textContent = 'El ordenador del salón todavía no ha enviado la agenda.'; return; }
   const min = Math.round((Date.now() - f) / 60000);
   const cuando = f.toDateString() === new Date().toDateString()
-    ? `hoy a las ${f.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`
+    ? `hoy a las ${horaDe(f)}`
     : f.toLocaleString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
   $('pie').innerHTML = min > 15
-    ? `<span class="aviso">El ordenador del salón no envía cambios desde ${esc(cuando)}: puede que falten las citas más recientes.</span>`
+    ? `<span class="aviso">El ordenador del salón no envía cambios desde ${esc(cuando)}: puede que falten las citas más recientes, y lo que hagáis desde el móvil no llegará a su agenda hasta que se encienda.</span>`
     : `Agenda al día (ordenador del salón: ${esc(cuando)}).`;
+}
+
+// ══════════════════════════════════════════════════
+//  HOJA PARA FORMULARIOS
+// ══════════════════════════════════════════════════
+let hojaAbierta = null;   // función que se llama al cerrar (o null)
+
+function abrirHoja(titulo, html) {
+  $('hojaTitulo').textContent = titulo;
+  $('hojaCuerpo').innerHTML = html;
+  $('hoja').hidden = false;
+  $('hoja').scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+  hojaAbierta = true;
+}
+
+function cerrarHoja() {
+  $('hoja').hidden = true;
+  $('hojaCuerpo').innerHTML = '';
+  document.body.style.overflow = '';
+  hojaAbierta = null;
+}
+
+$('btnCerrarHoja').addEventListener('click', cerrarHoja);
+
+const opcionesPersonal = elegida => (datos?.personal || [])
+  .map(p => `<option value="${p.id}"${p.id === elegida ? ' selected' : ''}>${esc(p.nombre)}${p.id === yo?.trabajadora_id ? ' (tú)' : ''}</option>`).join('');
+
+// Horas libres para una trabajadora, un día y una duración; pinta los botones en el contenedor
+async function pintarHoras(cont, { trabajadora, fecha, duracion: min, ignorar = null }, alElegir) {
+  if (!trabajadora || !fecha || !min) { cont.innerHTML = '<p class="ayuda">Elige trabajadora, servicios y día para ver las horas libres.</p>'; alElegir(null); return; }
+  cont.innerHTML = '<p class="ayuda">Buscando horas libres…</p>';
+  alElegir(null);
+  const pedido = (pintarHoras.ultimo = {});
+  try {
+    const r = await rpc('equipo_horas_libres', { p_trabajadora: trabajadora, p_fecha: fecha, p_duracion: min, p_ignorar_cita: ignorar });
+    if (pedido !== pintarHoras.ultimo) return;   // ya se ha pedido otra cosa
+    if (!r.horas.length) { cont.innerHTML = `<p class="ayuda">${esc(r.motivo || 'No hay horas libres.')}</p>`; return; }
+    cont.innerHTML = `<div class="horas">${r.horas.map(h => `<button type="button" data-hora="${h}" aria-pressed="false">${h}</button>`).join('')}</div>`;
+    cont.querySelectorAll('[data-hora]').forEach(b => b.addEventListener('click', () => {
+      cont.querySelectorAll('[data-hora]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+      alElegir(b.dataset.hora);
+    }));
+  } catch (err) {
+    if (pedido === pintarHoras.ultimo) cont.innerHTML = `<p class="error">${esc(textoError(err))}</p>`;
+  }
+}
+
+async function cargarServicios() {
+  servicios ??= await rpc('equipo_servicios');
+  return servicios;
+}
+
+// ── Nueva cita ──
+async function abrirNuevaCita() {
+  const inicial = typeof vista.filtro === 'number' ? vista.filtro : yo?.trabajadora_id ?? datos?.personal[0]?.id;
+  const fechaIni = vista.fecha >= hoy() ? vista.fecha : hoy();
+  abrirHoja('Nueva cita', `
+    <div class="campo">
+      <label for="nBuscar">Buscar clienta</label>
+      <input id="nBuscar" type="search" placeholder="Nombre o teléfono" autocomplete="off">
+      <div class="resultados" id="nResultados"></div>
+    </div>
+    <div class="dos">
+      <div class="campo"><label for="nNombre">Nombre *</label><input id="nNombre" autocomplete="off"></div>
+      <div class="campo"><label for="nApellido">Apellido</label><input id="nApellido" autocomplete="off"></div>
+    </div>
+    <div class="campo"><label for="nTelefono">Teléfono *</label><input id="nTelefono" type="tel" inputmode="tel" autocomplete="off"></div>
+    <div class="campo"><label for="nTrab">Trabajadora *</label><select id="nTrab">${opcionesPersonal(inicial)}</select></div>
+    <span class="rotulo">Servicios *</span>
+    <div id="nServicios"><p class="ayuda">Cargando servicios…</p></div>
+    <p class="resumen" id="nResumen"></p>
+    <div class="campo"><label for="nFecha">Día *</label><input id="nFecha" type="date" min="${hoy()}" value="${fechaIni}"></div>
+    <span class="rotulo">Hora *</span>
+    <div id="nHoras" style="margin-bottom:14px"></div>
+    <div class="campo"><label for="nNotas">Notas</label><textarea id="nNotas" maxlength="500"></textarea></div>
+    <button class="btn" id="nGuardar" type="button">Guardar cita</button>
+    <p class="error" id="nError" role="alert" hidden></p>`);
+
+  const elegidos = new Set();
+  let clienteId = 0, hora = null;
+
+  // Clientas
+  let buscando;
+  $('nBuscar').addEventListener('input', () => {
+    clearTimeout(buscando);
+    const q = $('nBuscar').value.trim();
+    if (q.length < 2) { $('nResultados').innerHTML = ''; return; }
+    buscando = setTimeout(async () => {
+      try {
+        const lista = await rpc('buscar_clientas', { p_q: q });
+        if ($('nBuscar')?.value.trim() !== q) return;
+        $('nResultados').innerHTML = lista.length
+          ? lista.map((c, i) => `<button type="button" data-i="${i}">${esc(`${c.nombre} ${c.apellido}`.trim())}${c.telefono ? ` · ${esc(c.telefono)}` : ''}</button>`).join('')
+          : '<p class="ayuda">No está registrada: escribe sus datos abajo y se guardará como clienta nueva.</p>';
+        $('nResultados').querySelectorAll('[data-i]').forEach(b => b.addEventListener('click', () => {
+          const c = lista[Number(b.dataset.i)];
+          clienteId = c.id;
+          $('nNombre').value = c.nombre; $('nApellido').value = c.apellido; $('nTelefono').value = c.telefono;
+          $('nBuscar').value = '';
+          $('nResultados').innerHTML = `<p class="elegida">✓ Clienta registrada: ${esc(`${c.nombre} ${c.apellido}`.trim())}</p>`;
+        }));
+      } catch (err) { $('nResultados').innerHTML = `<p class="error">${esc(textoError(err))}</p>`; }
+    }, 300);
+  });
+  // Si se cambia el teléfono, ya no es la clienta elegida (la app la buscará por el teléfono nuevo)
+  $('nTelefono').addEventListener('input', () => { clienteId = 0; });
+
+  const duracionElegida = () => (servicios || []).filter(s => elegidos.has(s.id)).reduce((t, s) => t + s.duracion, 0);
+  const refrescarHoras = () => pintarHoras($('nHoras'),
+    { trabajadora: Number($('nTrab').value), fecha: $('nFecha').value, duracion: duracionElegida() }, h => { hora = h; });
+
+  function pintarServicios() {
+    const p = persona(Number($('nTrab').value));
+    const suyos = (servicios || []).filter(s => !p?.secciones?.length || p.secciones.includes(s.seccion) || elegidos.has(s.id));
+    const grupos = [];
+    for (const s of suyos) {
+      let g = grupos.find(x => x.seccion === s.seccion);
+      if (!g) grupos.push(g = { seccion: s.seccion, lista: [] });
+      g.lista.push(s);
+    }
+    const abiertos = new Set([...$('nServicios').querySelectorAll('details[open]')].map(d => d.dataset.seccion));
+    $('nServicios').innerHTML = grupos.length ? grupos.map(g => {
+      const n = g.lista.filter(s => elegidos.has(s.id)).length;
+      return `<details class="grupo" data-seccion="${esc(g.seccion)}"${abiertos.has(g.seccion) || n ? ' open' : ''}>
+        <summary>${esc(g.seccion || 'Otros')}${n ? ` <span class="cuantos">· ${n}</span>` : ''}</summary>
+        ${g.lista.map(s => `<label class="servicio"><input type="checkbox" value="${s.id}"${elegidos.has(s.id) ? ' checked' : ''}><span>${esc(s.nombre)}</span><small>${s.duracion} min</small></label>`).join('')}
+      </details>`;
+    }).join('') : '<p class="ayuda">No hay servicios.</p>';
+    const min = duracionElegida();
+    $('nResumen').textContent = elegidos.size ? `${elegidos.size} servicio${elegidos.size === 1 ? '' : 's'} · ${min} min` : '';
+  }
+
+  $('nServicios').addEventListener('change', e => {
+    if (e.target.type !== 'checkbox') return;
+    const id = Number(e.target.value);
+    e.target.checked ? elegidos.add(id) : elegidos.delete(id);
+    pintarServicios(); refrescarHoras();
+  });
+  $('nTrab').addEventListener('change', () => { pintarServicios(); refrescarHoras(); });
+  $('nFecha').addEventListener('change', refrescarHoras);
+
+  try { await cargarServicios(); pintarServicios(); }
+  catch (err) { $('nServicios').innerHTML = `<p class="error">${esc(textoError(err))}</p>`; }
+  refrescarHoras();
+
+  $('nGuardar').addEventListener('click', async () => {
+    const error = m => { $('nError').textContent = m; $('nError').hidden = false; };
+    $('nError').hidden = true;
+    const nombre = $('nNombre').value.trim(), telefono = $('nTelefono').value.trim();
+    if (!nombre) return error('Escribe el nombre de la clienta.');
+    if (telefono.replace(/\D/g, '').length < 9) return error('Escribe un teléfono válido.');
+    if (!elegidos.size) return error('Elige al menos un servicio.');
+    if (!hora) return error('Elige la hora.');
+    $('nGuardar').disabled = true; $('nGuardar').textContent = 'Guardando…';
+    try {
+      const r = await rpc('equipo_crear', {
+        p_trabajadora_id: Number($('nTrab').value), p_fecha: $('nFecha').value, p_hora: hora,
+        p_servicio_ids: (servicios || []).filter(s => elegidos.has(s.id)).map(s => s.id),
+        p_cliente_id: clienteId, p_nombre: nombre, p_apellido: $('nApellido').value.trim(), p_telefono: telefono,
+        p_notas: $('nNotas').value.trim(),
+      });
+      if (!r.ok) { error(r.error); refrescarHoras(); return; }
+      cerrarHoja();
+      vista.fecha = $('nFecha')?.value || vista.fecha;
+      aviso(`Cita guardada de ${r.hora} a ${r.fin}.`);
+      vista.modo = 'dia'; guardarVista();
+      await cargar(true);
+    } catch (err) { error(textoError(err)); }
+    finally { const b = $('nGuardar'); if (b) { b.disabled = false; b.textContent = 'Guardar cita'; } }
+  });
+}
+
+// ── Acciones de una cita: mover o cancelar ──
+function abrirAcciones(c) {
+  const nombre = `${c.cliente_nombre} ${c.cliente_apellido}`.trim() || 'Sin nombre';
+  abrirHoja('Cita', `
+    <div class="ficha">
+      <strong>${esc(nombre)}</strong>
+      <span>${esc(may(fmt(c.fecha, { weekday: 'long', day: 'numeric', month: 'long' })))}, de ${hm(c.horas[0])} a ${finDe(c.horas)}</span>
+      <span>${esc(c.servicios)} · con ${esc(persona(c.trabajadora_id)?.nombre || '¿?')}</span>
+    </div>
+    <div class="acciones">
+      <button class="btn-sec" id="aMover" type="button">Cambiar hora, día o trabajadora</button>
+      <button class="btn-peligro" id="aCancelar" type="button">Cancelar la cita</button>
+    </div>`);
+  $('aMover').addEventListener('click', () => abrirMover(c));
+  $('aCancelar').addEventListener('click', () => abrirCancelar(c));
+}
+
+function abrirMover(c) {
+  const nombre = `${c.cliente_nombre} ${c.cliente_apellido}`.trim() || 'Sin nombre';
+  const min = c.horas.length * 30;
+  abrirHoja('Mover cita', `
+    <div class="ficha">
+      <strong>${esc(nombre)}</strong>
+      <span>Ahora: ${esc(fmt(c.fecha, { weekday: 'long', day: 'numeric', month: 'long' }))} a las ${hm(c.horas[0])} con ${esc(persona(c.trabajadora_id)?.nombre || '¿?')}</span>
+      <span>${esc(c.servicios)} · ${min} min</span>
+    </div>
+    <div class="campo"><label for="mTrab">Trabajadora</label><select id="mTrab">${opcionesPersonal(c.trabajadora_id)}</select></div>
+    <div class="campo"><label for="mFecha">Día</label><input id="mFecha" type="date" min="${hoy()}" value="${c.fecha}"></div>
+    <span class="rotulo">Nueva hora</span>
+    <div id="mHoras" style="margin-bottom:14px"></div>
+    <button class="btn" id="mGuardar" type="button">Mover la cita</button>
+    <p class="error" id="mError" role="alert" hidden></p>`);
+
+  let hora = null;
+  const refrescar = () => pintarHoras($('mHoras'),
+    { trabajadora: Number($('mTrab').value), fecha: $('mFecha').value, duracion: min, ignorar: c.cita_id }, h => { hora = h; });
+  $('mTrab').addEventListener('change', refrescar);
+  $('mFecha').addEventListener('change', refrescar);
+  refrescar();
+
+  $('mGuardar').addEventListener('click', async () => {
+    const error = m => { $('mError').textContent = m; $('mError').hidden = false; };
+    $('mError').hidden = true;
+    if (!hora) return error('Elige la nueva hora.');
+    $('mGuardar').disabled = true; $('mGuardar').textContent = 'Guardando…';
+    try {
+      const fecha = $('mFecha').value;
+      const r = await rpc('equipo_mover', { p_cita_id: c.cita_id, p_trabajadora_id: Number($('mTrab').value), p_fecha: fecha, p_hora: hora });
+      if (!r.ok) { error(r.error); refrescar(); return; }
+      cerrarHoja();
+      vista.fecha = fecha;
+      aviso('Cita movida.');
+      await cargar(true);
+    } catch (err) { error(textoError(err)); }
+    finally { const b = $('mGuardar'); if (b) { b.disabled = false; b.textContent = 'Mover la cita'; } }
+  });
+}
+
+function abrirCancelar(c) {
+  const nombre = `${c.cliente_nombre} ${c.cliente_apellido}`.trim() || 'Sin nombre';
+  abrirHoja('Cancelar cita', `
+    <div class="ficha">
+      <strong>${esc(nombre)}</strong>
+      <span>${esc(may(fmt(c.fecha, { weekday: 'long', day: 'numeric', month: 'long' })))} a las ${hm(c.horas[0])}</span>
+      <span>${esc(c.servicios)}</span>
+    </div>
+    <div class="campo"><label for="cMotivo">Motivo (opcional)</label><input id="cMotivo" maxlength="300" placeholder="Por ejemplo: ha llamado para anularla"></div>
+    <button class="btn" id="cSi" type="button" style="background:var(--error)">Sí, cancelar la cita</button>
+    <p class="error" id="cError" role="alert" hidden></p>`);
+
+  $('cSi').addEventListener('click', async () => {
+    $('cSi').disabled = true;
+    try {
+      const r = await rpc('equipo_cancelar', { p_cita_id: c.cita_id, p_motivo: $('cMotivo').value.trim() });
+      if (!r.ok) { $('cError').textContent = r.error; $('cError').hidden = false; return; }
+      cerrarHoja();
+      aviso('Cita cancelada.');
+      await cargar(true);
+    } catch (err) { $('cError').textContent = textoError(err); $('cError').hidden = false; }
+    finally { const b = $('cSi'); if (b) b.disabled = false; }
+  });
+}
+
+// ══════════════════════════════════════════════════
+//  FICHAR (registro de jornada)
+// ══════════════════════════════════════════════════
+let mesFichajes = hoy().slice(0, 7);   // 'AAAA-MM'
+let fichajes = [];
+
+// Días con sus tramos y el tiempo trabajado (igual que en la app del salón)
+function jornadas(lista) {
+  const anulados = new Set(lista.filter(f => f.tipo === 'anulacion').map(f => f.anula));
+  const porDia = new Map();
+  for (const f of lista) {
+    const d = iso(new Date(f.momento));
+    if (!porDia.has(d)) porDia.set(d, []);
+    porDia.get(d).push(f);
+  }
+  return [...porDia.entries()].sort((a, b) => a[0] < b[0] ? 1 : -1).map(([dia, todos]) => {
+    const validos = todos.filter(f => f.tipo !== 'anulacion' && !anulados.has(f.id)).sort((a, b) => new Date(a.momento) - new Date(b.momento));
+    let total = 0, entrada = null, aviso = '';
+    const tramos = [];
+    for (const f of validos) {
+      const t = new Date(f.momento);
+      if (f.tipo === 'entrada') { if (entrada) { aviso = 'Hay una entrada sin su salida.'; tramos.push(`${horaDe(entrada)}–?`); } entrada = t; }
+      else if (entrada) { total += (t - entrada) / 60000; tramos.push(`${horaDe(entrada)}–${horaDe(t)}`); entrada = null; }
+      else { aviso = 'Hay una salida sin su entrada.'; tramos.push(`?–${horaDe(t)}`); }
+    }
+    if (entrada) { tramos.push(`${horaDe(entrada)}–…`); if (dia !== hoy()) aviso = 'Falta fichar la salida.'; }
+    return { dia, todos, validos, total, aviso, tramos, abierta: !!entrada, corregido: todos.some(f => f.origen === 'correccion') };
+  });
+}
+
+async function cargarFichajes() {
+  const [a, m] = mesFichajes.split('-').map(Number);
+  const desde = `${mesFichajes}-01`, hasta = iso(new Date(a, m, 0));
+  pintarFichar(true);
+  try {
+    fichajes = await rpc('mis_fichajes', { p_desde: desde, p_hasta: hasta });
+    pintarFichar();
+  } catch (err) {
+    if (err instanceof SinSesion) { mostrarLogin(textoError(err)); return; }
+    $('vistaFichar').innerHTML = `<p class="error">${esc(textoError(err))}</p>`;
+  }
+}
+
+function pintarFichar(cargando = false) {
+  const esteMes = mesFichajes === hoy().slice(0, 7);
+  const dias = jornadas(fichajes);
+  const deHoy = esteMes ? dias.find(d => d.dia === hoy()) : null;
+  const dentro = !!deHoy?.abierta;
+  const desde = dentro ? deHoy.validos.filter(f => f.tipo === 'entrada').at(-1) : null;
+  const total = dias.reduce((t, d) => t + d.total, 0);
+  const [a, m] = mesFichajes.split('-').map(Number);
+  const nombreMes = may(new Date(a, m - 1, 1).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }));
+
+  $('vistaFichar').innerHTML = `
+    ${esteMes ? `
+      <div class="reloj">
+        <div class="ahora" id="relojAhora">${horaDe(new Date())}</div>
+        <div class="estado${dentro ? ' dentro' : ''}">${cargando ? 'Cargando…' : dentro ? `Trabajando desde las ${horaDe(new Date(desde.momento))}` : 'Ahora no estás fichada'}</div>
+      </div>
+      <button class="boton-fichar ${dentro ? 'salida' : 'entrada'}" id="btnFichar" type="button"${cargando ? ' disabled' : ''}>
+        ${dentro ? 'Fichar la salida' : 'Fichar la entrada'}
+      </button>
+      <p class="error" id="errorFichar" role="alert" hidden></p>` : ''}
+    <div class="bloque">
+      <div class="fila" style="margin-bottom:6px">
+        <button class="flecha" id="fAntes" type="button" aria-label="Mes anterior">‹</button>
+        <div class="titulo-fecha">${esc(nombreMes)}<small>${dias.length ? `${duracion(total)} horas` : 'Sin fichajes'}</small></div>
+        <button class="flecha" id="fDespues" type="button" aria-label="Mes siguiente"${esteMes ? ' disabled style="opacity:.3"' : ''}>›</button>
+      </div>
+      ${dias.map(d => `
+        <div class="linea-f${d.aviso ? ' mal' : ''}">
+          <span class="d">${esc(may(fmt(d.dia, { weekday: 'short', day: 'numeric' })))}</span>
+          <span class="t">${esc(d.tramos.join(', '))}${d.aviso ? `<br>${esc(d.aviso)}` : ''}${d.corregido ? '<br>Corregido por el salón.' : ''}</span>
+          <span class="n">${d.total ? duracion(d.total) : ''}</span>
+        </div>`).join('') || '<p class="ayuda">No hay fichajes este mes.</p>'}
+    </div>
+    <p class="nota">La hora es la del servidor, no la del móvil. Si te equivocas o se te olvida fichar, díselo a Begoña: lo corrige ella desde el ordenador del salón.</p>`;
+
+  $('fAntes').addEventListener('click', () => { mesFichajes = iso(new Date(a, m - 2, 1)).slice(0, 7); cargarFichajes(); });
+  if (!esteMes) $('fDespues').addEventListener('click', () => { mesFichajes = iso(new Date(a, m, 1)).slice(0, 7); cargarFichajes(); });
+  $('btnFichar')?.addEventListener('click', () => fichar(dentro ? 'salida' : 'entrada'));
+}
+
+async function fichar(tipo) {
+  const b = $('btnFichar');
+  b.disabled = true; b.textContent = 'Fichando…';
+  try {
+    const r = await rpc('fichar', { p_tipo: tipo });
+    if (!r.ok) { $('errorFichar').textContent = r.error; $('errorFichar').hidden = false; b.disabled = false; b.textContent = tipo === 'salida' ? 'Fichar la salida' : 'Fichar la entrada'; return; }
+    aviso(`${tipo === 'entrada' ? 'Entrada' : 'Salida'} fichada a las ${r.hora}.`);
+    await cargarFichajes();
+  } catch (err) {
+    $('errorFichar').textContent = textoError(err); $('errorFichar').hidden = false;
+    b.disabled = false; b.textContent = tipo === 'salida' ? 'Fichar la salida' : 'Fichar la entrada';
+  }
 }
 
 // ══════════════════════════════════════════════════
@@ -498,24 +970,36 @@ function pintarPie() {
 document.querySelectorAll('[data-vista]').forEach(b => b.addEventListener('click', () => {
   vista.modo = b.dataset.vista; guardarVista(); pintar();
 }));
+document.querySelectorAll('[data-tab]').forEach(b => b.addEventListener('click', () => cambiarTab(b.dataset.tab)));
 $('btnAntes').addEventListener('click', () => { vista.fecha = masDias(vista.fecha, vista.modo === 'dia' ? -1 : -7); cargar(); });
 $('btnDespues').addEventListener('click', () => { vista.fecha = masDias(vista.fecha, vista.modo === 'dia' ? 1 : 7); cargar(); });
 $('btnHoy').addEventListener('click', () => { vista.fecha = hoy(); cargar(); });
-$('btnRecargar').addEventListener('click', () => cargar(true));
+$('btnRecargar').addEventListener('click', () => { vista.tab === 'agenda' ? cargar(true) : cargarFichajes(); });
 $('btnSalir').addEventListener('click', salir);
+$('btnNueva').addEventListener('click', () => { if (datos) abrirNuevaCita(); });
 $('chips').addEventListener('click', e => {
   const b = e.target.closest('[data-filtro]'); if (!b) return;
   vista.filtro = b.dataset.filtro === 'todas' ? 'todas' : Number(b.dataset.filtro);
   guardarVista(); pintar();
 });
-$('contenido').addEventListener('click', e => {
-  const b = e.target.closest('[data-dia]'); if (!b) return;
-  vista.fecha = b.dataset.dia; vista.modo = 'dia'; guardarVista(); pintar(); window.scrollTo(0, 0);
-});
+function tocarContenido(e) {
+  if (e.target.closest('a')) return;   // el teléfono abre la llamada
+  const d = e.target.closest('[data-dia]');
+  if (d) { vista.fecha = d.dataset.dia; vista.modo = 'dia'; guardarVista(); pintar(); window.scrollTo(0, 0); return; }
+  const c = e.target.closest('[data-cita]');
+  if (c) { const cita = datos?.citas.find(x => x.id === c.dataset.cita); if (cita) abrirAcciones(cita); }
+}
+$('contenido').addEventListener('click', tocarContenido);
+$('contenido').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('[data-cita]')) tocarContenido(e); });
 
-// Se pone al día al volver a la app y cada minuto mientras está abierta
-document.addEventListener('visibilitychange', () => { if (!document.hidden && yo && sesion) cargar(true); });
-setInterval(() => { if (!document.hidden && yo && sesion) cargar(true); }, 60000);
+// Se pone al día al volver a la app y cada minuto mientras está abierta (no si hay un formulario abierto)
+function ponerAlDia() {
+  if (document.hidden || !yo || !sesion || hojaAbierta) return;
+  vista.tab === 'agenda' ? cargar(true) : cargarFichajes();
+}
+document.addEventListener('visibilitychange', ponerAlDia);
+setInterval(ponerAlDia, 60000);
+setInterval(() => { const r = $('relojAhora'); if (r) r.textContent = horaDe(new Date()); }, 10000);
 
 // ── Arranque ──
 (async () => {

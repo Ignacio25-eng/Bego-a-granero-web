@@ -204,8 +204,8 @@
   <p class="sub">Begoña Granero · Peluquería y Estética</p>
   <form id="formLogin" novalidate>
     <div class="campo">
-      <label for="email">Email</label>
-      <input id="email" type="email" autocomplete="username" inputmode="email" autocapitalize="none" required>
+      <label for="email">Usuario</label>
+      <input id="email" type="text" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required>
     </div>
     <div class="campo">
       <label for="contrasena">Contraseña</label>
@@ -275,6 +275,14 @@
 // ══════════════════════════════════════════════════
 const SUPABASE_URL = 'https://jazzbriexlsmmotuxzit.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_KzFizhKF6XEmbGk3l7zLcw_BZO0Br0K';
+// Las trabajadoras entran con un usuario ("lucia"); Supabase necesita un email, así que se usa uno inventado
+// con este dominio (el mismo que en la app del salón, EquipoService.DominioUsuarios). Un email completo vale tal cual.
+const DOMINIO_USUARIOS = 'equipo.begonagranero.es';
+function emailDe(usuario) {
+  const u = usuario.trim().toLowerCase();
+  if (u.includes('@')) return u;
+  return u.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9._-]/g, '') + '@' + DOMINIO_USUARIOS;
+}
 const LS_SESION = 'equipo_sesion';
 const LS_VISTA  = 'equipo_vista';
 
@@ -387,12 +395,13 @@ const mensajeInicio = err => err.sinAcceso ? err.message : err instanceof SinSes
 
 $('formLogin').addEventListener('submit', async e => {
   e.preventDefault();
-  const email = $('email').value.trim(), contrasena = $('contrasena').value;
-  if (!email || !contrasena) { mostrarLogin('Escribe tu email y tu contraseña.'); return; }
+  const usuario = $('email').value.trim(), contrasena = $('contrasena').value;
+  if (!usuario || !contrasena) { mostrarLogin('Escribe tu usuario y tu contraseña.'); return; }
+  const email = emailDe(usuario);
   $('btnEntrar').disabled = true; $('btnEntrar').textContent = 'Entrando…';
   try {
     try { await pedirToken('password', { email, password: contrasena }); }
-    catch (err) { mostrarLogin(err.status === 400 ? 'El email o la contraseña no son correctos.' : textoError(err)); return; }
+    catch (err) { mostrarLogin(err.status === 400 ? 'El usuario o la contraseña no son correctos.' : textoError(err)); return; }
     $('contrasena').value = '';
     try { await empezar(); }
     catch (err) { olvidarSesion(); mostrarLogin(mensajeInicio(err)); }
@@ -406,7 +415,7 @@ async function empezar() {
   const r = await rpc('equipo_yo');
   if (!r?.ok) {
     olvidarSesion();
-    throw Object.assign(new Error('Este usuario no tiene acceso a la agenda. Pide a Begoña que ponga tu email en tu ficha de la app del salón.'), { sinAcceso: true });
+    throw Object.assign(new Error('Este usuario no tiene acceso a la agenda. Pide a Begoña que lo ponga en tu ficha de la app del salón.'), { sinAcceso: true });
   }
   yo = r;
   if (vista.filtro == null) vista.filtro = yo.trabajadora_id ?? 'todas';
@@ -906,7 +915,7 @@ async function cargarFichajes() {
         <h3>Fichar</h3>
         <p class="ayuda">Has entrado con el usuario del salón, que no es ninguna trabajadora, así que no puede fichar: cada fichaje va a nombre de quien lo hace.</p>
         <p class="ayuda" style="margin-top:10px">Para fichar, cada trabajadora entra en esta app con <strong>su propio usuario</strong>:
-          su email tiene que estar en su ficha de la app del salón (Trabajadoras › editar › «Email para la app del móvil») y tener un usuario creado con ese email.</p>
+          su usuario tiene que estar en su ficha de la app del salón (Trabajadoras › editar › «Usuario para la app del móvil») y creado en Supabase.</p>
         <p class="ayuda" style="margin-top:10px">Los fichajes de todas se ven en el ordenador del salón, en Trabajadoras › Fichajes.</p>
       </div>`;
     return;

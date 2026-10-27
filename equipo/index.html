@@ -491,6 +491,8 @@ const ESTADOS = {
   cancelada:     ['Cancelada', 'etq-anul'],
   no_presentada: ['No vino', 'etq-anul'],
 };
+// Icono de teléfono dibujado (el emoji ☎ sale grande y rojo en iPhone)
+const ICONO_TEL = '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" style="vertical-align:-2px;margin-right:5px"><path fill="currentColor" d="M6.6 10.8a15.5 15.5 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg>';
 const anulada = c => c.estado === 'cancelada' || c.estado === 'no_presentada';
 const editable = c => c.cita_id != null && (c.estado === 'pendiente' || c.estado === 'confirmada') && c.fecha >= hoy();
 
@@ -568,7 +570,7 @@ function tarjetaCita(c) {
       ${c.servicios ? `<div class="servicios">${esc(c.servicios)}</div>` : ''}
       <div class="abajo">
         ${vista.filtro === 'todas' ? `<span class="quien"><span class="punto" style="background:${esc(colorDe(c.trabajadora_id))}"></span>${esc(p?.nombre || '¿?')}</span>` : ''}
-        ${tel ? `<a class="tel" href="tel:${esc(tel)}">☎ ${esc(c.cliente_telefono)}</a>` : ''}
+        ${tel ? `<a class="tel" href="tel:${esc(tel)}">${ICONO_TEL}${esc(c.cliente_telefono)}</a>` : ''}
       </div>
       ${pend ? `<div class="aviso">${esc(pend)}</div>` : ''}
     </div>

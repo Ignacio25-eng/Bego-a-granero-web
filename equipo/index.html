@@ -411,7 +411,6 @@ async function empezar() {
   yo = r;
   if (vista.filtro == null) vista.filtro = yo.trabajadora_id ?? 'todas';
   $('hola').textContent = yo.trabajadora_id ? `Hola, ${yo.nombre}` : 'Agenda del salón';
-  $('tabs').hidden = !yo.trabajadora_id;   // solo las trabajadoras fichan
   $('pantallaLogin').hidden = true;
   $('pantallaApp').hidden = false;
   cambiarTab('agenda');
@@ -900,6 +899,18 @@ function jornadas(lista) {
 }
 
 async function cargarFichajes() {
+  // Cada fichaje va a nombre de una trabajadora: el usuario del salón no ficha
+  if (!yo?.trabajadora_id) {
+    $('vistaFichar').innerHTML = `
+      <div class="bloque">
+        <h3>Fichar</h3>
+        <p class="ayuda">Has entrado con el usuario del salón, que no es ninguna trabajadora, así que no puede fichar: cada fichaje va a nombre de quien lo hace.</p>
+        <p class="ayuda" style="margin-top:10px">Para fichar, cada trabajadora entra en esta app con <strong>su propio usuario</strong>:
+          su email tiene que estar en su ficha de la app del salón (Trabajadoras › editar › «Email para la app del móvil») y tener un usuario creado con ese email.</p>
+        <p class="ayuda" style="margin-top:10px">Los fichajes de todas se ven en el ordenador del salón, en Trabajadoras › Fichajes.</p>
+      </div>`;
+    return;
+  }
   const [a, m] = mesFichajes.split('-').map(Number);
   const desde = `${mesFichajes}-01`, hasta = iso(new Date(a, m, 0));
   pintarFichar(true);

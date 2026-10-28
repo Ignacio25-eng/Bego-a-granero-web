@@ -939,7 +939,7 @@ document.getElementById('cartaTabs').addEventListener('keydown', (e) => {
 function elegirSeccion(i) {
   if (!EN_LINEA || !CATALOGO[i]) return;
   document.getElementById('serviciosElegidos').innerHTML = '';
-  anadirServicio(CATALOGO[i].servicios[0][2]);
+  anadirServicio(reservables(CATALOGO[i])[0]?.[2]);
 }
 
 // ══════════════════════════════════════════════════
@@ -983,6 +983,10 @@ const MAX_SERVICIOS = 3;
 // "1 h 30 min", "45 min"
 const duracionTexto = (min) => min < 60 ? `${min} min` : `${Math.floor(min / 60)} h${min % 60 ? ` ${min % 60} min` : ''}`;
 
+// Bonos y ciclos de sesiones: salen en la carta, pero solo se compran en el salón (no se reservan online)
+const soloEnSalon = (nombre) => /^(bono|ciclo)\b/i.test(nombre.trim());
+const reservables = (s) => s.servicios.filter(([n]) => !soloEnSalon(n));
+
 const buscarServicio = (id) => {
   for (const s of CATALOGO) for (const x of s.servicios) if (x[2] === id) return { id, nombre: x[0], precio: x[1], duracion: x[3], seccion: x[4] };
   return null;
@@ -1010,9 +1014,10 @@ function anadirServicio(id) {
   sel.setAttribute('aria-label', `Servicio ${num}`);
   sel.innerHTML = `<option value="">${num > 1 ? '– Elige otro servicio –' : '– Elige un servicio –'}</option>`;
   CATALOGO.forEach(s => {
+    if (!reservables(s).length) return;
     const g = document.createElement('optgroup');
     g.label = s.menu;
-    s.servicios.forEach(([n, p, sid, dur]) => {
+    reservables(s).forEach(([n, p, sid, dur]) => {
       const o = document.createElement('option');
       o.value = sid; o.textContent = `${n} · ${duracionTexto(dur)} · ${euros(p)}`;
       g.appendChild(o);

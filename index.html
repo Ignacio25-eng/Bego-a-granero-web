@@ -812,12 +812,15 @@ let CATALOGO = [
     ],
     extras: [['Parafina', 9], ['Uña nueva grande', 7], ['Retirada esmalte', 11], ['Retirada acrílico', 113]] },
   { seccion: 'Depilación', menu: 'Depilación',
-    desc: 'Depilación por zonas, diseño de cejas con henna y láser, para una piel suave durante más tiempo.',
+    desc: 'Depilación por zonas y diseño de cejas con henna, para una piel suave durante más tiempo.',
     servicios: [
       ['Cejas', 9], ['Diseño cejas henna', 16], ['Labio superior', 6], ['Mentón', 6], ['Axilas', 9], ['Brazos', 13],
       ['Pecho', 21], ['Espalda', 21], ['Glúteos', 11], ['Ingles rasuradas', 16], ['Ingles integrales', 19],
-      ['Medias piernas', 17], ['Muslos', 17], ['Piernas enteras', 23], ['Láser (por zona)', 26],
+      ['Medias piernas', 17], ['Muslos', 17], ['Piernas enteras', 23],
     ] },
+  { seccion: 'Láser', menu: 'Láser',
+    desc: 'Depilación láser por zonas, para olvidarte de la depilación durante mucho más tiempo.',
+    servicios: [['Láser zona', 26]] },
   { seccion: 'Bioterapia Facial', menu: 'Bioterapia facial',
     desc: 'Tratamientos faciales en sesión, ciclos y bonos para una piel luminosa, y micropigmentación para realzar tus facciones.',
     servicios: [
@@ -832,14 +835,17 @@ let CATALOGO = [
       ['Maquillaje sencillo', 36], ['Maquillaje fiesta', 46], ['Maquillaje boda', 61],
     ] },
   { seccion: 'Tratamientos Corporales', menu: 'Corporal',
-    desc: 'Masajes, drenaje linfático, presoterapia, maderoterapia y corposhape, en sesiones sueltas o en bonos.',
+    desc: 'Masajes, drenaje linfático, presoterapia y maderoterapia, en sesiones sueltas o en bonos.',
     servicios: [
       ['Masaje relajante corporal (30 min)', 36], ['Masaje relajante corporal (60 min)', 56], ['Drenaje linfático (sesión)', 56],
-      ['Presoterapia (sesión)', 16], ['Maderoterapia 30 min', 31], ['Maderoterapia 1 h', 51], ['Corposhape (sesión)', 71],
+      ['Presoterapia (sesión)', 16], ['Maderoterapia 30 min', 31], ['Maderoterapia 1 h', 51],
       ['Bono presoterapia (10 sesiones)', 126], ['Ciclo bioterapia corporal (6 sesiones)', 201],
       ['Bono maderoterapia (7 sesiones)', 326], ['Bono masaje relajante (7 sesiones + 2 presoterapias de regalo)', 351],
-      ['Bono drenaje linfático (7 sesiones + 2 presoterapias de regalo)', 351], ['Bono corposhape (7 sesiones)', 426],
+      ['Bono drenaje linfático (7 sesiones + 2 presoterapias de regalo)', 351],
     ] },
+  { seccion: 'Corposhape', menu: 'Corposhape',
+    desc: 'Tratamiento corporal corposhape, en sesiones sueltas o en bono.',
+    servicios: [['Corposhape (sesión)', 71], ['Bono corposhape (7 sesiones)', 426]] },
 ];
 
 const EXTRAS = /^(suplemento|retirada|reparación|uña nueva|parafina|dibujos)/i;

@@ -555,6 +555,9 @@ function textoPendiente(c) {
   if (!c.pendiente) return '';
   if (c.origen === 'web' && c.cita_id == null) return 'Reservada en la web: el ordenador del salón aún no la ha pasado a su agenda.';
   if (c.cita_id == null) return `Dada desde el móvil por ${c.cambiada_por}: el ordenador del salón aún no la ha recogido.`;
+  // La clienta respondió al recordatorio desde su enlace (confirmar.html)
+  if ((c.cambiada_por || '').startsWith('La clienta'))
+    return `${anulada(c) ? '✕ Cancelada' : '✓ Confirmada'} por la clienta desde el recordatorio de WhatsApp.`;
   return `${anulada(c) ? 'Cancelada' : 'Cambiada'} desde el móvil por ${c.cambiada_por}: el ordenador del salón aún no lo ha recogido.`;
 }
 

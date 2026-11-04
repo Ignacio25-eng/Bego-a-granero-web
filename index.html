@@ -592,6 +592,10 @@
           <input type="tel" id="telefono" placeholder="600 000 000" autocomplete="tel" maxlength="20">
         </div>
         <div class="form-group">
+          <label for="email">Email * <span class="label-nota">(te enviamos ahí el ticket, no tenemos ticket en papel)</span></label>
+          <input type="email" id="email" placeholder="tucorreo@ejemplo.com" autocomplete="email" inputmode="email" autocapitalize="none" maxlength="120">
+        </div>
+        <div class="form-group">
           <label for="notas">Notas (opcional)</label>
           <textarea id="notas" placeholder="Ej.: zona a depilar, color que quieres, alergias…" maxlength="500"></textarea>
         </div>
@@ -717,7 +721,8 @@
   <h3>Responsable</h3>
   <p>Begoña Granero Boutique de Belleza · C/ Obispo Golfín, 9 · 28430 Alpedrete (Madrid) · +34 665 08 50 53</p>
   <h3>Qué datos tratamos y para qué</h3>
-  <p>Los datos que nos envías al pedir cita (nombre, apellido, teléfono, servicio, fecha y notas) se usan únicamente para gestionar tu cita y contactarte sobre ella.</p>
+  <p>Los datos que nos envías al pedir cita (nombre, apellido, teléfono, email, servicio, fecha y notas) se usan únicamente para gestionar tu cita, contactarte sobre ella y enviarte por correo el ticket o la factura de los servicios que te hagamos (no damos tickets en papel). Al darnos tu email aceptas recibirlos así. No te enviaremos publicidad.</p>
+  <p>Para evitar reservas falsas en masa, al reservar se guarda también la dirección IP desde la que se hace, solo durante 24 horas y únicamente para limitar cuántas reservas se hacen desde una misma conexión (interés legítimo en proteger la agenda del salón).</p>
   <h3>Base legal</h3>
   <p>Tu consentimiento, que das al marcar la casilla del formulario, y la gestión de la cita que solicitas.</p>
   <h3>Cuánto tiempo los guardamos</h3>
@@ -1179,6 +1184,7 @@ async function reservar() {
   const nombre   = document.getElementById('nombre').value.trim();
   const apellido = document.getElementById('apellido').value.trim();
   const telefono = document.getElementById('telefono').value.trim();
+  const email    = document.getElementById('email').value.trim();
   const notas    = document.getElementById('notas').value.trim();
 
   if (!elegidos.length) return showAlert('bookingAlert', 'error', 'Elige un servicio.');
@@ -1186,6 +1192,7 @@ async function reservar() {
   if (!selectedSlot) return showAlert('bookingAlert', 'error', 'Elige una hora.');
   if (!nombre)       return showAlert('bookingAlert', 'error', 'Escribe tu nombre.');
   if (telefono.replace(/\D/g, '').length < 9) return showAlert('bookingAlert', 'error', 'Escribe un teléfono válido para poder contactarte.');
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return showAlert('bookingAlert', 'error', 'Escribe un email válido: te enviaremos ahí el ticket.');
   if (!document.getElementById('privacidad').checked) return showAlert('bookingAlert', 'error', 'Debes aceptar la política de privacidad para reservar.');
 
   const btn = document.getElementById('btnReservar');
@@ -1195,7 +1202,7 @@ async function reservar() {
     r = await api('rpc/reservar_cita', {
       p_nombre: nombre, p_apellido: apellido, p_telefono: telefono,
       p_servicios: elegidos.map(x => ({ servicio_id: x.servicio.id, trabajadora_id: x.trabajadora })),
-      p_fecha: fecha, p_hora: selectedSlot, p_notas: notas,
+      p_fecha: fecha, p_hora: selectedSlot, p_notas: notas, p_email: email,
     });
   } catch {
     r = { ok: false, error: 'No hemos podido conectar. Inténtalo de nuevo o llámanos al 665 08 50 53.' };

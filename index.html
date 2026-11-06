@@ -825,7 +825,19 @@ let CATALOGO = [
     ] },
   { seccion: 'Láser', menu: 'Láser',
     desc: 'Depilación láser por zonas, para olvidarte de la depilación durante mucho más tiempo.',
-    servicios: [['Láser zona', 26]] },
+    servicios: [
+      ['Láser labio superior', 26], ['Láser mentón', 26], ['Láser patillas', 26], ['Láser cara completa', 26], ['Láser cuello', 26],
+      ['Láser axilas', 26], ['Láser brazos completos', 26], ['Láser medios brazos', 26], ['Láser manos', 26],
+      ['Láser pecho', 26], ['Láser areolas', 26], ['Láser abdomen', 26], ['Láser línea alba', 26], ['Láser espalda', 26],
+      ['Láser lumbares', 26], ['Láser glúteos', 26], ['Láser ingles', 26], ['Láser ingles brasileñas', 26], ['Láser perianal', 26],
+      ['Láser muslos', 26], ['Láser medias piernas', 26], ['Láser piernas completas', 26], ['Láser pies', 26],
+    ] },
+  { seccion: 'Pestañas', menu: 'Pestañas y cejas',
+    desc: 'Extensiones de pestañas pelo a pelo, por grupos o en volumen 3D y 5D, lifting de pestañas y microblading de cejas.',
+    servicios: [
+      ['Extensión de pestañas promo', 46], ['Extensión de pestañas pelo a pelo en promoción', 36], ['Extensión de pestañas pelo a pelo', 51],
+      ['Extensión de pestañas 3D o 5D', 86], ['Extensión de pestañas grupo', 26], ['Lifting de pestañas', 46], ['Microblading', 201],
+    ] },
   { seccion: 'Bioterapia Facial', menu: 'Bioterapia facial',
     desc: 'Tratamientos faciales en sesión, ciclos y bonos para una piel luminosa, y micropigmentación para realzar tus facciones.',
     servicios: [
@@ -913,6 +925,7 @@ function renderCarta(i) {
       <div class="carta-precios">
         ${lista(s.servicios)}
         ${s.extras ? `<p class="carta-sub">Extras y complementos</p>${lista(s.extras, 'extras')}` : ''}
+        ${s.servicios.some(([n]) => porTelefono(n)) ? '<p class="carta-nota">Las mechas se piden por teléfono: según tu pelo te recomendaremos unas u otras.</p>' : ''}
         <p class="carta-nota">Precios en euros. Si tienes dudas sobre qué tratamiento te conviene, pregúntanos.</p>
       </div>
     </div>`;
@@ -997,6 +1010,11 @@ const duracionTexto = (min) => min < 60 ? `${min} min` : `${Math.floor(min / 60)
 // Bonos y ciclos de sesiones: salen en la carta, pero solo se compran en el salón (no se reservan online)
 const soloEnSalon = (nombre) => /^(bono|ciclo)\b/i.test(nombre.trim());
 const reservables = (s) => s.servicios.filter(([n]) => !soloEnSalon(n));
+// Mechas: cuáles y cuánto tiempo depende del pelo de cada clienta, así que se piden llamando.
+// Salen en la lista para que quien las busque vea que tiene que llamar.
+const porTelefono = (nombre) => /^mechas\b/i.test(nombre.trim());
+const AVISO_TELEFONO = 'Las mechas no se pueden reservar online: dependiendo de tu pelo (cuánto tienes y cómo es) te haremos unas mechas u otras. ' +
+  'Llámanos al <a href="tel:+34665085053">665 08 50 53</a> o escríbenos por WhatsApp y te asesoramos y te damos cita.';
 
 const buscarServicio = (id) => {
   for (const s of CATALOGO) for (const x of s.servicios) if (x[2] === id) return { id, nombre: x[0], precio: x[1], duracion: x[3], seccion: x[4] };
@@ -1030,7 +1048,7 @@ function anadirServicio(id) {
     g.label = s.menu;
     reservables(s).forEach(([n, p, sid, dur]) => {
       const o = document.createElement('option');
-      o.value = sid; o.textContent = `${n} · ${duracionTexto(dur)} · ${euros(p)}`;
+      o.value = sid; o.textContent = porTelefono(n) ? `${n} · cita por teléfono` : `${n} · ${duracionTexto(dur)} · ${euros(p)}`;
       g.appendChild(o);
     });
     sel.appendChild(g);
@@ -1089,7 +1107,7 @@ function alCambiarServicios() {
       o.value = t.id; o.textContent = `Con ${t.nombre}`;
       quien.appendChild(o);
     });
-    quien.disabled = !srv || posibles.length === 0;
+    quien.disabled = !srv || posibles.length === 0 || porTelefono(srv.nombre);
     if (posibles.some(t => String(t.id) === antes)) quien.value = antes;
     f.querySelector('.srv-quitar').hidden = filas.length === 1 && !srv;
     f.classList.toggle('sin-equipo', !!srv && posibles.length === 0);
@@ -1111,6 +1129,8 @@ async function cargarHoras() {
   const n = ++peticionHoras;   // cualquier búsqueda anterior que llegue tarde se descarta
   const elegidos = serviciosElegidos();
   const fecha = document.getElementById('fecha').value;
+  // Sale nada más elegirlas, sin esperar a que pongan el día
+  if (elegidos.some(x => porTelefono(x.servicio.nombre))) { selectedSlot = null; return mensajeHoras(AVISO_TELEFONO, true); }
   if (!elegidos.length || !fecha) { selectedSlot = null; return mensajeHoras('Elige un servicio y un día para ver las horas libres.'); }
   const sinEquipo = filasServicio().find(f => f.classList.contains('sin-equipo'));
   if (sinEquipo) {
@@ -1188,6 +1208,7 @@ async function reservar() {
   const notas    = document.getElementById('notas').value.trim();
 
   if (!elegidos.length) return showAlert('bookingAlert', 'error', 'Elige un servicio.');
+  if (elegidos.some(x => porTelefono(x.servicio.nombre))) return showAlert('bookingAlert', 'error', 'Las mechas se piden por teléfono: llámanos al 665 08 50 53.');
   if (!fecha)        return showAlert('bookingAlert', 'error', 'Elige un día para la cita.');
   if (!selectedSlot) return showAlert('bookingAlert', 'error', 'Elige una hora.');
   if (!nombre)       return showAlert('bookingAlert', 'error', 'Escribe tu nombre.');

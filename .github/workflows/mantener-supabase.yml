@@ -1,0 +1,29 @@
+# Supabase (plan gratuito) pausa el proyecto si pasa una semana sin uso: entonces la web deja de
+# poder reservar y confirmar citas. Esta tarea de GitHub hace una consulta pequeña cada 3 días
+# para que nunca lo vea inactivo. Usa la misma clave pública que la web y un código inventado:
+# no lee ni cambia ningún dato. También se puede lanzar a mano desde la pestaña «Actions».
+name: Mantener Supabase activo
+
+on:
+  schedule:
+    - cron: '17 9 */3 * *'   # días 1, 4, 7… de cada mes a las 9:17 (hora UTC)
+  workflow_dispatch:
+
+jobs:
+  consulta:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Consulta pequeña a Supabase
+        env:
+          SUPABASE_URL: https://jazzbriexlsmmotuxzit.supabase.co
+          SUPABASE_KEY: sb_publishable_KzFizhKF6XEmbGk3l7zLcw_BZO0Br0K
+        run: |
+          codigo=$(curl -s -o respuesta.txt -w '%{http_code}' --max-time 60 \
+            -X POST "$SUPABASE_URL/rest/v1/rpc/ver_confirmacion" \
+            -H "apikey: $SUPABASE_KEY" -H "Content-Type: application/json" \
+            -d '{"p_token":"mantener-activo-000000000000"}')
+          echo "Supabase ha respondido $codigo: $(cat respuesta.txt)"
+          if [ "$codigo" != "200" ]; then
+            echo "::error::Supabase no responde bien ($codigo). Mira si el proyecto está pausado en supabase.com."
+            exit 1
+          fi

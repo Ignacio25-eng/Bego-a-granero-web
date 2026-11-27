@@ -619,7 +619,7 @@
   #cartaTabs .carta-tab[data-categoria="Bioterapia Facial"] img { object-position: center 58%; }
   #cartaTabs .carta-tab[data-categoria="Corposhape"] img { object-position: center 81%; }
 
-  #bookingForm [hidden] { display: none !important; }
+  #bookingForm[hidden], #bookingForm [hidden] { display: none !important; }
   #bookingForm .reserva-pasos { display: flex; flex-wrap: wrap; gap: .55rem 1rem; list-style: none; border-bottom: 1px solid var(--line-dark); padding-bottom: 1rem; }
   .reserva-pasos li { display: flex; align-items: center; gap: .4rem; color: var(--mid); font-size: .82rem; }
   .reserva-pasos span { display: grid; place-items: center; width: 1.65rem; height: 1.65rem; border: 1px solid var(--gold-light); border-radius: 50%; }
@@ -752,6 +752,14 @@
     .agenda-categorias button { min-height: 44px; }
     .agenda-resultado { min-height: 48px; }
   }
+
+  #agendaSiguienteSemana { margin-bottom: .8rem; padding: .45rem .75rem; cursor: pointer; }
+  #bookingOk { gap: .8rem; }
+  .agenda-confirmacion-ficha { display: grid; gap: .65rem; text-align: left; width: min(100%, 27rem); margin: .3rem 0; padding: .8rem 1rem; border: 1px solid var(--gold-light); border-radius: 9px; background: var(--cream); }
+  .agenda-confirmacion-ficha dt { color: var(--gold); font-size: .8rem; }
+  .agenda-confirmacion-ficha dd { margin: .1rem 0 0; color: var(--charcoal); }
+  .agenda-calendarios { display: flex; gap: .6rem; flex-wrap: wrap; justify-content: center; }
+  .agenda-calendarios > * { font-family: inherit; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -987,6 +995,7 @@
             <span><strong>Primera cita disponible</strong><span id="agendaPrimeraHora"></span></span>
             <span class="agenda-primera-accion">Elegir <span aria-hidden="true">→</span></span>
           </button>
+          <button type="button" class="btn-secondary agenda-siguiente-semana" id="agendaSiguienteSemana" hidden></button>
           <div class="form-group">
           <input type="date" id="fecha" hidden aria-label="Día elegido">
           <div class="agenda-calendario" role="group" aria-label="Calendario de disponibilidad">
@@ -1040,7 +1049,7 @@
           <input type="checkbox" id="privacidad">
           <span>He leído y acepto la <a href="#" onclick="abrirLegal(event,'dlgPrivacidad')">política de privacidad</a>. *</span>
         </label>
-        <button type="button" class="btn-book" id="btnReservar" disabled aria-describedby="previewReserva">Confirmar cita</button>
+        <button type="button" class="btn-book" id="btnReservar" aria-describedby="previewReserva">Simular confirmación</button>
         </div>
         <div class="agenda-resumen-movil" id="agendaResumenMovil" hidden>
           <p id="agendaResumenMovilTexto" aria-live="polite"></p>
@@ -1054,10 +1063,21 @@
       <!-- Se muestra al confirmar la cita -->
       <div class="booking-form booking-ok" id="bookingOk" hidden>
         <div class="ok-icono" aria-hidden="true">✓</div>
-        <div class="form-title">¡Cita confirmada!</div>
-        <p id="bookingOkTexto"></p>
-        <p class="form-note">Si necesitas cambiarla o anularla, llámanos o escríbenos por WhatsApp al <a href="tel:+34665085053">665 08 50 53</a>.</p>
-        <button class="btn-book" type="button" onclick="otraCita()">Reservar otra cita</button>
+        <h3 class="form-title" id="agendaConfirmacionTitulo" tabindex="-1">Confirmación de ejemplo</h3>
+        <p>Esta demostración no guarda una cita ni envía mensajes.</p>
+        <dl class="agenda-confirmacion-ficha" id="agendaConfirmacionFicha">
+          <div><dt>Día y hora</dt><dd id="agendaConfirmacionHora"></dd></div>
+          <div><dt>Servicios</dt><dd id="agendaConfirmacionServicios"></dd></div>
+          <div><dt>Salón</dt><dd>Calle del Obispo Golfín, 9 · Alpedrete</dd></div>
+        </dl>
+        <h4>Añadir a mi calendario</h4>
+        <div class="agenda-calendarios">
+          <button class="btn-primary" type="button" id="agendaDescargarIcs">Apple Calendar / archivo .ics</button>
+          <a class="btn-secondary" id="agendaGoogleCal" target="_blank" rel="noopener noreferrer">Google Calendar</a>
+        </div>
+        <p class="agenda-cal-ayuda">En Google Calendar se abrirá un bloque provisional de 30 minutos. Puedes ajustarlo antes de guardar.</p>
+        <p class="form-note">Para cambios o anulaciones <a href="tel:+34665085053">Llamar</a> · <a href="https://wa.me/34665085053" target="_blank" rel="noopener">WhatsApp</a></p>
+        <button class="btn-secondary" type="button" onclick="otraCita()">Volver a la maqueta</button>
       </div>
     </div>
   </div>
@@ -1729,9 +1749,9 @@ function disponibilidadAgenda(dia, elegidos) {
   return { estado: horas.length ? 'Disponible' : 'Completo', horas };
 }
 
-function primeraCitaAgenda(elegidos) {
+function primeraCitaAgenda(elegidos, desde = agendaHoy) {
   if (!elegidos.length || elegidos.some(({ servicio }) => porTelefono(servicio.nombre))) return null;
-  for (const dia = new Date(agendaHoy); dia <= agendaLimite; dia.setDate(dia.getDate() + 1)) {
+  for (const dia = new Date(desde); dia <= agendaLimite; dia.setDate(dia.getDate() + 1)) {
     const { horas } = disponibilidadAgenda(dia, elegidos);
     if (horas.length) return { dia, hora: horas[0] };
   }
@@ -1759,6 +1779,32 @@ agendaPrimeraBoton.addEventListener('click', () => {
   selectedSlot = hora;
   cargarHoras();
   document.querySelector('#slotsGrid [aria-pressed="true"]')?.focus();
+});
+
+const agendaSemanaBoton = document.getElementById('agendaSiguienteSemana');
+let agendaSemanaSeleccion = null;
+
+function pintarSiguienteSemana(elegidos) {
+  const fecha = document.getElementById('fecha').value;
+  const siguienteLunes = fecha ? new Date(fecha + 'T12:00:00') : new Date(agendaHoy);
+  siguienteLunes.setDate(siguienteLunes.getDate() + 7 - (siguienteLunes.getDay() + 6) % 7);
+  agendaSemanaSeleccion = primeraCitaAgenda(elegidos, siguienteLunes);
+  agendaSemanaBoton.hidden = !agendaSemanaSeleccion;
+  if (agendaSemanaSeleccion) {
+    const lunes = new Date(agendaSemanaSeleccion.dia);
+    lunes.setDate(lunes.getDate() - (lunes.getDay() + 6) % 7);
+    agendaSemanaBoton.textContent = 'Ver huecos de la semana del ' + formatDate(lunes);
+  }
+}
+
+agendaSemanaBoton.addEventListener('click', () => {
+  if (!agendaSemanaSeleccion) return;
+  const { dia } = agendaSemanaSeleccion;
+  document.getElementById('fecha').value = agendaIso(dia);
+  agendaMesVisible = new Date(dia.getFullYear(), dia.getMonth(), 1, 12);
+  selectedSlot = null;
+  cargarHoras();
+  document.querySelector('#agendaDias [aria-pressed="true"]')?.focus();
 });
 
 function pintarCalendarioAgenda(elegidos) {
@@ -1818,6 +1864,7 @@ function cargarHoras() {
     selectedSlot = null;
   }
   pintarPrimeraCitaAgenda(elegidos);
+  pintarSiguienteSemana(elegidos);
   pintarCalendarioAgenda(elegidos);
   actualizarFichaAgenda();
   if (elegidos.some(({ servicio }) => porTelefono(servicio.nombre))) return mensajeHoras(AVISO_TELEFONO, true);
@@ -1881,13 +1928,107 @@ function showAlert(id, type, msg) {
 //  RESERVAR (la cita queda confirmada al momento)
 // ══════════════════════════════════════════════════
 
+
+const agendaCalendarioZona = 'Europe/Madrid';
+const agendaCalendarioLugar = 'Begoña Granero, Calle del Obispo Golfín, 9, Alpedrete';
+const agendaCalendarioOffset = new Intl.DateTimeFormat('en', {
+  timeZone: agendaCalendarioZona, timeZoneName: 'longOffset',
+});
+let agendaCitaConfirmada = null;
+
+function horaSalonUTC(fecha, hora) {
+  const pared = Date.parse(fecha + 'T' + hora + ':00Z');
+  let utc = pared;
+  for (let i = 0; i < 2; i++) {
+    const offset = agendaCalendarioOffset.formatToParts(utc).find(parte => parte.type === 'timeZoneName').value;
+    const partes = /GMT([+-])(\d{2}):(\d{2})/.exec(offset);
+    const minutos = partes ? (Number(partes[2]) * 60 + Number(partes[3])) * (partes[1] === '-' ? -1 : 1) : 0;
+    utc = pared - minutos * 60000;
+  }
+  return utc;
+}
+
+const fechaCalendarioUTC = instante => new Date(instante).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+const textoCalendario = texto => texto.replace(/\\/g, '\\\\').replace(/\r?\n/g, '\\n').replace(/([;,])/g, '\\$1');
+
+function citaComoIcs(cita) {
+  const lineas = [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Begona Granero//Maqueta de reservas//ES',
+    'BEGIN:VEVENT', 'UID:' + cita.uid, 'DTSTAMP:' + cita.sello,
+    'DTSTART:' + cita.inicio, 'SUMMARY:' + textoCalendario(cita.titulo),
+    'LOCATION:' + textoCalendario(agendaCalendarioLugar),
+    'DESCRIPTION:' + textoCalendario(cita.descripcion), 'END:VEVENT', 'END:VCALENDAR',
+  ];
+  const utf8 = new TextEncoder();
+  return lineas.map(linea => {
+    let actual = '';
+    let salida = '';
+    for (const letra of linea) {
+      if (utf8.encode(actual + letra).length > 75) {
+        salida += actual + '\r\n';
+        actual = ' ';
+      }
+      actual += letra;
+    }
+    return salida + actual;
+  }).join('\r\n') + '\r\n';
+}
+
+document.getElementById('btnReservar').addEventListener('click', () => {
+  const fecha = document.getElementById('fecha').value;
+  const servicios = serviciosElegidos();
+  if (!fecha || !selectedSlot || !servicios.length) {
+    return showAlert('bookingAlert', 'error', 'Elige un servicio, un día y una hora de ejemplo.');
+  }
+  const servicio = servicios.map(({ servicio }) => servicio.nombre).join(' + ');
+  const inicioUTC = horaSalonUTC(fecha, selectedSlot);
+  agendaCitaConfirmada = {
+    uid: 'demo-' + Date.now() + '@begona-granero.example',
+    sello: fechaCalendarioUTC(Date.now()),
+    inicio: fechaCalendarioUTC(inicioUTC),
+    titulo: 'Ejemplo · Begoña Granero',
+    descripcion: 'Demostración sin reserva real. Servicios: ' + servicio,
+  };
+  const { inicio, titulo, descripcion } = agendaCitaConfirmada;
+  const parametros = new URLSearchParams({
+    action: 'TEMPLATE', text: titulo,
+    dates: inicio + '/' + fechaCalendarioUTC(inicioUTC + 30 * 60000),
+    ctz: agendaCalendarioZona, details: descripcion, location: agendaCalendarioLugar,
+  });
+  document.getElementById('agendaGoogleCal').href = 'https://calendar.google.com/calendar/render?' + parametros;
+  document.getElementById('agendaConfirmacionHora').textContent = formatDate(fecha) + ' · ' + selectedSlot;
+  document.getElementById('agendaConfirmacionServicios').textContent = servicio;
+  document.getElementById('bookingForm').hidden = true;
+  document.getElementById('bookingOk').hidden = false;
+  document.getElementById('agendaConfirmacionTitulo').focus();
+});
+
+document.getElementById('agendaDescargarIcs').addEventListener('click', () => {
+  if (!agendaCitaConfirmada) return;
+  const archivo = new Blob([citaComoIcs(agendaCitaConfirmada)], { type: 'text/calendar;charset=utf-8' });
+  const enlace = document.createElement('a');
+  enlace.href = URL.createObjectURL(archivo);
+  enlace.download = 'cita-de-ejemplo-begona-granero.ics';
+  document.body.append(enlace);
+  enlace.click();
+  enlace.remove();
+  setTimeout(() => URL.revokeObjectURL(enlace.href), 1000);
+});
+
 function otraCita() {
-  ['fecha', 'notas'].forEach(id => { document.getElementById(id).value = ''; });
-  document.getElementById('serviciosElegidos').innerHTML = '';
-  abrirSelectorAgenda();
-  alCambiarServicios();
+  ['fecha', 'nombre', 'apellido', 'telefono', 'email', 'notas'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('privacidad').checked = false;
+  document.getElementById('serviciosElegidos').replaceChildren();
   document.getElementById('bookingOk').hidden = true;
   document.getElementById('bookingForm').hidden = false;
+  document.getElementById('agendaDatos').hidden = true;
+  const botonDatos = document.getElementById('agendaAbrirDatos');
+  botonDatos.setAttribute('aria-expanded', 'false');
+  botonDatos.textContent = 'Añadir mis datos';
+  agendaCitaConfirmada = null;
+  agendaMesVisible = new Date(agendaHoy.getFullYear(), agendaHoy.getMonth(), 1, 12);
+  abrirSelectorAgenda();
+  alCambiarServicios();
 }
 
 
@@ -1904,10 +2045,9 @@ function actualizarFichaAgenda() {
     : 'Día y hora por elegir.';
   const total = document.getElementById('reservaResumenTotal');
   total.hidden = elegidos.length === 0;
-  const minutos = elegidos.reduce((suma, { servicio }) => suma + servicio.duracion, 0);
   const precio = elegidos.reduce((suma, { servicio }) => suma + servicio.precio, 0);
   const precioTotal = euros(Math.round(precio * 100) / 100);
-  total.textContent = duracionTexto(minutos) + ' · ' + precioTotal;
+  total.textContent = precioTotal;
   const fichaMovil = document.getElementById('agendaResumenMovil');
   const mostrar = Boolean(elegidos.length && fecha && selectedSlot);
   fichaMovil.hidden = !mostrar;

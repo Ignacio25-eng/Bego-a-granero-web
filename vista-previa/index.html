@@ -502,6 +502,45 @@
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
   }
+
+  /* Acabado editorial de la portada y de la galería. */
+  #hero .hero-visual { gap: 1rem; }
+  #hero .hero-salon { position: relative; isolation: isolate; }
+  #hero .hero-salon::after {
+    content: '';
+    position: absolute;
+    inset: .6rem;
+    border: 1px solid #ffcb9066;
+    border-radius: 11px;
+    pointer-events: none;
+  }
+  #hero .hero-salon img { aspect-ratio: 5 / 4; object-position: center 36%; }
+  #hero .hero-card { background: transparent; padding: .65rem 0 0; border: 0; }
+  #hero .hero-card-title { border: 0; margin-bottom: .3rem; }
+  #hero .hero-service-list li { min-width: 0; }
+  #servicios .section-header, #galeria .section-header, #opiniones .section-header { text-align: center; }
+  #servicios .section-sub, #galeria .section-sub, #opiniones .section-sub { margin-inline: auto; }
+  #servicios .section-eyebrow, #galeria .section-eyebrow, #opiniones .section-eyebrow { justify-content: center; }
+  #servicios .section-eyebrow::before, #galeria .section-eyebrow::before, #opiniones .section-eyebrow::before {
+    content: '';
+    width: 2.5rem;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold));
+  }
+  .gallery-item { position: relative; overflow: hidden; border-radius: 12px; }
+  .gallery-item img { display: block; }
+  .gallery-caption {
+    position: absolute;
+    inset: auto 1px 1px;
+    padding: 1.4rem .8rem .55rem;
+    border-radius: 0 0 11px 11px;
+    background: linear-gradient(transparent, #100c0bf2 65%);
+    color: #fff4ec;
+    font-size: .85rem;
+  }
+  #sobre .about-photo { aspect-ratio: 3 / 2; }
+  #sobre .about-photo img { object-position: center 63%; }
+  #reservas .booking-info { border-left: 1px solid var(--gold-light); padding-left: 1.2rem; }
 </style>
 </head>
 <body>
@@ -608,10 +647,10 @@
     </div>
     <!-- Para añadir una foto: copiarla a la carpeta "fotos" y añadir una línea como estas. Se ve mejor en múltiplos de 4. -->
     <div class="gallery-grid">
-      <div class="gallery-item"><img src="https://ignacio25-eng.github.io/Web-Peluqueria-Alpedrete/fotos/salon.jpg" alt="Interior del salón Begoña Granero en Alpedrete" loading="lazy"></div>
-      <div class="gallery-item"><img src="https://ignacio25-eng.github.io/Web-Peluqueria-Alpedrete/fotos/mechas-ondas.jpg" alt="Melena larga con mechas rubias y ondas" loading="lazy"></div>
-      <div class="gallery-item"><img src="https://ignacio25-eng.github.io/Web-Peluqueria-Alpedrete/fotos/unas-francesa.jpg" alt="Manicura francesa en uñas cuadradas" loading="lazy"></div>
-      <div class="gallery-item"><img src="https://ignacio25-eng.github.io/Web-Peluqueria-Alpedrete/fotos/unas-plata.jpg" alt="Uñas almendradas con diseño de líneas plateadas" loading="lazy"></div>
+      <div class="gallery-item"><img src="https://ignacio25-eng.github.io/Web-Peluqueria-Alpedrete/fotos/salon.jpg" alt="Interior del salón Begoña Granero en Alpedrete" loading="lazy"><span class="gallery-caption" aria-hidden="true">El salón</span></div>
+      <div class="gallery-item"><img src="https://ignacio25-eng.github.io/Web-Peluqueria-Alpedrete/fotos/mechas-ondas.jpg" alt="Melena larga con mechas rubias y ondas" loading="lazy"><span class="gallery-caption" aria-hidden="true">Mechas y ondas</span></div>
+      <div class="gallery-item"><img src="https://ignacio25-eng.github.io/Web-Peluqueria-Alpedrete/fotos/unas-francesa.jpg" alt="Manicura francesa en uñas cuadradas" loading="lazy"><span class="gallery-caption" aria-hidden="true">Manicura francesa</span></div>
+      <div class="gallery-item"><img src="https://ignacio25-eng.github.io/Web-Peluqueria-Alpedrete/fotos/unas-plata.jpg" alt="Uñas almendradas con diseño de líneas plateadas" loading="lazy"><span class="gallery-caption" aria-hidden="true">Diseño en plata</span></div>
     </div>
     <div class="gallery-more">
       <a href="https://www.instagram.com/begograneroboutique/?hl=es" target="_blank" rel="noopener" class="btn-secondary">Ver más en Instagram</a>

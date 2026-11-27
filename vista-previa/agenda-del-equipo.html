@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Maqueta de la agenda · Begoña Granero</title>
+  <style>body{margin:0;background:#f8f5f0}
+#salon-agenda{--paper:#faf7f4;--panel:#fff;--ink:#2c2c2c;--soft:#615954;--line:#e8ddd3;--pale:#f2ede8;max-width:540px;margin:auto;min-height:100dvh;padding-bottom:calc(138px + env(safe-area-inset-bottom));font-size:15px}
+#salon-agenda .top{padding:.75rem .8rem;background:var(--paper);border-bottom:0}
+#salon-agenda .brand{font:600 1.28rem Georgia,serif}
+#salon-agenda .mock-control select{font-size:.72rem;min-height:34px;padding:.25rem .35rem}
+#salon-agenda main{padding:.1rem .8rem 1.25rem}
+#salon-agenda button,#salon-agenda select{min-height:44px}
+#salon-agenda .vistas{display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:3px;border-radius:9px;background:var(--pale)}
+#salon-agenda .vistas button{background:transparent;border-color:transparent;color:var(--soft)}
+#salon-agenda .vistas button[aria-pressed=true]{background:#fff;color:var(--ink);font-weight:700;border-color:var(--line)}
+#salon-agenda .selector-dia{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;text-align:center;margin:.55rem 0 .1rem}
+#salon-agenda .selector-dia h2{font:700 .97rem/1.25 system-ui,sans-serif}
+#salon-agenda .selector-dia button{background:transparent;border:0;color:#834c49;font-size:1rem}
+#salon-agenda #sa-hoy{min-height:36px;padding:.1rem .6rem;font-size:.78rem}
+#salon-agenda .filters{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:.35rem;margin:0 0 .8rem;padding:.1rem .15rem .25rem;scrollbar-width:thin}
+#salon-agenda .filters button{flex:none;border-radius:999px;min-height:44px;padding:.35rem .65rem;border-color:#dec9ad;font-size:.82rem}
+#salon-agenda .filters button[aria-pressed=true]{background:#2c2c2c;color:#fff;border-color:#2c2c2c}
+#salon-agenda [data-persona]::before{content:'';display:inline-block;width:.52rem;height:.52rem;border-radius:50%;background:#be827d;margin-right:.38rem}
+#salon-agenda [data-persona="1"]::before{background:#769a87}
+#salon-agenda [data-persona="2"]::before{background:#658ba7}
+#salon-agenda .sync{display:flex;align-items:center;border-radius:8px;padding:.5rem .65rem;gap:.3rem .65rem;flex-wrap:wrap}
+#salon-agenda .sync>div{flex:1 1 180px}
+#salon-agenda .sync button{font-size:.75rem}
+#salon-agenda #sa-horario{border:1px solid var(--line);background:#fff;border-radius:10px;padding:.65rem .75rem;color:var(--ink);font-size:.82rem;font-weight:700;margin:0 0 .7rem}
+#salon-agenda #sa-vista{border:0;background:transparent}
+#salon-agenda .lista-dia,#salon-agenda .semana{display:grid;grid-template-columns:1fr;gap:.5rem;padding:0}
+#salon-agenda .cita,#salon-agenda .lista-dia .cita{display:grid;gap:.2rem;margin:0;border:1px solid var(--line);border-left:4px solid #b8827f;border-radius:10px;background:#fff;padding:.65rem .72rem;font-size:.9rem;line-height:1.3}
+#salon-agenda .cita[data-equipo="1"]{border-left-color:#769a87}
+#salon-agenda .cita[data-equipo="2"]{border-left-color:#658ba7}
+#salon-agenda .cita small{font-size:.78rem}
+#salon-agenda .cita .cita-hora{font-size:.82rem;font-weight:700;color:var(--ink)}
+#salon-agenda .semana section{min-height:0;background:#fff;border:1px solid var(--line);border-radius:10px;padding:.55rem .65rem}
+#salon-agenda .semana section:last-child{border:1px solid var(--line)}
+#salon-agenda .semana .cita{margin-top:.4rem}
+#salon-agenda .vacio{text-align:center;color:var(--soft);padding:1.2rem .5rem}
+#salon-agenda .fab{position:fixed;right:max(.9rem,calc((100vw - 540px)/2 + .9rem));bottom:calc(76px + env(safe-area-inset-bottom));z-index:2;background:#a46b68;color:white;border:0;border-radius:999px;padding:.55rem 1rem;box-shadow:0 4px 12px #38222229}
+#salon-agenda .fab:disabled{display:none}
+#salon-agenda .bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,540px);z-index:3;display:grid;grid-template-columns:1fr 1fr;gap:0;padding:0 0 env(safe-area-inset-bottom);box-shadow:0 -3px 10px #3822220a}
+#salon-agenda .bottom button{display:grid;justify-items:center;align-content:center;min-height:60px;gap:.1rem;background:#fff;border:0;color:var(--soft);font-size:.75rem}
+#salon-agenda .bottom span{font-size:1.3rem;line-height:1}
+#salon-agenda .bottom button[aria-pressed=true]{color:#854b47;font-weight:700}
+#salon-agenda .sync{display:grid;justify-content:stretch;gap:.2rem}
+#salon-agenda .sync small{font-size:.72rem}
+
+#salon-agenda .proxima-cita{width:100%;margin:0 0 .7rem;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.15rem .75rem;padding:.65rem .75rem;text-align:left;background:#f8ede8;border:1px solid #dbb5ad;color:var(--ink);border-radius:10px}
+#salon-agenda .proxima-cita > :not(.proxima-flecha){grid-column:1}
+#salon-agenda .proxima-etiqueta{color:#784541;font-size:.76rem;font-weight:700}
+#salon-agenda #sa-proxima-servicio{color:var(--soft);font-size:.83rem}
+#salon-agenda .proxima-flecha{grid-column:2;grid-row:1/4;align-self:center;color:#854b47;font-size:1.45rem}
+#salon-agenda .detalle-cita{display:grid;gap:.65rem;margin:.7rem 0 1rem}
+#salon-agenda .detalle-cita dt{color:var(--soft);font-size:.78rem}
+#salon-agenda .detalle-cita dd{margin:0;font-weight:650}
+#salon-agenda .bottom small{font-size:.68rem;font-weight:500;color:var(--soft)}
+#salon-agenda .bottom button{min-height:67px;padding:.3rem .5rem}
+#salon-agenda .fab{bottom:calc(83px + env(safe-area-inset-bottom))}
+</style>
+</head>
+<body>
+<style>
+#salon-agenda{--paper:#f8f5f0;--panel:#fffefa;--ink:#2b2320;--soft:#6d5f56;--line:#e5dbcf;--gold:#82511f;--gold-bg:#f4ddbc;--green:#376353;--rose:#f5e2e0;--sage:#e0ede8;--blue:#e4ecf4;background:var(--paper);color:var(--ink);font:14px/1.45 system-ui,sans-serif;color-scheme:light}
+#salon-agenda *{box-sizing:border-box}
+#salon-agenda [hidden]{display:none!important}
+#salon-agenda button,#salon-agenda select,#salon-agenda input{font:inherit;color:inherit}
+#salon-agenda button,#salon-agenda select{min-height:38px;padding:.4rem .7rem;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+#salon-agenda button:disabled{opacity:.55}
+#salon-agenda button[aria-pressed=true]{background:#322722;color:#fff;border-color:#322722}
+#salon-agenda .primary{background:var(--gold-bg);border-color:#d8a66e;color:#392416;font-weight:700}
+#salon-agenda .top,#salon-agenda .bottom{display:flex;align-items:center;justify-content:space-between;gap:.65rem;flex-wrap:wrap;padding:.65rem clamp(.75rem,3vw,1.6rem);background:var(--panel)}
+#salon-agenda .top{border-bottom:1px solid var(--line)}
+#salon-agenda .bottom{border-top:1px solid var(--line);justify-content:center}
+#salon-agenda .brand{font:1.2rem Georgia,serif}
+#salon-agenda .brand small{display:block;font:600 .65rem system-ui;color:var(--gold);letter-spacing:.12em;text-transform:uppercase}
+#salon-agenda .mock-control{display:flex;gap:.5rem;align-items:center;color:var(--soft);font-size:.75rem;flex-wrap:wrap}
+#salon-agenda main{padding:clamp(.75rem,3vw,1.6rem)}
+#salon-agenda h2,#salon-agenda h3,#salon-agenda p{margin:0}
+#salon-agenda h2{font:clamp(1.5rem,3.5vw,2.1rem)/1.15 Georgia,serif}
+#salon-agenda h2:first-letter{text-transform:uppercase}
+#salon-agenda .hours{color:var(--soft);font-size:.82rem;margin-top:.2rem}
+#salon-agenda .filters{margin:.85rem 0}
+#salon-agenda .sync{justify-content:space-between;gap:.65rem;background:#ebf2ed;border:1px solid #cbded2;border-radius:9px;padding:.55rem .7rem;color:var(--green);margin:0 0 .9rem;font-size:.82rem}
+#salon-agenda .sync[data-tarde=true]{background:#fff0d9;border-color:#e9cf9f;color:#6e4216}
+#salon-agenda .sync strong{display:block}
+#salon-agenda .sync button{background:#ffffffa0}
+#salon-agenda .agenda{border:1px solid var(--line);border-radius:10px;background:var(--panel);overflow:hidden}
+#salon-agenda .cita{z-index:1;align-self:stretch;margin:2px 4px;padding:.22rem .38rem;border-radius:5px;border-left:3px solid #9e665d;background:var(--rose);overflow-wrap:anywhere;font-size:.75rem;line-height:1.14}
+#salon-agenda .cita[data-equipo="1"]{background:var(--sage);border-color:#517b6a}
+#salon-agenda .cita[data-equipo="2"]{background:var(--blue);border-color:#587a9e}
+#salon-agenda .cita strong,#salon-agenda .cita b{display:block}
+#salon-agenda .cita small{font-size:.64rem;color:var(--soft)}
+#salon-agenda .lista-dia{display:none}
+#salon-agenda .semana{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+#salon-agenda .semana section{min-height:104px;padding:.5rem;border-right:1px solid var(--line)}
+#salon-agenda .semana section:last-child{border:0}
+#salon-agenda .semana h3{font-size:.8rem;margin-bottom:.4rem}
+#salon-agenda .semana .cita{margin:.25rem 0}
+#salon-agenda .vacio,#salon-agenda .fichaje{padding:1.35rem}
+#salon-agenda .vacio p,#salon-agenda .fichaje p{color:var(--soft);margin:.35rem 0}
+#salon-agenda dialog{width:min(410px,calc(100% - 24px));border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);padding:1rem}
+#salon-agenda dialog::backdrop{background:#2b232066}
+#salon-agenda dialog form,#salon-agenda dialog label{display:grid;gap:.45rem}
+#salon-agenda dialog form{gap:.8rem}
+#salon-agenda dialog input{min-width:0;padding:.4rem .6rem;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+#salon-agenda .dialog-actions{display:flex;justify-content:end;gap:.5rem}
+@media(max-width:660px){
+  #salon-agenda .lista-dia{display:grid;gap:.4rem;padding:.55rem}
+  #salon-agenda .lista-dia .cita{padding:.5rem;font-size:.82rem}
+  #salon-agenda .semana{grid-template-columns:1fr}
+  #salon-agenda .semana section{min-height:0;border-right:0;border-bottom:1px solid var(--line)}
+  #salon-agenda button,#salon-agenda select{min-height:44px}
+}
+</style>
+<div id="salon-agenda" lang="es">
+  <header class="top">
+    <div class="brand">Agenda del equipo</div>
+    <label class="mock-control">Maqueta <select aria-label="Estado de sincronización simulado" id="sa-estado"><option value="ok">Sincronizada</option><option value="tarde">Sin actualizar</option></select></label>
+  </header>
+  <main>
+    <div id="sa-agenda">
+      <div class="vistas" role="group" aria-label="Vista de la agenda">
+        <button id="sa-dia" type="button" aria-pressed="true">Día</button>
+        <button id="sa-semana" type="button" aria-pressed="false">Semana</button>
+      </div>
+      <div class="selector-dia">
+        <button id="sa-anterior" type="button" aria-label="Periodo anterior">‹</button>
+        <div><h2 id="sa-fecha">Viernes, 27 de noviembre</h2><button id="sa-hoy" type="button">Hoy</button></div>
+        <button id="sa-siguiente" type="button" aria-label="Periodo siguiente">›</button>
+      </div>
+      <div class="filters" role="group" aria-label="Filtrar por profesional">
+        <button id="sa-todas" type="button" aria-pressed="true">Todas</button>
+        <button id="sa-mia" data-persona="0" type="button" aria-pressed="false">Mi agenda</button>
+        <button id="sa-profesional-2" data-persona="1" type="button" aria-pressed="false">Profesional 2</button>
+        <button id="sa-profesional-3" data-persona="2" type="button" aria-pressed="false">Profesional 3</button>
+      </div>
+      <div class="sync" id="sa-sync">
+        <strong id="sa-sync-titulo"></strong>
+        <p id="sa-sync-texto"></p>
+        <small id="sa-ultima-consulta"></small>
+      </div>
+      <p class="hours" id="sa-horario">Abierto de 10:00 a 20:00</p>
+      <button id="sa-proxima" class="proxima-cita" type="button" aria-haspopup="dialog" aria-controls="sa-detalle" hidden>
+        <span class="proxima-etiqueta">Tu próxima cita</span>
+        <strong id="sa-proxima-hora"></strong>
+        <span id="sa-proxima-servicio"></span>
+        <span class="proxima-flecha" aria-hidden="true">›</span>
+      </button>
+      <div id="sa-vista" class="agenda" aria-label="Citas de ejemplo"></div>
+      <button id="sa-nueva" class="primary fab" type="button">+ Nueva cita</button>
+    </div>
+    <section id="sa-fichaje" class="agenda fichaje" hidden>
+      <h2>Fichar</h2><p id="sa-ficha-estado" aria-live="polite">Sin entrada registrada en la maqueta.</p>
+      <button id="sa-fichar" class="primary" type="button">Simular entrada</button>
+    </section>
+  </main>
+  <nav class="bottom" aria-label="Área de trabajo">
+    <button id="sa-nav-agenda" type="button" aria-pressed="true"><span aria-hidden="true">▦</span>Agenda</button>
+    <button id="sa-nav-fichar" type="button" aria-pressed="false"><span aria-hidden="true">◷</span>Fichar<small id="sa-fichaje-resumen">Sin fichar</small></button>
+  </nav>
+  <dialog id="sa-detalle" aria-labelledby="sa-detalle-titulo">
+    <h3 id="sa-detalle-titulo">Detalle de la cita</h3>
+    <dl class="detalle-cita">
+      <div><dt>Fecha y hora</dt><dd id="sa-detalle-hora"></dd></div>
+      <div><dt>Clienta de ejemplo</dt><dd id="sa-detalle-clienta"></dd></div>
+      <div><dt>Servicio</dt><dd id="sa-detalle-servicio"></dd></div>
+    </dl>
+    <div class="dialog-actions"><button id="sa-detalle-cerrar" type="button">Cerrar</button></div>
+  </dialog>
+  <dialog id="sa-dialog" aria-labelledby="sa-dialog-titulo">
+    <form id="sa-form">
+      <h3 id="sa-dialog-titulo">Nueva cita de ejemplo</h3>
+      <label>Servicio<input id="sa-servicio" required maxlength="42" placeholder="Ej. Manicura"></label>
+      <label>Profesional<select id="sa-persona"><option value="0">Profesional 1</option><option value="1">Profesional 2</option><option value="2">Profesional 3</option></select></label>
+      <label>Hora<input id="sa-hora" type="time" min="10:00" max="19:00" step="1800" value="12:00" required></label>
+      <div class="dialog-actions"><button id="sa-cancelar" type="button">Cancelar</button><button class="primary" type="submit">Añadir a la maqueta</button></div>
+    </form>
+  </dialog>
+</div>
+<script>
+(() => {
+  const root = document.getElementById('salon-agenda');
+  const el = id => root.querySelector('#sa-' + id);
+  const hoy = new Date(2026, 10, 27, 12);
+  const equipo = ['Profesional 1', 'Profesional 2', 'Profesional 3'];
+  const citas = [
+    {offset: 0, equipo: 0, media: 0, duracion: 2, clienta: 'Marina R.', servicio: 'Corte y peinado'},
+    {offset: 0, equipo: 1, media: 2, duracion: 3, servicio: 'Color y lavado'},
+    {offset: 0, equipo: 2, media: 3, duracion: 2, servicio: 'Manicura'},
+    {offset: 0, equipo: 0, media: 10, duracion: 2, clienta: 'Elena V.', servicio: 'Tratamiento capilar'},
+    {offset: 0, equipo: 2, media: 13, duracion: 2, servicio: 'Bioterapia facial'},
+    {offset: -2, equipo: 1, media: 5, duracion: 2, servicio: 'Peinado'},
+    {offset: 1, equipo: 0, media: 1, duracion: 2, servicio: 'Corte'},
+    {offset: 4, equipo: 2, media: 12, duracion: 2, servicio: 'Pedicura'},
+  ];
+  const fechaLarga = new Intl.DateTimeFormat('es-ES', { weekday:'long', day:'numeric', month:'long' });
+  const fechaCorta = new Intl.DateTimeFormat('es-ES', { weekday:'short', day:'numeric' });
+  let offset = 0, vista = 'día', filtro = null, registro = 'sin entrada';
+  const relojConsulta = new Intl.DateTimeFormat('es-ES', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Madrid' });
+  let ultimaConsulta = new Date();
+
+  function pintarSincronizacion() {
+    const tarde = el('estado').value === 'tarde';
+    el('sync').dataset.tarde = tarde;
+    el('sync-titulo').textContent = tarde ? 'Sin actualizar desde el ordenador del salón' : 'Agenda sincronizada';
+    el('sync-texto').textContent = tarde
+      ? 'Último envío de ejemplo: 21 nov., 22:47. Algunas citas podrían faltar.'
+      : 'La agenda se comprueba sola al volver a abrirla y cada minuto.';
+    el('ultima-consulta').textContent = 'Última comprobación de prueba a las ' + relojConsulta.format(ultimaConsulta);
+  }
+
+  function ponerAlDia() {
+    if (document.hidden || el('dialog').open) return;
+    ultimaConsulta = new Date();
+    pintarSincronizacion();
+  }
+  const dia = n => new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + n, 12);
+  const reloj = media => (10 + Math.floor(media / 2)) + ':' + (media % 2 ? '30' : '00');
+  const abierto = n => ![0, 1].includes(dia(n).getDay());
+  const cierre = n => dia(n).getDay() === 6 ? 8 : 20;
+  function nodo(tag, clase, texto) {
+    const item = document.createElement(tag);
+    if (clase) item.className = clase;
+    if (texto) item.textContent = texto;
+    return item;
+  }
+  function citasDel(d) {
+    return citas.filter(c => c.offset === d && (filtro === null || c.equipo === filtro)).sort((a, b) => a.media - b.media);
+  }
+  function tarjeta(cita, listar) {
+    const card = nodo('article','cita');
+    card.dataset.equipo = cita.equipo;
+    card.append(nodo('small','cita-hora',reloj(cita.media) + '–' + reloj(cita.media + cita.duracion)), nodo('strong','',cita.servicio));
+    if (listar) card.append(nodo('small','',equipo[cita.equipo]));
+    return card;
+  }
+  function pintarDia(contenido, lista) {
+    if (!lista.length) {
+      const empty = nodo('div','vacio');
+      const tarde = el('estado').value === 'tarde';
+      empty.append(nodo('strong','',!abierto(offset) ? 'Salón cerrado' : tarde ? 'No hay citas sincronizadas para este día.' : 'No hay citas programadas.'));
+      if (tarde && abierto(offset)) empty.append(nodo('p','','Puede haber cambios pendientes del ordenador del salón.'));
+      contenido.append(empty);
+      return;
+    }
+    const listado = nodo('div','lista-dia');
+    lista.forEach(cita => listado.append(tarjeta(cita, true)));
+    contenido.append(listado);
+  }
+
+  let proximaCita = null;
+  function pintarProximaCita() {
+    const esMiHoy = filtro === 0 && vista === 'día' && offset === 0 && el('estado').value === 'ok';
+    // El ejemplo representa el comienzo de la jornada, antes de las 10:00.
+    proximaCita = esMiHoy ? citasDel(0)[0] || null : null;
+    el('proxima').hidden = !proximaCita;
+    if (!proximaCita) return;
+    el('proxima-hora').textContent = reloj(proximaCita.media) + ' · ' + (proximaCita.clienta || 'Clienta de ejemplo');
+    el('proxima-servicio').textContent = proximaCita.servicio;
+  }
+
+  function pintar() {
+    const tarde = el('estado').value === 'tarde';
+    pintarSincronizacion();
+    pintarProximaCita();
+    el('nueva').disabled = !abierto(offset);
+    el('mia').setAttribute('aria-pressed', String(filtro === 0));
+    el('todas').setAttribute('aria-pressed', String(filtro === null));
+    el('dia').setAttribute('aria-pressed', String(vista === 'día'));
+    el('semana').setAttribute('aria-pressed', String(vista === 'semana'));
+    el('profesional-2').setAttribute('aria-pressed', String(filtro === 1));
+    el('profesional-3').setAttribute('aria-pressed', String(filtro === 2));
+    el('horario').textContent = abierto(offset) ? 'Abierto de 10:00 a ' + reloj(cierre(offset)) : 'Salón cerrado';
+    const contenido = el('vista');
+    contenido.replaceChildren();
+    if (vista === 'día') {
+      el('fecha').textContent = fechaLarga.format(dia(offset));
+      pintarDia(contenido, tarde ? [] : citasDel(offset));
+      return;
+    }
+    const lunes = offset - (dia(offset).getDay() + 6) % 7;
+    el('fecha').textContent = 'Semana del ' + fechaLarga.format(dia(lunes));
+    el('horario').textContent = tarde ? 'No hay citas sincronizadas para esta semana.' : 'Vista semanal del equipo';
+    const semana = nodo('div','semana');
+    for (let n = lunes; n < lunes + 7; n++) {
+      const cell = nodo('section');
+      cell.append(nodo('h3','',fechaCorta.format(dia(n))));
+      const lista = tarde ? [] : citasDel(n);
+      if (!lista.length) cell.append(nodo('p','hours',!abierto(n) ? 'Cerrado' : tarde ? 'Sin sincronizar' : 'Sin citas'));
+      lista.forEach(cita => cell.append(tarjeta(cita, true)));
+      semana.append(cell);
+    }
+    contenido.append(semana);
+  }
+  function escuchar(id, evento, fn) { el(id).addEventListener(evento, fn); }
+  escuchar('estado','change',() => { ponerAlDia(); pintar(); });
+  document.addEventListener('visibilitychange', ponerAlDia);
+  window.addEventListener('online', ponerAlDia);
+  setInterval(ponerAlDia, 60000);
+  escuchar('anterior','click',() => { offset -= vista === 'día' ? 1 : 7; pintar(); });
+  escuchar('siguiente','click',() => { offset += vista === 'día' ? 1 : 7; pintar(); });
+  escuchar('hoy','click',() => { offset = 0; pintar(); });
+  escuchar('dia','click',() => { vista = 'día'; pintar(); });
+  escuchar('semana','click',() => { vista = 'semana'; pintar(); });
+  escuchar('mia','click',() => { filtro = 0; pintar(); });
+  escuchar('todas','click',() => { filtro = null; pintar(); });
+  escuchar('profesional-2','click',() => { filtro = 1; pintar(); });
+  escuchar('profesional-3','click',() => { filtro = 2; pintar(); });
+  escuchar('proxima','click',() => {
+    if (!proximaCita) return;
+    el('detalle-hora').textContent = fechaLarga.format(dia(proximaCita.offset)) + ' · ' + reloj(proximaCita.media);
+    el('detalle-clienta').textContent = proximaCita.clienta || 'Clienta de ejemplo';
+    el('detalle-servicio').textContent = proximaCita.servicio;
+    el('detalle').showModal();
+  });
+  escuchar('detalle-cerrar','click',() => el('detalle').close());
+  escuchar('nueva','click',() => {
+    el('form').reset();
+    el('persona').value = String(filtro ?? 0);
+    el('hora').max = reloj(cierre(offset) - 2);
+    el('dialog').showModal();
+  });
+  escuchar('cancelar','click',() => el('dialog').close());
+  escuchar('form','submit',event => {
+    event.preventDefault();
+    const servicio = el('servicio').value.trim();
+    if (!servicio) return el('servicio').focus();
+    const [h, m] = el('hora').value.split(':').map(Number);
+    const equipo = Number(el('persona').value);
+    const media = (h - 10) * 2 + m / 30;
+    if (citas.some(cita => cita.offset === offset && cita.equipo === equipo && media < cita.media + cita.duracion && media + 2 > cita.media)) {
+      el('hora').setCustomValidity('Esta hora se solapa con otra cita de ejemplo.');
+      el('hora').reportValidity();
+      el('hora').setCustomValidity('');
+      return;
+    }
+    citas.push({ offset, equipo, media, duracion: 2, servicio });
+    el('estado').value = 'ok';
+    el('dialog').close();
+    pintar();
+  });
+  function mostrarFichaje(ver) {
+    el('agenda').hidden = ver;
+    el('fichaje').hidden = !ver;
+    el('nav-agenda').setAttribute('aria-pressed', String(!ver));
+    el('nav-fichar').setAttribute('aria-pressed', String(ver));
+  }
+  escuchar('nav-agenda','click',() => mostrarFichaje(false));
+  escuchar('nav-fichar','click',() => mostrarFichaje(true));
+  escuchar('fichar','click',() => {
+    registro = registro === 'entrada' ? 'salida' : 'entrada';
+    const estado = (registro === 'entrada' ? 'Entrada' : 'Salida') + ' a las ' + relojConsulta.format(new Date());
+    el('fichaje-resumen').textContent = estado;
+    el('ficha-estado').textContent = estado + ' · Fichaje de prueba.';
+    el('fichar').textContent = registro === 'entrada' ? 'Simular salida' : 'Simular entrada';
+  });
+  pintar();
+})();
+</script>
+</body>
+</html>

@@ -48,6 +48,18 @@
 #salon-agenda .bottom button[aria-pressed=true]{color:#854b47;font-weight:700}
 #salon-agenda .sync{display:grid;justify-content:stretch;gap:.2rem}
 #salon-agenda .sync small{font-size:.72rem}
+
+#salon-agenda .proxima-cita{width:100%;margin:0 0 .7rem;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.15rem .75rem;padding:.65rem .75rem;text-align:left;background:#f8ede8;border:1px solid #dbb5ad;color:var(--ink);border-radius:10px}
+#salon-agenda .proxima-cita > :not(.proxima-flecha){grid-column:1}
+#salon-agenda .proxima-etiqueta{color:#784541;font-size:.76rem;font-weight:700}
+#salon-agenda #sa-proxima-servicio{color:var(--soft);font-size:.83rem}
+#salon-agenda .proxima-flecha{grid-column:2;grid-row:1/4;align-self:center;color:#854b47;font-size:1.45rem}
+#salon-agenda .detalle-cita{display:grid;gap:.65rem;margin:.7rem 0 1rem}
+#salon-agenda .detalle-cita dt{color:var(--soft);font-size:.78rem}
+#salon-agenda .detalle-cita dd{margin:0;font-weight:650}
+#salon-agenda .bottom small{font-size:.68rem;font-weight:500;color:var(--soft)}
+#salon-agenda .bottom button{min-height:67px;padding:.3rem .5rem}
+#salon-agenda .fab{bottom:calc(83px + env(safe-area-inset-bottom))}
 </style>
 </head>
 <body>
@@ -132,6 +144,12 @@
         <small id="sa-ultima-consulta"></small>
       </div>
       <p class="hours" id="sa-horario">Abierto de 10:00 a 20:00</p>
+      <button id="sa-proxima" class="proxima-cita" type="button" aria-haspopup="dialog" aria-controls="sa-detalle" hidden>
+        <span class="proxima-etiqueta">Tu próxima cita</span>
+        <strong id="sa-proxima-hora"></strong>
+        <span id="sa-proxima-servicio"></span>
+        <span class="proxima-flecha" aria-hidden="true">›</span>
+      </button>
       <div id="sa-vista" class="agenda" aria-label="Citas de ejemplo"></div>
       <button id="sa-nueva" class="primary fab" type="button">+ Nueva cita</button>
     </div>
@@ -142,8 +160,17 @@
   </main>
   <nav class="bottom" aria-label="Área de trabajo">
     <button id="sa-nav-agenda" type="button" aria-pressed="true"><span aria-hidden="true">▦</span>Agenda</button>
-    <button id="sa-nav-fichar" type="button" aria-pressed="false"><span aria-hidden="true">◷</span>Fichar</button>
+    <button id="sa-nav-fichar" type="button" aria-pressed="false"><span aria-hidden="true">◷</span>Fichar<small id="sa-fichaje-resumen">Sin fichar</small></button>
   </nav>
+  <dialog id="sa-detalle" aria-labelledby="sa-detalle-titulo">
+    <h3 id="sa-detalle-titulo">Detalle de la cita</h3>
+    <dl class="detalle-cita">
+      <div><dt>Fecha y hora</dt><dd id="sa-detalle-hora"></dd></div>
+      <div><dt>Clienta de ejemplo</dt><dd id="sa-detalle-clienta"></dd></div>
+      <div><dt>Servicio</dt><dd id="sa-detalle-servicio"></dd></div>
+    </dl>
+    <div class="dialog-actions"><button id="sa-detalle-cerrar" type="button">Cerrar</button></div>
+  </dialog>
   <dialog id="sa-dialog" aria-labelledby="sa-dialog-titulo">
     <form id="sa-form">
       <h3 id="sa-dialog-titulo">Nueva cita de ejemplo</h3>
@@ -161,10 +188,10 @@
   const hoy = new Date(2026, 10, 27, 12);
   const equipo = ['Profesional 1', 'Profesional 2', 'Profesional 3'];
   const citas = [
-    {offset: 0, equipo: 0, media: 0, duracion: 2, servicio: 'Corte y peinado'},
+    {offset: 0, equipo: 0, media: 0, duracion: 2, clienta: 'Marina R.', servicio: 'Corte y peinado'},
     {offset: 0, equipo: 1, media: 2, duracion: 3, servicio: 'Color y lavado'},
     {offset: 0, equipo: 2, media: 3, duracion: 2, servicio: 'Manicura'},
-    {offset: 0, equipo: 0, media: 10, duracion: 2, servicio: 'Tratamiento capilar'},
+    {offset: 0, equipo: 0, media: 10, duracion: 2, clienta: 'Elena V.', servicio: 'Tratamiento capilar'},
     {offset: 0, equipo: 2, media: 13, duracion: 2, servicio: 'Bioterapia facial'},
     {offset: -2, equipo: 1, media: 5, duracion: 2, servicio: 'Peinado'},
     {offset: 1, equipo: 0, media: 1, duracion: 2, servicio: 'Corte'},
@@ -225,9 +252,21 @@
     contenido.append(listado);
   }
 
+  let proximaCita = null;
+  function pintarProximaCita() {
+    const esMiHoy = filtro === 0 && vista === 'día' && offset === 0 && el('estado').value === 'ok';
+    // El ejemplo representa el comienzo de la jornada, antes de las 10:00.
+    proximaCita = esMiHoy ? citasDel(0)[0] || null : null;
+    el('proxima').hidden = !proximaCita;
+    if (!proximaCita) return;
+    el('proxima-hora').textContent = reloj(proximaCita.media) + ' · ' + (proximaCita.clienta || 'Clienta de ejemplo');
+    el('proxima-servicio').textContent = proximaCita.servicio;
+  }
+
   function pintar() {
     const tarde = el('estado').value === 'tarde';
     pintarSincronizacion();
+    pintarProximaCita();
     el('nueva').disabled = !abierto(offset);
     el('mia').setAttribute('aria-pressed', String(filtro === 0));
     el('todas').setAttribute('aria-pressed', String(filtro === null));
@@ -271,6 +310,14 @@
   escuchar('todas','click',() => { filtro = null; pintar(); });
   escuchar('profesional-2','click',() => { filtro = 1; pintar(); });
   escuchar('profesional-3','click',() => { filtro = 2; pintar(); });
+  escuchar('proxima','click',() => {
+    if (!proximaCita) return;
+    el('detalle-hora').textContent = fechaLarga.format(dia(proximaCita.offset)) + ' · ' + reloj(proximaCita.media);
+    el('detalle-clienta').textContent = proximaCita.clienta || 'Clienta de ejemplo';
+    el('detalle-servicio').textContent = proximaCita.servicio;
+    el('detalle').showModal();
+  });
+  escuchar('detalle-cerrar','click',() => el('detalle').close());
   escuchar('nueva','click',() => {
     el('form').reset();
     el('persona').value = String(filtro ?? 0);
@@ -306,7 +353,9 @@
   escuchar('nav-fichar','click',() => mostrarFichaje(true));
   escuchar('fichar','click',() => {
     registro = registro === 'entrada' ? 'salida' : 'entrada';
-    el('ficha-estado').textContent = (registro === 'entrada' ? 'Entrada' : 'Salida') + ' registrada en la maqueta.';
+    const estado = (registro === 'entrada' ? 'Entrada' : 'Salida') + ' a las ' + relojConsulta.format(new Date());
+    el('fichaje-resumen').textContent = estado;
+    el('ficha-estado').textContent = estado + ' · Fichaje de prueba.';
     el('fichar').textContent = registro === 'entrada' ? 'Simular salida' : 'Simular entrada';
   });
   pintar();

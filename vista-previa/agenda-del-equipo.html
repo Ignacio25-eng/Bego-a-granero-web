@@ -46,6 +46,8 @@
 #salon-agenda .bottom button{display:grid;justify-items:center;align-content:center;min-height:60px;gap:.1rem;background:#fff;border:0;color:var(--soft);font-size:.75rem}
 #salon-agenda .bottom span{font-size:1.3rem;line-height:1}
 #salon-agenda .bottom button[aria-pressed=true]{color:#854b47;font-weight:700}
+#salon-agenda .sync{display:grid;justify-content:stretch;gap:.2rem}
+#salon-agenda .sync small{font-size:.72rem}
 </style>
 </head>
 <body>
@@ -104,7 +106,7 @@
 </style>
 <div id="salon-agenda" lang="es">
   <header class="top">
-    <div class="brand">Hola, Alba</div>
+    <div class="brand">Agenda del equipo</div>
     <label class="mock-control">Maqueta <select aria-label="Estado de sincronización simulado" id="sa-estado"><option value="ok">Sincronizada</option><option value="tarde">Sin actualizar</option></select></label>
   </header>
   <main>
@@ -120,11 +122,15 @@
       </div>
       <div class="filters" role="group" aria-label="Filtrar por profesional">
         <button id="sa-todas" type="button" aria-pressed="true">Todas</button>
-        <button id="sa-mia" data-persona="0" type="button" aria-pressed="false">Alba (tú)</button>
-        <button id="sa-irene" data-persona="1" type="button" aria-pressed="false">Irene</button>
-        <button id="sa-clara" data-persona="2" type="button" aria-pressed="false">Clara</button>
+        <button id="sa-mia" data-persona="0" type="button" aria-pressed="false">Mi agenda</button>
+        <button id="sa-profesional-2" data-persona="1" type="button" aria-pressed="false">Profesional 2</button>
+        <button id="sa-profesional-3" data-persona="2" type="button" aria-pressed="false">Profesional 3</button>
       </div>
-      <div class="sync" id="sa-sync"><div aria-live="polite"><strong id="sa-sync-titulo"></strong><p id="sa-sync-texto"></p></div><button id="sa-actualizar" type="button">Actualizar</button></div>
+      <div class="sync" id="sa-sync">
+        <strong id="sa-sync-titulo"></strong>
+        <p id="sa-sync-texto"></p>
+        <small id="sa-ultima-consulta"></small>
+      </div>
       <p class="hours" id="sa-horario">Abierto de 10:00 a 20:00</p>
       <div id="sa-vista" class="agenda" aria-label="Citas de ejemplo"></div>
       <button id="sa-nueva" class="primary fab" type="button">+ Nueva cita</button>
@@ -142,7 +148,7 @@
     <form id="sa-form">
       <h3 id="sa-dialog-titulo">Nueva cita de ejemplo</h3>
       <label>Servicio<input id="sa-servicio" required maxlength="42" placeholder="Ej. Manicura"></label>
-      <label>Profesional<select id="sa-persona"><option value="0">Alba</option><option value="1">Irene</option><option value="2">Clara</option></select></label>
+      <label>Profesional<select id="sa-persona"><option value="0">Profesional 1</option><option value="1">Profesional 2</option><option value="2">Profesional 3</option></select></label>
       <label>Hora<input id="sa-hora" type="time" min="10:00" max="19:00" step="1800" value="12:00" required></label>
       <div class="dialog-actions"><button id="sa-cancelar" type="button">Cancelar</button><button class="primary" type="submit">Añadir a la maqueta</button></div>
     </form>
@@ -153,7 +159,7 @@
   const root = document.getElementById('salon-agenda');
   const el = id => root.querySelector('#sa-' + id);
   const hoy = new Date(2026, 10, 27, 12);
-  const equipo = ['Alba', 'Irene', 'Clara'];
+  const equipo = ['Profesional 1', 'Profesional 2', 'Profesional 3'];
   const citas = [
     {offset: 0, equipo: 0, media: 0, duracion: 2, servicio: 'Corte y peinado'},
     {offset: 0, equipo: 1, media: 2, duracion: 3, servicio: 'Color y lavado'},
@@ -166,7 +172,25 @@
   ];
   const fechaLarga = new Intl.DateTimeFormat('es-ES', { weekday:'long', day:'numeric', month:'long' });
   const fechaCorta = new Intl.DateTimeFormat('es-ES', { weekday:'short', day:'numeric' });
-  let offset = 0, vista = 'día', filtro = null, actualizado = false, registro = 'sin entrada';
+  let offset = 0, vista = 'día', filtro = null, registro = 'sin entrada';
+  const relojConsulta = new Intl.DateTimeFormat('es-ES', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Madrid' });
+  let ultimaConsulta = new Date();
+
+  function pintarSincronizacion() {
+    const tarde = el('estado').value === 'tarde';
+    el('sync').dataset.tarde = tarde;
+    el('sync-titulo').textContent = tarde ? 'Sin actualizar desde el ordenador del salón' : 'Agenda sincronizada';
+    el('sync-texto').textContent = tarde
+      ? 'Último envío de ejemplo: 21 nov., 22:47. Algunas citas podrían faltar.'
+      : 'La agenda se comprueba sola al volver a abrirla y cada minuto.';
+    el('ultima-consulta').textContent = 'Última comprobación de prueba a las ' + relojConsulta.format(ultimaConsulta);
+  }
+
+  function ponerAlDia() {
+    if (document.hidden || el('dialog').open) return;
+    ultimaConsulta = new Date();
+    pintarSincronizacion();
+  }
   const dia = n => new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + n, 12);
   const reloj = media => (10 + Math.floor(media / 2)) + ':' + (media % 2 ? '30' : '00');
   const abierto = n => ![0, 1].includes(dia(n).getDay());
@@ -203,16 +227,14 @@
 
   function pintar() {
     const tarde = el('estado').value === 'tarde';
-    el('sync').dataset.tarde = tarde;
-    el('sync-titulo').textContent = tarde ? 'Sin actualizar desde el ordenador del salón' : 'Agenda sincronizada';
-    el('sync-texto').textContent = tarde ? (actualizado ? 'Sin cambios. Último envío de ejemplo: 21 nov., 22:47.' : 'Último envío de ejemplo: 21 nov., 22:47. Algunas citas podrían faltar.') : (actualizado ? 'Última comprobación de ejemplo: ahora.' : 'Última actualización de ejemplo: hoy a las 09:42.');
+    pintarSincronizacion();
     el('nueva').disabled = !abierto(offset);
     el('mia').setAttribute('aria-pressed', String(filtro === 0));
     el('todas').setAttribute('aria-pressed', String(filtro === null));
     el('dia').setAttribute('aria-pressed', String(vista === 'día'));
     el('semana').setAttribute('aria-pressed', String(vista === 'semana'));
-    el('irene').setAttribute('aria-pressed', String(filtro === 1));
-    el('clara').setAttribute('aria-pressed', String(filtro === 2));
+    el('profesional-2').setAttribute('aria-pressed', String(filtro === 1));
+    el('profesional-3').setAttribute('aria-pressed', String(filtro === 2));
     el('horario').textContent = abierto(offset) ? 'Abierto de 10:00 a ' + reloj(cierre(offset)) : 'Salón cerrado';
     const contenido = el('vista');
     contenido.replaceChildren();
@@ -236,8 +258,10 @@
     contenido.append(semana);
   }
   function escuchar(id, evento, fn) { el(id).addEventListener(evento, fn); }
-  escuchar('estado','change',() => { actualizado = false; pintar(); });
-  escuchar('actualizar','click',() => { actualizado = true; pintar(); });
+  escuchar('estado','change',() => { ponerAlDia(); pintar(); });
+  document.addEventListener('visibilitychange', ponerAlDia);
+  window.addEventListener('online', ponerAlDia);
+  setInterval(ponerAlDia, 60000);
   escuchar('anterior','click',() => { offset -= vista === 'día' ? 1 : 7; pintar(); });
   escuchar('siguiente','click',() => { offset += vista === 'día' ? 1 : 7; pintar(); });
   escuchar('hoy','click',() => { offset = 0; pintar(); });
@@ -245,8 +269,8 @@
   escuchar('semana','click',() => { vista = 'semana'; pintar(); });
   escuchar('mia','click',() => { filtro = 0; pintar(); });
   escuchar('todas','click',() => { filtro = null; pintar(); });
-  escuchar('irene','click',() => { filtro = 1; pintar(); });
-  escuchar('clara','click',() => { filtro = 2; pintar(); });
+  escuchar('profesional-2','click',() => { filtro = 1; pintar(); });
+  escuchar('profesional-3','click',() => { filtro = 2; pintar(); });
   escuchar('nueva','click',() => {
     el('form').reset();
     el('persona').value = String(filtro ?? 0);

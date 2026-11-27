@@ -541,6 +541,67 @@
   #sobre .about-photo { aspect-ratio: 3 / 2; }
   #sobre .about-photo img { object-position: center 63%; }
   #reservas .booking-info { border-left: 1px solid var(--gold-light); padding-left: 1.2rem; }
+
+  /* Tarjetas del catálogo y panel desplegable debajo de la fila activa. */
+  #cartaTabs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(.65rem, 2vw, 1.25rem);
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+  #cartaTabs .carta-tab {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: .5rem;
+    isolation: isolate;
+    overflow: hidden;
+    min-width: 0;
+    min-height: clamp(108px, 14vw, 160px);
+    padding: .85rem;
+    border-radius: 12px;
+    background: radial-gradient(ellipse at 18% 0%, #704831, transparent 80%), #241b1c;
+    color: #fff4ec;
+    font: 400 clamp(.9rem, 1.8vw, 1.15rem)/1.15 'Playfair Display', Georgia, serif;
+    text-align: left;
+    text-transform: none;
+    letter-spacing: 0;
+    white-space: normal;
+  }
+  #cartaTabs .carta-tab img, #cartaTabs .carta-tab::before {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  #cartaTabs .carta-tab img { object-fit: cover; z-index: -2; }
+  #cartaTabs .carta-tab::before {
+    content: '';
+    background: linear-gradient(180deg, transparent 15%, #130e0fd9 100%);
+    z-index: -1;
+  }
+  #cartaTabs .carta-tab:is(:hover, [aria-expanded="true"]) { border-color: var(--gold); }
+  #cartaTabs .carta-tab[aria-expanded="true"] { box-shadow: inset 0 0 0 1px var(--gold); }
+  .carta-tab-signo { color: var(--gold); font: 600 1.25rem/1 'DM Sans', sans-serif; }
+  .carta-tab-signo::before { content: '+'; }
+  [aria-expanded="true"] > .carta-tab-signo::before { content: '−'; }
+  #cartaPanel { grid-column: 1 / -1; min-width: 0; }
+  #cartaPanel[hidden] { display: none; }
+  .carta-cerrar {
+    margin-bottom: 1rem;
+    padding: .45rem .7rem;
+    border: 1px solid var(--gold-light);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--gold);
+    cursor: pointer;
+  }
+  @media (max-width: 768px) { #cartaTabs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 </style>
 </head>
 <body>
@@ -613,8 +674,9 @@
       <p class="section-sub">Cuidados profesionales para que te sientas extraordinaria en cada visita. Elige una sección para ver todos los tratamientos y sus precios.</p>
     </div>
     <!-- La carta se genera desde CATALOGO (en el script), copiado de la app del salón -->
-    <div class="carta-tabs" id="cartaTabs" role="tablist" aria-label="Secciones de servicios"></div>
-    <div id="cartaPanel" role="tabpanel"></div>
+    <div class="carta-tabs" id="cartaTabs" role="group" aria-label="Categorías de servicios">
+      <div id="cartaPanel" role="region" hidden></div>
+    </div>
   </div>
 </section>
 
@@ -1062,7 +1124,7 @@ let EN_LINEA     = false;   // true cuando los datos vienen de la app
 let TRABAJADORAS = [];
 let HORARIO      = [];
 let CERRADOS     = new Set();
-let seccionActual = 0;
+let seccionActual = null;
 
 // Servicios y extras de cada sección en orden alfabético (en español: Á junto a A, Ñ después de N)
 function ordenarCatalogo() {
@@ -1095,18 +1157,21 @@ const desde = (s) => Math.min(...s.servicios.map(x => x[1]));
 const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;');
 
 function renderCarta(i) {
-  seccionActual = i;
-  const s = CATALOGO[i];
-  document.querySelectorAll('.carta-tab').forEach((b, j) => {
-    b.setAttribute('aria-selected', j === i ? 'true' : 'false');
-    b.tabIndex = j === i ? 0 : -1;
+  const categoria = CATALOGO[i];
+  seccionActual = categoria?.seccion ?? null;
+  const panel = document.getElementById('cartaPanel');
+  document.querySelectorAll('.carta-tab').forEach((button, index) => {
+    button.setAttribute('aria-expanded', String(Boolean(categoria) && index === i));
   });
+  panel.hidden = !categoria;
+  if (!categoria) return;
+  const s = categoria;
   const lista = (items, cls) => `<ul class="carta-list${cls ? ' ' + cls : ''}">` +
     items.map(([n, p, , dur]) => `<li><span class="nombre">${esc(n)}${dur ? `<small class="dur">${duracionTexto(dur)}</small>` : ''}</span><span class="precio">${euros(p)}</span></li>`).join('') + '</ul>';
   document.getElementById('cartaPanel').innerHTML = `
     <div class="carta-panel">
       <div class="carta-intro"><div class="carta-intro-inner">
-        <p class="carta-num">${String(i + 1).padStart(2, '0')} / ${String(CATALOGO.length).padStart(2, '0')}</p>
+        <button type="button" class="carta-cerrar" aria-label="Cerrar precios de ${esc(s.menu).replace(/"/g, '&quot;')}">Cerrar <span aria-hidden="true">×</span></button>
         <h3 class="carta-title">${esc(s.menu)}</h3>
         <p class="carta-desc">${esc(s.desc)}</p>
         <p class="carta-desde">Desde<strong>${euros(desde(s))}</strong></p>
@@ -1119,35 +1184,70 @@ function renderCarta(i) {
         <p class="carta-nota">Precios en euros. Si tienes dudas sobre qué tratamiento te conviene, pregúntanos.</p>
       </div>
     </div>`;
-  document.getElementById('cartaPanel').setAttribute('aria-labelledby', `tab-${i}`);
+  panel.setAttribute('aria-labelledby', `tab-${i}`);
+  colocarPanelCarta();
+  panel.querySelector('.carta-cerrar').addEventListener('click', () => {
+    renderCarta(-1);
+    document.getElementById(`tab-${i}`).focus();
+  });
+}
+
+const fotosCarta = {
+  'Color y Protección': 'mechas-ondas.jpg',
+  'Bioterapia Manos': 'unas-francesa.jpg',
+};
+
+function colocarPanelCarta() {
+  const grid = document.getElementById('cartaTabs');
+  const panel = document.getElementById('cartaPanel');
+  if (panel.hidden) return;
+  const cards = [...grid.querySelectorAll('.carta-tab')];
+  const active = cards.findIndex(button => button.getAttribute('aria-expanded') === 'true');
+  const columns = getComputedStyle(grid).gridTemplateColumns.split(' ').length;
+  const lastInRow = cards[Math.min(cards.length - 1, (Math.floor(active / columns) + 1) * columns - 1)];
+  if (lastInRow && lastInRow.nextElementSibling !== panel) lastInRow.after(panel);
 }
 
 function pintarCarta() {
-  const tabs = document.getElementById('cartaTabs');
-  tabs.innerHTML = '';
-  CATALOGO.forEach((s, i) => {
-    const b = document.createElement('button');
-    b.type = 'button'; b.className = 'carta-tab'; b.id = `tab-${i}`;
-    b.setAttribute('role', 'tab'); b.setAttribute('aria-controls', 'cartaPanel');
-    b.textContent = s.menu;
-    b.addEventListener('click', () => renderCarta(i));
-    tabs.appendChild(b);
+  const grid = document.getElementById('cartaTabs');
+  const panel = document.getElementById('cartaPanel');
+  const activa = CATALOGO.findIndex(categoria => categoria.seccion === seccionActual);
+  const enfocada = document.activeElement?.dataset.categoria;
+  const tarjetas = CATALOGO.map((categoria, i) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'carta-tab';
+    button.id = `tab-${i}`;
+    button.dataset.categoria = categoria.seccion;
+    button.setAttribute('aria-controls', 'cartaPanel');
+    const foto = fotosCarta[categoria.seccion];
+    if (foto) {
+      const image = document.createElement('img');
+      image.src = `https://ignacio25-eng.github.io/Web-Peluqueria-Alpedrete/fotos/${foto}`;
+      image.alt = '';
+      image.loading = 'lazy';
+      button.appendChild(image);
+    }
+    const label = document.createElement('span');
+    label.className = 'carta-tab-nombre';
+    label.textContent = categoria.menu;
+    const mark = document.createElement('span');
+    mark.className = 'carta-tab-signo';
+    mark.setAttribute('aria-hidden', 'true');
+    button.append(label, mark);
+    button.addEventListener('click', () => renderCarta(seccionActual === categoria.seccion ? -1 : i));
+    return button;
   });
-  renderCarta(Math.min(seccionActual, CATALOGO.length - 1));
+  grid.replaceChildren(...tarjetas, panel);
+  renderCarta(activa);
+  if (enfocada) tarjetas.find(button => button.dataset.categoria === enfocada)?.focus();
 
   // Resumen de la portada
   document.getElementById('heroServicios').innerHTML = CATALOGO.map(s =>
     `<li><span>${esc(s.menu)}</span><span class="price">desde ${euros(desde(s))}</span></li>`).join('');
 }
 
-// Flechas del teclado para moverse entre secciones
-document.getElementById('cartaTabs').addEventListener('keydown', (e) => {
-  const tabs = document.getElementById('cartaTabs');
-  const i = [...tabs.children].indexOf(document.activeElement);
-  if (i < 0 || (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft')) return;
-  const j = (i + (e.key === 'ArrowRight' ? 1 : -1) + CATALOGO.length) % CATALOGO.length;
-  renderCarta(j); tabs.children[j].focus();
-});
+window.addEventListener('resize', colocarPanelCarta);
 
 // Al pulsar "Pedir cita" desde una sección, el formulario se abre con el primer servicio de esa sección
 function elegirSeccion(i) {

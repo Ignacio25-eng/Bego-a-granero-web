@@ -683,6 +683,29 @@
   .agenda-cal-leyenda i { width: .65rem; height: .65rem; background: #fffaf4; border-radius: 2px; }
   .agenda-cal-leyenda span + span i { background: #777075; }
   .agenda-cal-ayuda { color: var(--light); font-size: .75rem; margin: 0; }
+
+  #bookingForm .agenda-primera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+    gap: .45rem .8rem;
+    flex-wrap: wrap;
+    width: min(100%, 27rem);
+    min-height: 56px;
+    margin-bottom: .8rem;
+    padding: .65rem .85rem;
+    border: 1px solid var(--gold-light);
+    border-radius: 10px;
+    background: #322421;
+    color: var(--charcoal);
+    cursor: pointer;
+    font: inherit;
+  }
+  #bookingForm .agenda-primera:hover { border-color: var(--gold); }
+  .agenda-primera strong { display: block; font-size: .9rem; }
+  #agendaPrimeraHora { color: var(--mid); font-size: .82rem; }
+  .agenda-primera-accion { color: var(--gold); font-size: .83rem; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -911,6 +934,10 @@
         </div>
         <div class="agenda-bloque" id="agendaHorario">
           <h3>Elige el día y la hora</h3>
+          <button type="button" id="agendaPrimeraCita" class="agenda-primera" hidden>
+            <span><strong>Primera cita disponible</strong><span id="agendaPrimeraHora"></span></span>
+            <span class="agenda-primera-accion">Elegir <span aria-hidden="true">→</span></span>
+          </button>
           <div class="form-group">
           <input type="date" id="fecha" hidden aria-label="Día elegido">
           <div class="agenda-calendario" role="group" aria-label="Calendario de disponibilidad">
@@ -1537,7 +1564,8 @@ function alCambiarServicios() {
   cargarHoras();
 }
 
-const agendaHoy = new Date();
+const agendaAhora = new Date();
+const agendaHoy = new Date(agendaAhora);
 agendaHoy.setHours(12, 0, 0, 0);
 const agendaLimite = new Date(agendaHoy);
 agendaLimite.setDate(agendaLimite.getDate() + 90);
@@ -1573,6 +1601,7 @@ function disponibilidadAgenda(dia, elegidos) {
   const horas = [];
   if (semilla % 5 !== 0) {
     for (let hora = abreA; hora + duracion <= cierraA && horas.length < 8; hora += 30) {
+      if (dia.getTime() === agendaHoy.getTime() && hora <= agendaAhora.getHours() * 60 + agendaAhora.getMinutes()) continue;
       if (descanso && hora < descanso[1] && hora + duracion > descanso[0]) continue;
       if ((Math.floor(hora / 30) + semilla) % 4 === 0) continue;
       horas.push(String(Math.floor(hora / 60)).padStart(2, '0') + ':' + String(hora % 60).padStart(2, '0'));
@@ -1580,6 +1609,38 @@ function disponibilidadAgenda(dia, elegidos) {
   }
   return { estado: horas.length ? 'Disponible' : 'Completo', horas };
 }
+
+function primeraCitaAgenda(elegidos) {
+  if (!elegidos.length || elegidos.some(({ servicio }) => porTelefono(servicio.nombre))) return null;
+  for (const dia = new Date(agendaHoy); dia <= agendaLimite; dia.setDate(dia.getDate() + 1)) {
+    const { horas } = disponibilidadAgenda(dia, elegidos);
+    if (horas.length) return { dia, hora: horas[0] };
+  }
+  return null;
+}
+
+const agendaPrimeraBoton = document.getElementById('agendaPrimeraCita');
+let agendaPrimeraSeleccion = null;
+
+function pintarPrimeraCitaAgenda(elegidos) {
+  agendaPrimeraSeleccion = primeraCitaAgenda(elegidos);
+  agendaPrimeraBoton.hidden = !agendaPrimeraSeleccion;
+  if (!agendaPrimeraSeleccion) return;
+  const { dia, hora } = agendaPrimeraSeleccion;
+  document.getElementById('agendaPrimeraHora').textContent =
+    agendaNombreDia.format(dia) + ' · ' + hora;
+}
+
+agendaPrimeraBoton.addEventListener('click', () => {
+  if (!agendaPrimeraSeleccion) return;
+  const { dia, hora } = agendaPrimeraSeleccion;
+  const fecha = document.getElementById('fecha');
+  fecha.value = agendaIso(dia);
+  agendaMesVisible = new Date(dia.getFullYear(), dia.getMonth(), 1, 12);
+  selectedSlot = hora;
+  cargarHoras();
+  document.querySelector('#slotsGrid [aria-pressed="true"]')?.focus();
+});
 
 function pintarCalendarioAgenda(elegidos) {
   const year = agendaMesVisible.getFullYear(), month = agendaMesVisible.getMonth();
@@ -1637,6 +1698,7 @@ function cargarHoras() {
     fecha.value = '';
     selectedSlot = null;
   }
+  pintarPrimeraCitaAgenda(elegidos);
   pintarCalendarioAgenda(elegidos);
   actualizarFichaAgenda();
   if (elegidos.some(({ servicio }) => porTelefono(servicio.nombre))) return mensajeHoras(AVISO_TELEFONO, true);

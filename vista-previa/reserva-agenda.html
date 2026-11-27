@@ -706,6 +706,29 @@
   .agenda-primera strong { display: block; font-size: .9rem; }
   #agendaPrimeraHora { color: var(--mid); font-size: .82rem; }
   .agenda-primera-accion { color: var(--gold); font-size: .83rem; font-weight: 700; }
+
+  #bookingForm #slotsGrid { display: grid; grid-template-columns: minmax(0, 1fr); gap: .85rem; }
+  .agenda-franja h4 { margin: 0 0 .45rem; color: var(--gold); font-size: .82rem; }
+  .agenda-franja-horas { display: grid; grid-template-columns: repeat(auto-fit, minmax(64px, 1fr)); gap: .45rem; }
+  #bookingForm .agenda-franja .slot { font-family: inherit; padding: 0 .2rem; }
+  #bookingForm .agenda-resumen-movil { display: none; }
+  @media (max-width: 768px) {
+    #bookingForm .agenda-franja-horas { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    #bookingForm .agenda-resumen-movil:not([hidden]) {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: .25rem .6rem;
+      margin-top: 1rem;
+      padding: .55rem .75rem;
+      background: var(--cream);
+      border: 1px solid var(--gold-light);
+      border-radius: 8px;
+    }
+    .agenda-resumen-movil p { flex: 1 1 12rem; font-size: .83rem; color: var(--charcoal); }
+    .agenda-resumen-movil button { min-height: 44px; border: 0; padding: 0 .2rem; background: transparent; color: var(--gold); text-decoration: underline; cursor: pointer; }
+  }
 </style>
 </head>
 <body>
@@ -988,6 +1011,10 @@
           <span>He leído y acepto la <a href="#" onclick="abrirLegal(event,'dlgPrivacidad')">política de privacidad</a>. *</span>
         </label>
         <button type="button" class="btn-book" id="btnReservar" disabled aria-describedby="previewReserva">Confirmar cita</button>
+        </div>
+        <div class="agenda-resumen-movil" id="agendaResumenMovil" hidden>
+          <p id="agendaResumenMovilTexto" aria-live="polite"></p>
+          <button type="button" id="agendaCambiarHora">Cambiar</button>
         </div>
         <div class="reserva-acciones">
           <button type="button" class="btn-primary" id="agendaAbrirDatos" aria-expanded="false" aria-controls="agendaDatos">Añadir mis datos</button>
@@ -1600,7 +1627,7 @@ function disponibilidadAgenda(dia, elegidos) {
     ? [minutos(horario.descanso_desde), minutos(horario.descanso_hasta)] : null;
   const horas = [];
   if (semilla % 5 !== 0) {
-    for (let hora = abreA; hora + duracion <= cierraA && horas.length < 8; hora += 30) {
+    for (let hora = abreA; hora + duracion <= cierraA; hora += 30) {
       if (dia.getTime() === agendaHoy.getTime() && hora <= agendaAhora.getHours() * 60 + agendaAhora.getMinutes()) continue;
       if (descanso && hora < descanso[1] && hora + duracion > descanso[0]) continue;
       if ((Math.floor(hora / 30) + semilla) % 4 === 0) continue;
@@ -1706,29 +1733,43 @@ function cargarHoras() {
   pintarHoras(horas);
 }
 
+const franjasAgenda = [
+  { titulo: 'Mañana', filtrar: hora => Number(hora.split(':')[0]) < 14 },
+  { titulo: 'Tarde', filtrar: hora => Number(hora.split(':')[0]) >= 14 },
+];
+
 function pintarHoras(horas) {
   const grid = document.getElementById('slotsGrid');
-  grid.innerHTML = '';
-  horas.forEach(slot => {
-    const isSelected = slot === selectedSlot;
-    // Usar <div> con tabindex en vez de <button> para evitar problemas de iOS con botones en grid
-    const el = document.createElement('div');
-    el.className   = 'slot' + (isSelected ? ' selected' : '');
-    el.textContent = slot;
-    el.setAttribute('role', 'button');
-    el.setAttribute('tabindex', '0');
-    el.setAttribute('aria-label', slot);
-    el.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
-    const pick = () => {
-      selectedSlot = slot;
-      actualizarFichaAgenda();
-      pintarHoras(horas);
-      [...grid.children].find(elemento => elemento.getAttribute('aria-pressed') === 'true')?.focus();
-    };
-    el.addEventListener('click',   pick);
-    el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
-    grid.appendChild(el);
-  });
+  grid.replaceChildren();
+  for (const { titulo, filtrar } of franjasAgenda) {
+    const franja = horas.filter(filtrar);
+    if (!franja.length) continue;
+    const grupo = document.createElement('div');
+    grupo.className = 'agenda-franja';
+    const heading = document.createElement('h4');
+    heading.textContent = titulo;
+    const opciones = document.createElement('div');
+    opciones.className = 'agenda-franja-horas';
+    opciones.setAttribute('role', 'group');
+    opciones.setAttribute('aria-label', titulo);
+    for (const hora of franja) {
+      const elegida = hora === selectedSlot;
+      const boton = document.createElement('button');
+      boton.type = 'button';
+      boton.className = 'slot' + (elegida ? ' selected' : '');
+      boton.textContent = hora;
+      boton.setAttribute('aria-pressed', String(elegida));
+      boton.addEventListener('click', () => {
+        selectedSlot = hora;
+        actualizarFichaAgenda();
+        pintarHoras(horas);
+        grid.querySelector('[aria-pressed="true"]')?.focus();
+      });
+      opciones.append(boton);
+    }
+    grupo.append(heading, opciones);
+    grid.append(grupo);
+  }
 }
 
 document.getElementById('fecha').addEventListener('change', () => { selectedSlot = null; cargarHoras(); });
@@ -1772,8 +1813,23 @@ function actualizarFichaAgenda() {
   total.hidden = elegidos.length === 0;
   const minutos = elegidos.reduce((suma, { servicio }) => suma + servicio.duracion, 0);
   const precio = elegidos.reduce((suma, { servicio }) => suma + servicio.precio, 0);
-  total.textContent = duracionTexto(minutos) + ' · ' + euros(Math.round(precio * 100) / 100);
+  const precioTotal = euros(Math.round(precio * 100) / 100);
+  total.textContent = duracionTexto(minutos) + ' · ' + precioTotal;
+  const fichaMovil = document.getElementById('agendaResumenMovil');
+  const mostrar = Boolean(elegidos.length && fecha && selectedSlot);
+  fichaMovil.hidden = !mostrar;
+  document.getElementById('agendaResumenMovilTexto').textContent = mostrar
+    ? elegidos.map(({ servicio }) => servicio.nombre).join(' + ') + ' · ' +
+      agendaFechaCorta.format(new Date(fecha + 'T12:00:00')) + ', ' + selectedSlot + ' · ' + precioTotal
+    : '';
 }
+
+const agendaFechaCorta = new Intl.DateTimeFormat('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+document.getElementById('agendaCambiarHora').addEventListener('click', () => {
+  const diaElegido = document.querySelector('#agendaDias [aria-pressed="true"]');
+  const horaElegida = document.querySelector('#slotsGrid [aria-pressed="true"]');
+  (diaElegido || horaElegida)?.focus();
+});
 
 document.getElementById('agendaAbrirDatos').addEventListener('click', event => {
   const fecha = document.getElementById('fecha');

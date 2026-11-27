@@ -734,6 +734,25 @@
     .agenda-resumen-movil p { flex: 1 1 12rem; font-size: .83rem; color: var(--charcoal); }
     .agenda-resumen-movil button { min-height: 44px; border: 0; padding: 0 .2rem; background: transparent; color: var(--gold); text-decoration: underline; cursor: pointer; }
   }
+
+  #agendaSelector label { display: block; margin-bottom: .3rem; }
+  .agenda-categorias { display: flex; flex-wrap: wrap; gap: .4rem; margin: .75rem 0; }
+  .agenda-categorias button { border: 1px solid var(--gold-light); border-radius: 999px; min-height: 34px; padding: .25rem .65rem; background: var(--cream); color: var(--charcoal); font: inherit; font-size: .78rem; cursor: pointer; }
+  .agenda-categorias button[aria-pressed="true"] { background: var(--gold); color: var(--cta-ink); border-color: var(--gold); }
+  .agenda-resultados-estado { margin: .45rem 0; color: var(--light); font-size: .8rem; }
+  .agenda-resultados { list-style: none; margin: 0; padding: .28rem; max-height: 17rem; overflow: auto; border: 1px solid var(--line-dark); border-radius: 8px; }
+  .agenda-resultados li + li { border-top: 1px solid var(--line-dark); }
+  .agenda-resultado { display: flex; width: 100%; min-height: 44px; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .15rem .7rem; background: transparent; color: var(--charcoal); border: 0; padding: .45rem .6rem; font: inherit; font-size: .85rem; text-align: left; text-decoration: none; cursor: pointer; }
+  .agenda-resultado:hover { background: var(--cream); }
+  .agenda-resultado:focus-visible { outline-offset: -2px; }
+  .agenda-resultado span { color: var(--gold); font-size: .79rem; }
+  .agenda-servicio-elegido { flex: 1 1 100%; font-size: .88rem; }
+  #agendaServicios .agenda-anadir { margin-bottom: .5rem; min-height: 44px; cursor: pointer; }
+  #agendaLimiteServicios { color: var(--light); font-size: .8rem; }
+  @media (max-width: 768px) {
+    .agenda-categorias button { min-height: 44px; }
+    .agenda-resultado { min-height: 48px; }
+  }
 </style>
 </head>
 <body>
@@ -952,12 +971,17 @@
         <div class="agenda-bloque" id="agendaServicios">
           <h3>Elige tus servicios</h3>
           <div class="form-group">
-          <label>Servicios * <span class="label-nota">(hasta 3 seguidos, cada uno con quien quieras)</span></label>
-          <!-- Los servicios salen de la app del salón (Supabase) -->
-          <div class="srv-lista" id="serviciosElegidos"><select disabled><option>Cargando servicios…</option></select></div>
-          <button type="button" class="btn-anadir" id="btnOtroServicio" onclick="anadirServicio()" hidden>+ Añadir otro servicio</button>
-          <p class="srv-resumen" id="resumenServicios"></p>
-          <p id="reservaMechas" hidden>Las mechas se piden <a href="tel:+34665085053">por teléfono</a>.</p>
+          <div class="srv-lista" id="serviciosElegidos" aria-label="Servicios elegidos"></div>
+          <p class="srv-resumen" id="resumenServicios" aria-live="polite"></p>
+          <p id="agendaLimiteServicios" tabindex="-1" hidden>Has elegido 3 servicios.</p>
+          <button type="button" class="btn-secondary agenda-anadir" id="btnOtroServicio" aria-controls="agendaSelector" hidden>+ Añadir otro servicio</button>
+          <div id="agendaSelector">
+            <label for="agendaBuscarServicio">Buscar servicio</label>
+            <input type="search" id="agendaBuscarServicio" placeholder="Escribe corte, uñas, láser…" autocomplete="off" disabled>
+            <div id="agendaCategorias" class="agenda-categorias" role="group" aria-label="Filtrar por categoría"></div>
+            <p id="agendaResultadosEstado" class="agenda-resultados-estado" aria-live="polite">Cargando servicios…</p>
+            <ul id="agendaResultados" class="agenda-resultados" aria-label="Resultados de servicios" hidden></ul>
+          </div>
           </div>
         </div>
         <div class="agenda-bloque" id="agendaHorario">
@@ -1438,10 +1462,7 @@ window.addEventListener('resize', colocarPanelCarta);
 // Al pulsar "Pedir cita" desde una sección, el formulario se abre con el primer servicio de esa sección
 function elegirSeccion(i) {
   if (!CATALOGO[i]) return;
-  document.getElementById('serviciosElegidos').innerHTML = '';
-  const servicios = reservables(CATALOGO[i]);
-  anadirServicio((servicios.find(([nombre]) => !porTelefono(nombre)) || servicios[0])?.[2]);
-  document.querySelector('#agendaServicios select')?.focus();
+  abrirSelectorAgenda(CATALOGO[i].seccion, false);
 }
 
 // ══════════════════════════════════════════════════
@@ -1500,7 +1521,7 @@ const buscarServicio = (id) => {
 const filasServicio = () => [...document.querySelectorAll('#serviciosElegidos .srv-fila')];
 // [{ servicio, trabajadora (id o null), sel, quien }] de las filas con servicio elegido
 const serviciosElegidos = () => filasServicio().map(f => ({
-  servicio: buscarServicio(Number(f.querySelector('.srv-select').value)),
+  servicio: buscarServicio(Number(f.dataset.servicioId)),
   trabajadora: Number(f.querySelector('.srv-quien').value) || null,
 })).filter(x => x.servicio);
 
@@ -1508,43 +1529,129 @@ function mensajeHoras(texto, error) {
   document.getElementById('slotsGrid').innerHTML = `<p class="slots-msg${error ? ' error' : ''}">${texto}</p>`;
 }
 
-// Una fila: servicio (agrupado por secciones) + con quién + botón de quitar
+let categoriaAgenda = '';
+let seleccionAgendaPreparada = false;
+const buscadorAgenda = document.getElementById('agendaBuscarServicio');
+const selectorAgenda = document.getElementById('agendaSelector');
+const agendaCategorias = document.getElementById('agendaCategorias');
+const agendaResultados = document.getElementById('agendaResultados');
+const agendaEstado = document.getElementById('agendaResultadosEstado');
+const botonOtroServicio = document.getElementById('btnOtroServicio');
+const normalizarBusquedaAgenda = texto => texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+const palabrasAgenda = {
+  'Peinado': 'peluqueria pelo cabello',
+  'Color y Protección': 'tinte coloracion peluqueria',
+  'Bioterapia Manos': 'uñas manicura',
+  'Bioterapia Pies': 'uñas pedicura',
+};
+
+function abrirSelectorAgenda(categoria = '', enfocar = true) {
+  categoriaAgenda = categoria;
+  buscadorAgenda.value = '';
+  if (filasServicio().length >= MAX_SERVICIOS) {
+    document.getElementById('agendaLimiteServicios').focus();
+    return;
+  }
+  selectorAgenda.hidden = false;
+  botonOtroServicio.hidden = true;
+  pintarResultadosAgenda();
+  if (enfocar) buscadorAgenda.focus();
+}
+
+function pintarCategoriasAgenda() {
+  agendaCategorias.replaceChildren();
+  [{ seccion: '', menu: 'Todas' }, ...CATALOGO].forEach(({ seccion, menu }) => {
+    const boton = document.createElement('button');
+    boton.type = 'button';
+    boton.textContent = menu;
+    boton.dataset.categoriaAgenda = seccion;
+    boton.addEventListener('click', () => {
+      categoriaAgenda = seccion;
+      buscadorAgenda.value = '';
+      pintarResultadosAgenda();
+    });
+    agendaCategorias.append(boton);
+  });
+}
+
+function pintarResultadosAgenda() {
+  if (!seleccionAgendaPreparada) return;
+  const consulta = normalizarBusquedaAgenda(buscadorAgenda.value.trim()).split(/\s+/).filter(Boolean);
+  const activos = CATALOGO.filter(categoria => !categoriaAgenda || categoria.seccion === categoriaAgenda);
+  const usados = new Set(serviciosElegidos().map(({ servicio }) => servicio.id));
+  const opciones = consulta.length || categoriaAgenda
+    ? activos.flatMap(categoria => reservables(categoria)
+      .filter(([nombre, , id]) => !usados.has(id) && consulta.every(palabra =>
+        normalizarBusquedaAgenda([nombre, categoria.menu, palabrasAgenda[categoria.seccion] || ''].join(' ')).includes(palabra))))
+    : [];
+  agendaCategorias.querySelectorAll('button').forEach(boton => {
+    boton.setAttribute('aria-pressed', String(boton.dataset.categoriaAgenda === categoriaAgenda));
+  });
+  agendaResultados.replaceChildren();
+  agendaResultados.hidden = !opciones.length;
+  agendaEstado.textContent = opciones.length
+    ? opciones.length + (opciones.length === 1 ? ' servicio encontrado' : ' servicios encontrados')
+    : consulta.length || categoriaAgenda
+      ? 'No hay servicios que coincidan. Prueba otro nombre o categoría.'
+      : 'Busca por nombre o elige una categoría.';
+  for (const [nombre, precio, id, duracion] of opciones) {
+    const item = document.createElement('li');
+    const llamada = porTelefono(nombre);
+    const control = document.createElement(llamada ? 'a' : 'button');
+    control.className = 'agenda-resultado';
+    if (llamada) control.href = 'tel:+34665085053';
+    else {
+      control.type = 'button';
+      control.addEventListener('click', () => anadirServicio(id));
+    }
+    const titulo = document.createElement('strong');
+    titulo.textContent = nombre;
+    const detalle = document.createElement('span');
+    detalle.textContent = llamada ? euros(precio) + ' · Pedir por teléfono'
+      : euros(precio) + (duracion ? ' · ' + duracionTexto(duracion) : '');
+    control.append(titulo, detalle);
+    item.append(control);
+    agendaResultados.append(item);
+  }
+}
+
+buscadorAgenda.addEventListener('input', () => {
+  categoriaAgenda = '';
+  pintarResultadosAgenda();
+});
+botonOtroServicio.addEventListener('click', () => abrirSelectorAgenda());
+
 function anadirServicio(id) {
-  const lista = document.getElementById('serviciosElegidos');
-  if (lista.children.length >= MAX_SERVICIOS) return;
-  const num = lista.children.length + 1;
+  const servicio = buscarServicio(Number(id));
+  if (!servicio || porTelefono(servicio.nombre) || filasServicio().length >= MAX_SERVICIOS ||
+      serviciosElegidos().some(elegido => elegido.servicio.id === servicio.id)) return;
   const fila = document.createElement('div');
   fila.className = 'srv-fila';
-  const sel = document.createElement('select');
-  sel.className = 'srv-select';
-  sel.setAttribute('aria-label', `Servicio ${num}`);
-  sel.innerHTML = `<option value="">${num > 1 ? '– Elige otro servicio –' : '– Elige un servicio –'}</option>`;
-  CATALOGO.forEach(s => {
-    if (!reservables(s).length) return;
-    const g = document.createElement('optgroup');
-    g.label = s.menu;
-    reservables(s).forEach(([n, p, sid, dur]) => {
-      const o = document.createElement('option');
-      o.value = sid; o.textContent = porTelefono(n) ? `${n} · cita por teléfono` : `${n} · ${duracionTexto(dur)} · ${euros(p)}`;
-      g.appendChild(o);
-    });
-    sel.appendChild(g);
-  });
-  if (id) sel.value = id;
+  fila.dataset.servicioId = servicio.id;
+  const nombre = document.createElement('strong');
+  nombre.className = 'agenda-servicio-elegido';
+  nombre.textContent = servicio.nombre + ' · ' + euros(servicio.precio) + ' · ' + duracionTexto(servicio.duracion);
   const quien = document.createElement('select');
   quien.className = 'srv-quien';
-  quien.setAttribute('aria-label', `Con quién (servicio ${num})`);
-  quien.innerHTML = '<option value="">Sin preferencia</option>';
-  const quitar = document.createElement('button');
-  quitar.type = 'button'; quitar.className = 'srv-quitar'; quitar.textContent = '×';
-  quitar.setAttribute('aria-label', 'Quitar este servicio');
-  quitar.addEventListener('click', () => { fila.remove(); if (!lista.children.length) anadirServicio(); alCambiarServicios(); });
-  sel.addEventListener('change', alCambiarServicios);
+  quien.setAttribute('aria-label', 'Profesional para ' + servicio.nombre);
   quien.addEventListener('change', () => { selectedSlot = null; cargarHoras(); });
-  fila.append(sel, quien, quitar);
-  lista.appendChild(fila);
+  const quitar = document.createElement('button');
+  quitar.type = 'button';
+  quitar.className = 'srv-quitar';
+  quitar.textContent = '×';
+  quitar.setAttribute('aria-label', 'Quitar ' + servicio.nombre);
+  quitar.addEventListener('click', () => {
+    fila.remove();
+    alCambiarServicios();
+    if (filasServicio().length === 0) abrirSelectorAgenda();
+    else if (selectorAgenda.hidden) botonOtroServicio.focus();
+    else buscadorAgenda.focus();
+  });
+  fila.append(nombre, quien, quitar);
+  document.getElementById('serviciosElegidos').append(fila);
+  selectorAgenda.hidden = true;
   alCambiarServicios();
-  if (!id && num > 1) sel.focus();
+  (botonOtroServicio.hidden ? document.getElementById('agendaLimiteServicios') : botonOtroServicio).focus();
 }
 
 function prepararFormulario() {
@@ -1556,7 +1663,11 @@ function prepararFormulario() {
       categoria.servicios = categoria.servicios.map(([nombre, precio]) => [nombre, precio, ++id, 30, categoria.seccion]);
     });
   }
-  anadirServicio();
+  seleccionAgendaPreparada = true;
+  buscadorAgenda.disabled = false;
+  pintarCategoriasAgenda();
+  pintarResultadosAgenda();
+  alCambiarServicios();
   const hoy = new Date(), max = new Date(); max.setDate(max.getDate() + 90);
   const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   document.getElementById('fecha').min = iso(hoy);
@@ -1567,11 +1678,8 @@ function prepararFormulario() {
 // solo las trabajadoras que hacen el apartado de ese servicio (más «Sin preferencia»)
 function alCambiarServicios() {
   const filas = filasServicio();
-  const sels  = filas.map(f => f.querySelector('.srv-select'));
-  sels.forEach(s => [...s.options].forEach(o => { o.disabled = !!o.value && o.value !== s.value && sels.some(x => x.value === o.value); }));
-
   filas.forEach(f => {
-    const srv   = buscarServicio(Number(f.querySelector('.srv-select').value));
+    const srv = buscarServicio(Number(f.dataset.servicioId));
     const quien = f.querySelector('.srv-quien');
     const antes = quien.value;
     quien.innerHTML = '<option value="">Sin preferencia</option>';
@@ -1587,7 +1695,9 @@ function alCambiarServicios() {
     f.classList.toggle('sin-equipo', !!srv && posibles.length === 0);
   });
 
-  document.getElementById('btnOtroServicio').hidden = filas.length >= MAX_SERVICIOS || sels.some(s => !s.value);
+  botonOtroServicio.hidden = filas.length === 0 || filas.length >= MAX_SERVICIOS || !selectorAgenda.hidden;
+  document.getElementById('agendaLimiteServicios').hidden = filas.length < MAX_SERVICIOS;
+  pintarResultadosAgenda();
 
   const elegidos = serviciosElegidos();
   const total  = elegidos.reduce((a, x) => a + x.servicio.duracion, 0);
@@ -1595,7 +1705,6 @@ function alCambiarServicios() {
   document.getElementById('resumenServicios').textContent = elegidos.length > 1
     ? `${elegidos.length} servicios seguidos, en este orden · ${duracionTexto(total)} en total · ${euros(Math.round(precio * 100) / 100)}`
     : elegidos.length ? `Dura ${duracionTexto(total)}` : '';
-  document.getElementById('reservaMechas').hidden = !elegidos.some(x => porTelefono(x.servicio.nombre));
   selectedSlot = null;
   cargarHoras();
 }
@@ -1801,7 +1910,8 @@ function showAlert(id, type, msg) {
 function otraCita() {
   ['fecha', 'notas'].forEach(id => { document.getElementById(id).value = ''; });
   document.getElementById('serviciosElegidos').innerHTML = '';
-  anadirServicio();
+  abrirSelectorAgenda();
+  alCambiarServicios();
   document.getElementById('bookingOk').hidden = true;
   document.getElementById('bookingForm').hidden = false;
 }
@@ -1852,7 +1962,7 @@ document.getElementById('agendaAbrirDatos').addEventListener('click', event => {
   }
   if (!elegidos.length || !fecha.value || !fecha.checkValidity() || !selectedSlot) {
     showAlert('bookingAlert', 'error', 'Elige un servicio, un día y una hora de ejemplo.');
-    if (!elegidos.length) document.querySelector('#agendaServicios select')?.focus();
+    if (!elegidos.length) abrirSelectorAgenda();
     else if (!fecha.value || !fecha.checkValidity()) {
       (document.querySelector('#agendaDias button:not(:disabled)') || document.getElementById('agendaMesSiguiente')).focus();
     }

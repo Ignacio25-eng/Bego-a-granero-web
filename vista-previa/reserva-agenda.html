@@ -666,6 +666,23 @@
     #reservas .booking-info { position: static; }
     #bookingForm { padding: clamp(1rem, 4vw, 1.6rem); }
   }
+
+  .agenda-calendario { width: min(100%, 27rem); padding: .75rem; background: #1a1517; border: 1px solid var(--line-dark); border-radius: 12px; }
+  .agenda-cal-cabecera { display: flex; align-items: center; justify-content: space-between; gap: .25rem; margin-bottom: .55rem; }
+  .agenda-cal-cabecera h4 { margin: 0; color: var(--charcoal); text-transform: capitalize; text-align: center; font-size: .98rem; }
+  .agenda-cal-cabecera button { width: 38px; height: 38px; border: 1px solid var(--gold-light); border-radius: 50%; color: var(--gold); background: transparent; font-size: 1.35rem; cursor: pointer; }
+  .agenda-cal-cabecera button:disabled { opacity: .45; cursor: default; }
+  .agenda-cal-semana, .agenda-cal-dias { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: clamp(2px, .65vw, 6px); }
+  .agenda-cal-semana { text-align: center; color: var(--light); font-size: clamp(.6rem, 1.5vw, .76rem); margin-bottom: .4rem; }
+  .agenda-cal-dias button { min-width: 0; min-height: clamp(35px, 6vw, 44px); padding: 0; border: 1px solid transparent; border-radius: 6px; font: 700 .83rem 'DM Sans', sans-serif; color: #231b1b; background: #fffaf4; cursor: pointer; scroll-margin-top: 100px; }
+  .agenda-cal-dias button:disabled { background: #353033; color: #b3a8ac; cursor: default; }
+  .agenda-cal-dias button[aria-pressed="true"] { background: var(--gold); color: var(--cta-ink); }
+  .agenda-cal-dias button:not(:disabled):hover { border-color: #a66c32; }
+  .agenda-cal-leyenda { display: flex; flex-wrap: wrap; gap: .25rem .8rem; margin: .7rem 0 .3rem; color: var(--mid); font-size: .73rem; }
+  .agenda-cal-leyenda span { display: flex; align-items: center; gap: .3rem; }
+  .agenda-cal-leyenda i { width: .65rem; height: .65rem; background: #fffaf4; border-radius: 2px; }
+  .agenda-cal-leyenda span + span i { background: #777075; }
+  .agenda-cal-ayuda { color: var(--light); font-size: .75rem; margin: 0; }
 </style>
 </head>
 <body>
@@ -895,8 +912,18 @@
         <div class="agenda-bloque" id="agendaHorario">
           <h3>Elige el día y la hora</h3>
           <div class="form-group">
-          <label for="fecha">Día *</label>
-          <input type="date" id="fecha">
+          <input type="date" id="fecha" hidden aria-label="Día elegido">
+          <div class="agenda-calendario" role="group" aria-label="Calendario de disponibilidad">
+            <div class="agenda-cal-cabecera">
+              <button type="button" id="agendaMesAnterior" aria-label="Mes anterior">‹</button>
+              <h4 id="agendaMes" aria-live="polite"></h4>
+              <button type="button" id="agendaMesSiguiente" aria-label="Mes siguiente">›</button>
+            </div>
+            <div class="agenda-cal-semana" aria-hidden="true"><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span></div>
+            <div class="agenda-cal-dias" id="agendaDias"></div>
+            <p class="agenda-cal-leyenda"><span><i aria-hidden="true"></i> Disponible</span><span><i aria-hidden="true"></i> Completo o cerrado</span></p>
+            <p id="agendaCalAyuda" class="agenda-cal-ayuda" aria-live="polite"></p>
+          </div>
         </div>
         <div class="form-group">
           <span class="slots-label">Hora *</span>
@@ -1510,13 +1537,111 @@ function alCambiarServicios() {
   cargarHoras();
 }
 
+const agendaHoy = new Date();
+agendaHoy.setHours(12, 0, 0, 0);
+const agendaLimite = new Date(agendaHoy);
+agendaLimite.setDate(agendaLimite.getDate() + 90);
+let agendaMesVisible = new Date(agendaHoy.getFullYear(), agendaHoy.getMonth(), 1, 12);
+const agendaNombreMes = new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric' });
+const agendaNombreDia = new Intl.DateTimeFormat('es-ES', { dateStyle: 'full' });
+const agendaIso = dia => [
+  dia.getFullYear(), String(dia.getMonth() + 1).padStart(2, '0'), String(dia.getDate()).padStart(2, '0'),
+].join('-');
+
+function disponibilidadAgenda(dia, elegidos) {
+  if (dia < agendaHoy || dia > agendaLimite) return { estado: 'Fuera del periodo de reserva', horas: [] };
+  const diaSemana = dia.getDay();
+  const horario = HORARIO.find(franja => franja.dia === diaSemana);
+  const abre = HORARIO.length ? horario?.abierto : diaSemana >= 2 && diaSemana <= 6;
+  if (!abre || CERRADOS.has(agendaIso(dia))) return { estado: 'Cerrado', horas: [] };
+  if (!elegidos.length || elegidos.some(({ servicio }) => porTelefono(servicio.nombre))) {
+    return { estado: 'Selecciona un servicio reservable', horas: [] };
+  }
+
+  const clave = elegidos.reduce((suma, { servicio, trabajadora }) =>
+    suma + [...servicio.nombre].reduce((valor, letra) => (valor * 31 + letra.codePointAt(0)) % 997, 0) + (trabajadora || 0), 0);
+  const semilla = dia.getDate() + dia.getMonth() * 3 + clave;
+  const duracion = elegidos.reduce((suma, { servicio }) => suma + servicio.duracion, 0);
+  const minutos = hora => {
+    const [h, m] = hora.split(':').map(Number);
+    return h * 60 + m;
+  };
+  const abreA = minutos(horario?.apertura || '10:00');
+  const cierraA = minutos(horario?.cierre || (diaSemana === 6 ? '14:00' : '20:00'));
+  const descanso = horario?.tiene_descanso && horario.descanso_desde && horario.descanso_hasta
+    ? [minutos(horario.descanso_desde), minutos(horario.descanso_hasta)] : null;
+  const horas = [];
+  if (semilla % 5 !== 0) {
+    for (let hora = abreA; hora + duracion <= cierraA && horas.length < 8; hora += 30) {
+      if (descanso && hora < descanso[1] && hora + duracion > descanso[0]) continue;
+      if ((Math.floor(hora / 30) + semilla) % 4 === 0) continue;
+      horas.push(String(Math.floor(hora / 60)).padStart(2, '0') + ':' + String(hora % 60).padStart(2, '0'));
+    }
+  }
+  return { estado: horas.length ? 'Disponible' : 'Completo', horas };
+}
+
+function pintarCalendarioAgenda(elegidos) {
+  const year = agendaMesVisible.getFullYear(), month = agendaMesVisible.getMonth();
+  document.getElementById('agendaMes').textContent = agendaNombreMes.format(agendaMesVisible);
+  document.getElementById('agendaMesAnterior').disabled =
+    year === agendaHoy.getFullYear() && month === agendaHoy.getMonth();
+  document.getElementById('agendaMesSiguiente').disabled =
+    year === agendaLimite.getFullYear() && month === agendaLimite.getMonth();
+  const puedeReservar = elegidos.length && !elegidos.some(({ servicio }) => porTelefono(servicio.nombre));
+  document.getElementById('agendaCalAyuda').textContent = puedeReservar
+    ? 'Disponibilidad de ejemplo para tu selección.'
+    : 'Elige un servicio reservable para ver qué días están libres.';
+  const calendario = document.getElementById('agendaDias');
+  const fecha = document.getElementById('fecha');
+  calendario.replaceChildren();
+  const huecos = (agendaMesVisible.getDay() + 6) % 7;
+  for (let i = 0; i < huecos; i++) calendario.append(document.createElement('span'));
+  const ultimoDia = new Date(year, month + 1, 0).getDate();
+  for (let n = 1; n <= ultimoDia; n++) {
+    const dia = new Date(year, month, n, 12);
+    const iso = agendaIso(dia);
+    const { estado, horas } = disponibilidadAgenda(dia, elegidos);
+    const boton = document.createElement('button');
+    boton.type = 'button';
+    boton.textContent = n;
+    boton.dataset.fecha = iso;
+    boton.dataset.estado = estado;
+    boton.disabled = horas.length === 0;
+    boton.setAttribute('aria-label', agendaNombreDia.format(dia) + ' · ' + estado);
+    boton.setAttribute('aria-pressed', String(iso === fecha.value && !boton.disabled));
+    boton.addEventListener('click', () => {
+      fecha.value = iso;
+      selectedSlot = null;
+      cargarHoras();
+      calendario.querySelector('[aria-pressed="true"]')?.focus();
+    });
+    calendario.append(boton);
+  }
+}
+
+function cambiarMesAgenda(direccion) {
+  agendaMesVisible = new Date(agendaMesVisible.getFullYear(), agendaMesVisible.getMonth() + direccion, 1, 12);
+  pintarCalendarioAgenda(serviciosElegidos());
+  const boton = document.getElementById(direccion > 0 ? 'agendaMesSiguiente' : 'agendaMesAnterior');
+  if (boton.disabled) document.getElementById(direccion > 0 ? 'agendaMesAnterior' : 'agendaMesSiguiente').focus();
+}
+document.getElementById('agendaMesAnterior').addEventListener('click', () => cambiarMesAgenda(-1));
+document.getElementById('agendaMesSiguiente').addEventListener('click', () => cambiarMesAgenda(1));
+
 function cargarHoras() {
-  actualizarFichaAgenda();
   const elegidos = serviciosElegidos();
-  const fecha = document.getElementById('fecha').value;
-  if (elegidos.some(x => porTelefono(x.servicio.nombre))) return mensajeHoras(AVISO_TELEFONO, true);
-  if (!elegidos.length || !fecha) return mensajeHoras('Elige un día para ver las horas de ejemplo.');
-  pintarHoras(['10:00', '10:30', '11:15', '12:00', '12:45', '13:30']);
+  const fecha = document.getElementById('fecha');
+  const horas = fecha.value ? disponibilidadAgenda(new Date(fecha.value + 'T12:00:00'), elegidos).horas : [];
+  if (!horas.length) {
+    fecha.value = '';
+    selectedSlot = null;
+  }
+  pintarCalendarioAgenda(elegidos);
+  actualizarFichaAgenda();
+  if (elegidos.some(({ servicio }) => porTelefono(servicio.nombre))) return mensajeHoras(AVISO_TELEFONO, true);
+  if (!horas.length) return mensajeHoras(elegidos.length ? 'Elige un día en blanco para ver las horas.' : 'Elige un servicio para ver los días disponibles.');
+  pintarHoras(horas);
 }
 
 function pintarHoras(horas) {
@@ -1601,7 +1726,9 @@ document.getElementById('agendaAbrirDatos').addEventListener('click', event => {
   if (!elegidos.length || !fecha.value || !fecha.checkValidity() || !selectedSlot) {
     showAlert('bookingAlert', 'error', 'Elige un servicio, un día y una hora de ejemplo.');
     if (!elegidos.length) document.querySelector('#agendaServicios select')?.focus();
-    else if (!fecha.value || !fecha.checkValidity()) fecha.focus();
+    else if (!fecha.value || !fecha.checkValidity()) {
+      (document.querySelector('#agendaDias button:not(:disabled)') || document.getElementById('agendaMesSiguiente')).focus();
+    }
     else document.querySelector('#slotsGrid .slot')?.focus();
     return;
   }
@@ -1623,6 +1750,7 @@ function formatDate(fechaStr) {
 // ══════════════════════════════════════════════════
 ordenarCatalogo();
 pintarCarta();
+pintarCalendarioAgenda([]);
 mensajeHoras('Cargando servicios…');
 (async function cargarDatos() {
   try {
@@ -1646,7 +1774,7 @@ mensajeHoras('Cargando servicios…');
     EN_LINEA = false;
   }
   prepararFormulario();
-  if (EN_LINEA) mensajeHoras('Elige un servicio y un día para ver las horas libres.');
+
 })();
 
 // ══════════════════════════════════════════════════

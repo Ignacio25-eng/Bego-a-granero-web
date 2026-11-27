@@ -758,7 +758,7 @@
   .agenda-confirmacion-ficha dt { color: var(--gold); font-size: .8rem; }
   .agenda-confirmacion-ficha dd { margin: .1rem 0 0; color: var(--charcoal); }
 
-  #bookingOk { padding: clamp(1.15rem, 4vw, 2.4rem); }
+  #bookingOk { padding: clamp(1.15rem, 4vw, 2.4rem); scroll-margin-top: 88px; }
   #bookingOk .ok-icono { background: #392820; color: var(--gold); border: 1px solid var(--gold-light); }
   #bookingOk .form-title { font-style: normal; font-size: clamp(1.55rem, 3.6vw, 2.25rem); }
   #bookingOk .form-title:focus { outline: none; }
@@ -2090,8 +2090,14 @@ document.getElementById('btnReservar').addEventListener('click', async event => 
   document.getElementById('agendaConfirmacionHora').textContent = formatDate(fecha) + ' · ' + confirmada;
   document.getElementById('agendaConfirmacionServicios').textContent = servicios;
   document.getElementById('bookingForm').hidden = true;
-  document.getElementById('bookingOk').hidden = false;
-  document.getElementById('agendaConfirmacionTitulo').focus();
+  const confirmacion = document.getElementById('bookingOk');
+  confirmacion.hidden = false;
+  // Deja que la página recoloque la tarjeta al desaparecer el formulario.
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    if (confirmacion.hidden) return;
+    document.getElementById('agendaConfirmacionTitulo').focus({ preventScroll: true });
+    confirmacion.scrollIntoView({ block: 'start', behavior: 'instant' });
+  }));
   agendaCache.clear();
   const inicioUTC = horaSalonUTC(fecha, confirmada);
   if (!Number.isFinite(inicioUTC)) return;

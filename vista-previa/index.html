@@ -618,6 +618,29 @@
   #cartaTabs .carta-tab[data-categoria="Tratamientos Capilares"] img { object-position: center 32%; }
   #cartaTabs .carta-tab[data-categoria="Bioterapia Facial"] img { object-position: center 58%; }
   #cartaTabs .carta-tab[data-categoria="Corposhape"] img { object-position: center 81%; }
+
+  #bookingForm [hidden] { display: none !important; }
+  #bookingForm .reserva-pasos { display: flex; flex-wrap: wrap; gap: .55rem 1rem; list-style: none; border-bottom: 1px solid var(--line-dark); padding-bottom: 1rem; }
+  .reserva-pasos li { display: flex; align-items: center; gap: .4rem; color: var(--mid); font-size: .82rem; }
+  .reserva-pasos span { display: grid; place-items: center; width: 1.65rem; height: 1.65rem; border: 1px solid var(--gold-light); border-radius: 50%; }
+  .reserva-pasos [aria-current] { color: var(--gold); font-weight: 700; }
+  .reserva-pasos [aria-current] span { background: var(--gold); color: var(--cta-ink); }
+  #bookingForm .preview-reserva { margin: .65rem 0 1.25rem; }
+  #bookingForm h3 { font: 400 clamp(1.4rem, 3vw, 2rem)/1.18 'Playfair Display', serif; margin: 0 0 .9rem; }
+  .reserva-acciones { display: flex; gap: .65rem; flex-wrap: wrap; margin-top: 1rem; }
+  .reserva-acciones button, .reserva-ficha button { cursor: pointer; min-height: 44px; }
+  .reserva-ficha { display: grid; gap: .85rem; background: var(--cream); border: 1px solid var(--line-dark); border-radius: .7rem; padding: .9rem; margin-bottom: 1rem; }
+  .reserva-ficha > div { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: .2rem .7rem; }
+  .reserva-ficha strong { grid-column: 1 / -1; color: var(--gold); font-size: .8rem; }
+  .reserva-ficha p { color: var(--mid); font-size: .88rem; }
+  .reserva-ficha button { background: transparent; border: none; color: var(--gold); text-decoration: underline; padding-inline: .3rem; }
+  #reservaMechas a, #bookingForm .form-note a { color: var(--gold); }
+  #bookingForm .slot { min-height: 48px; }
+  #bookingForm .slot.selected::after { content: ' ✓'; }
+  @media (max-width: 768px) {
+    #reservas .booking-wrapper { gap: 1.3rem; }
+    #reservas .booking-info { order: 1; }
+  }
 </style>
 </head>
 <body>
@@ -803,7 +826,7 @@
     <div class="section-header">
       <p class="section-eyebrow">Reserva online</p>
       <h2 class="section-title">Pide tu cita</h2>
-      <p class="section-sub">Elige servicio, día y hora: la cita queda confirmada al momento.</p>
+      <p class="section-sub">Elige tu servicio y encuentra el momento que mejor te venga.</p>
     </div>
     <div class="booking-wrapper">
       <div class="booking-info">
@@ -825,16 +848,25 @@
         </div>
       </div>
       <div class="booking-form" id="bookingForm">
-        <div class="form-title">Reservar cita</div>
+        <ol class="reserva-pasos" aria-label="Pasos de la reserva">
+          <li aria-current="step"><span>1</span> Servicios</li><li><span>2</span> Día y hora</li><li><span>3</span> Tus datos</li>
+        </ol>
+        <p class="preview-reserva" id="previewReserva">Maqueta con horas de ejemplo. No envía citas.</p>
         <div id="bookingAlert" class="alert" role="status"></div>
-        <div class="form-group">
+        <div data-reserva-paso="1">
+          <h3 tabindex="-1">¿Qué te gustaría reservar?</h3>
+          <div class="form-group">
           <label>Servicios * <span class="label-nota">(hasta 3 seguidos, cada uno con quien quieras)</span></label>
           <!-- Los servicios salen de la app del salón (Supabase) -->
           <div class="srv-lista" id="serviciosElegidos"><select disabled><option>Cargando servicios…</option></select></div>
           <button type="button" class="btn-anadir" id="btnOtroServicio" onclick="anadirServicio()" hidden>+ Añadir otro servicio</button>
           <p class="srv-resumen" id="resumenServicios"></p>
+          <p id="reservaMechas" hidden>Las mechas se piden <a href="tel:+34665085053">por teléfono</a>.</p>
+          </div>
         </div>
-        <div class="form-group">
+        <div data-reserva-paso="2" hidden>
+          <h3 tabindex="-1">Elige el día y la hora</h3>
+          <div class="form-group">
           <label for="fecha">Día *</label>
           <input type="date" id="fecha">
         </div>
@@ -844,7 +876,14 @@
             <p class="slots-msg">Elige un servicio y un día para ver las horas libres.</p>
           </div>
         </div>
-        <div class="form-row">
+        </div>
+        <div data-reserva-paso="3" hidden>
+          <h3 tabindex="-1">Revisa tu cita</h3>
+          <div class="reserva-ficha">
+            <div><strong>Servicios</strong><p id="reservaResumenServicios"></p><button type="button" data-reserva-ir="1" aria-label="Cambiar servicios">Cambiar</button></div>
+            <div><strong>Día y hora</strong><p id="reservaResumenHora"></p><button type="button" data-reserva-ir="2" aria-label="Cambiar día y hora">Cambiar</button></div>
+          </div>
+          <div class="form-row">
           <div class="form-group">
             <label for="nombre">Nombre *</label>
             <input type="text" id="nombre" placeholder="Tu nombre" autocomplete="given-name" maxlength="60">
@@ -864,15 +903,19 @@
         </div>
         <div class="form-group">
           <label for="notas">Notas (opcional)</label>
-          <textarea id="notas" placeholder="Ej.: zona a depilar, color que quieres, alergias…" maxlength="500"></textarea>
+          <textarea id="notas" placeholder="Ej.: la zona que te interesa o el color que buscas" maxlength="500"></textarea>
         </div>
         <label class="check-group" for="privacidad">
           <input type="checkbox" id="privacidad">
           <span>He leído y acepto la <a href="#" onclick="abrirLegal(event,'dlgPrivacidad')">política de privacidad</a>. *</span>
         </label>
-        <button class="btn-book" id="btnReservar" disabled aria-describedby="previewReserva">Confirmar cita</button>
-        <p class="preview-reserva" id="previewReserva">Vista previa del diseño. El envío de citas está desactivado.</p>
-        <p class="form-note">¿Prefieres llamar? <a href="tel:+34665085053">665 08 50 53</a></p>
+        <button type="button" class="btn-book" id="btnReservar" disabled aria-describedby="previewReserva">Confirmar cita</button>
+        </div>
+        <div class="reserva-acciones">
+          <button type="button" class="btn-secondary" id="reservaVolver" hidden>Volver</button>
+          <button type="button" class="btn-primary" id="reservaSiguiente">Continuar</button>
+        </div>
+        <p class="form-note">¿Necesitas ayuda? <a href="tel:+34665085053">Llamar</a> · <a href="https://wa.me/34665085053" target="_blank" rel="noopener">WhatsApp</a></p>
       </div>
       <!-- Se muestra al confirmar la cita -->
       <div class="booking-form booking-ok" id="bookingOk" hidden>
@@ -1029,7 +1072,7 @@ const SUPABASE_URL = 'https://jazzbriexlsmmotuxzit.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_KzFizhKF6XEmbGk3l7zLcw_BZO0Br0K';
 
 async function api(ruta, cuerpo) {
-  if (cuerpo && ruta !== "rpc/disponibilidad_cita") throw new Error("Operación desactivada en la vista previa.");
+  if (cuerpo) throw new Error("Operación desactivada en la vista previa.");
   const r = await fetch(`${SUPABASE_URL}/rest/v1/${ruta}`, {
     method: cuerpo ? 'POST' : 'GET',
     headers: { apikey: SUPABASE_KEY, 'Content-Type': 'application/json' },
@@ -1281,9 +1324,11 @@ window.addEventListener('resize', colocarPanelCarta);
 
 // Al pulsar "Pedir cita" desde una sección, el formulario se abre con el primer servicio de esa sección
 function elegirSeccion(i) {
-  if (!EN_LINEA || !CATALOGO[i]) return;
+  if (!CATALOGO[i]) return;
   document.getElementById('serviciosElegidos').innerHTML = '';
-  anadirServicio(reservables(CATALOGO[i])[0]?.[2]);
+  const servicios = reservables(CATALOGO[i]);
+  anadirServicio((servicios.find(([nombre]) => !porTelefono(nombre)) || servicios[0])?.[2]);
+  mostrarPasoReserva(1, true);
 }
 
 // ══════════════════════════════════════════════════
@@ -1321,7 +1366,6 @@ function pintarHorario() {
 //  RESERVA ONLINE
 // ══════════════════════════════════════════════════
 let selectedSlot = null;
-let peticionHoras = 0;
 const MAX_SERVICIOS = 3;
 
 // "1 h 30 min", "45 min"
@@ -1391,17 +1435,14 @@ function anadirServicio(id) {
 }
 
 function prepararFormulario() {
-  const btn = document.getElementById('btnReservar');
   const lista = document.getElementById('serviciosElegidos');
   lista.innerHTML = '';
   if (!EN_LINEA) {
-    lista.innerHTML = '<select disabled><option>Reserva online no disponible ahora mismo</option></select>';
-    btn.disabled = true;
-    document.getElementById('btnOtroServicio').hidden = true;
-    mensajeHoras('Ahora mismo no podemos enseñarte las horas libres. Llámanos o escríbenos por WhatsApp al 665 08 50 53 y te damos cita.', true);
-    return;
+    let id = 0;
+    CATALOGO.forEach(categoria => {
+      categoria.servicios = categoria.servicios.map(([nombre, precio]) => [nombre, precio, ++id, 30, categoria.seccion]);
+    });
   }
-  btn.disabled = false;
   anadirServicio();
   const hoy = new Date(), max = new Date(); max.setDate(max.getDate() + 90);
   const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -1441,45 +1482,17 @@ function alCambiarServicios() {
   document.getElementById('resumenServicios').textContent = elegidos.length > 1
     ? `${elegidos.length} servicios seguidos, en este orden · ${duracionTexto(total)} en total · ${euros(Math.round(precio * 100) / 100)}`
     : elegidos.length ? `Dura ${duracionTexto(total)}` : '';
+  document.getElementById('reservaMechas').hidden = !elegidos.some(x => porTelefono(x.servicio.nombre));
   selectedSlot = null;
   cargarHoras();
 }
 
-async function cargarHoras() {
-  const n = ++peticionHoras;   // cualquier búsqueda anterior que llegue tarde se descarta
+function cargarHoras() {
   const elegidos = serviciosElegidos();
   const fecha = document.getElementById('fecha').value;
-  // Sale nada más elegirlas, sin esperar a que pongan el día
-  if (elegidos.some(x => porTelefono(x.servicio.nombre))) { selectedSlot = null; return mensajeHoras(AVISO_TELEFONO, true); }
-  if (!elegidos.length || !fecha) { selectedSlot = null; return mensajeHoras('Elige un servicio y un día para ver las horas libres.'); }
-  const sinEquipo = filasServicio().find(f => f.classList.contains('sin-equipo'));
-  if (sinEquipo) {
-    selectedSlot = null;
-    const nombre = buscarServicio(Number(sinEquipo.querySelector('.srv-select').value)).nombre;
-    return mensajeHoras(`«${esc(nombre)}» no se puede reservar online ahora mismo. Quítalo o llámanos y te damos cita.`, true);
-  }
-  const dia = HORARIO.find(d => d.dia === new Date(fecha + 'T12:00:00').getDay());
-  if (!dia || !dia.abierto || CERRADOS.has(fecha)) { selectedSlot = null; return mensajeHoras('Ese día el salón está cerrado. Elige otro día, por favor.', true); }
-
-  mensajeHoras('Buscando horas libres…');
-  let horas;
-  try {
-    horas = await api('rpc/disponibilidad_cita', {
-      p_servicios: elegidos.map(x => ({ servicio_id: x.servicio.id, trabajadora_id: x.trabajadora })),
-      p_fecha: fecha,
-    });
-  } catch {
-    if (n === peticionHoras) mensajeHoras('No hemos podido consultar las horas. Revisa tu conexión e inténtalo de nuevo.', true);
-    return;
-  }
-  if (n !== peticionHoras) return;   // ya se ha pedido otro día u otros servicios
-  if (!horas.length) {
-    selectedSlot = null;
-    const conAlguien = elegidos.some(x => x.trabajadora);
-    return mensajeHoras(`No quedan horas libres ese día para ${elegidos.length > 1 ? 'todos estos servicios seguidos' : 'este servicio'}. Prueba con otro día` + (conAlguien ? ' o con «Sin preferencia».' : '.'), true);
-  }
-  if (!horas.includes(selectedSlot)) selectedSlot = null;
-  pintarHoras(horas);
+  if (elegidos.some(x => porTelefono(x.servicio.nombre))) return mensajeHoras(AVISO_TELEFONO, true);
+  if (!elegidos.length || !fecha) return mensajeHoras('Elige un día para ver las horas de ejemplo.');
+  pintarHoras(['10:00', '10:30', '11:15', '12:00', '12:45', '13:30']);
 }
 
 function pintarHoras(horas) {
@@ -1495,7 +1508,11 @@ function pintarHoras(horas) {
     el.setAttribute('tabindex', '0');
     el.setAttribute('aria-label', slot);
     el.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
-    const pick = () => { selectedSlot = slot; pintarHoras(horas); };
+    const pick = () => {
+      selectedSlot = slot;
+      pintarHoras(horas);
+      [...grid.children].find(elemento => elemento.getAttribute('aria-pressed') === 'true')?.focus();
+    };
     el.addEventListener('click',   pick);
     el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
     grid.appendChild(el);
@@ -1526,6 +1543,58 @@ function otraCita() {
   document.getElementById('bookingOk').hidden = true;
   document.getElementById('bookingForm').hidden = false;
 }
+
+
+let pasoReserva = 1;
+function mostrarPasoReserva(paso, enfocar = false) {
+  pasoReserva = paso;
+  const form = document.getElementById('bookingForm');
+  const panels = form.querySelectorAll('[data-reserva-paso]');
+  panels.forEach((panel, i) => { panel.hidden = i + 1 !== paso; });
+  form.querySelectorAll('.reserva-pasos li').forEach((li, i) => {
+    if (i + 1 === paso) li.setAttribute('aria-current', 'step');
+    else li.removeAttribute('aria-current');
+  });
+  document.getElementById('reservaVolver').hidden = paso === 1;
+  const siguiente = document.getElementById('reservaSiguiente');
+  siguiente.hidden = paso === 3;
+  siguiente.textContent = paso === 2 ? 'Revisar cita' : 'Continuar';
+  if (paso === 3) {
+    const elegidos = serviciosElegidos();
+    const detalle = elegidos.map(({ servicio, trabajadora }) => {
+      const nombre = TRABAJADORAS.find(persona => Number(persona.id) === trabajadora)?.nombre;
+      return servicio.nombre + ' · ' + (nombre || 'Sin preferencia');
+    });
+    const minutos = elegidos.reduce((total, { servicio }) => total + servicio.duracion, 0);
+    const precio = elegidos.reduce((total, { servicio }) => total + servicio.precio, 0);
+    document.getElementById('reservaResumenServicios').textContent = detalle.join(' / ') +
+      ' · ' + duracionTexto(minutos) + ' · ' + euros(Math.round(precio * 100) / 100);
+    document.getElementById('reservaResumenHora').textContent =
+      formatDate(document.getElementById('fecha').value) + ' a las ' + selectedSlot;
+  }
+  if (enfocar) panels[paso - 1].querySelector('h3').focus();
+}
+
+document.getElementById('reservaSiguiente').addEventListener('click', () => {
+  if (pasoReserva === 1) {
+    const elegidos = serviciosElegidos();
+    if (!elegidos.length) return showAlert('bookingAlert', 'error', 'Elige un servicio para continuar.');
+    if (elegidos.some(x => porTelefono(x.servicio.nombre))) {
+      return showAlert('bookingAlert', 'error', 'Las mechas se reservan por teléfono.');
+    }
+  }
+  if (pasoReserva === 2) {
+    const fecha = document.getElementById('fecha');
+    if (!fecha.value || !fecha.checkValidity() || !selectedSlot) {
+      return showAlert('bookingAlert', 'error', 'Elige un día válido y una hora para continuar.');
+    }
+  }
+  mostrarPasoReserva(pasoReserva + 1, true);
+});
+document.getElementById('reservaVolver').addEventListener('click', () => mostrarPasoReserva(pasoReserva - 1, true));
+document.querySelectorAll('[data-reserva-ir]').forEach(button => {
+  button.addEventListener('click', () => mostrarPasoReserva(Number(button.dataset.reservaIr), true));
+});
 
 function formatDate(fechaStr) {
   const d = new Date(fechaStr + 'T12:00:00');

@@ -32,7 +32,7 @@
     --error:     #C0504D;
     --success:   #5F8A6B;
     --aviso:     #9A7B3F;
-    --tabs:      calc(60px + env(safe-area-inset-bottom));
+    --tabs:      calc(70px + env(safe-area-inset-bottom));
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { -webkit-text-size-adjust: 100%; }
@@ -193,6 +193,14 @@
 
   .toast { position: fixed; left: 16px; right: 16px; bottom: calc(var(--tabs) + 16px); z-index: 30; background: var(--charcoal); color: var(--white);
            border-radius: 8px; padding: 12px 14px; font-size: .92rem; text-align: center; box-shadow: 0 4px 14px rgba(0,0,0,.2); }
+
+  .proxima-cita { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:3px 10px; text-align:left; width:100%; padding:11px 14px; margin:0 0 10px; border:1px solid #dfbdb6; border-radius:10px; background:#f8eeea; color:var(--charcoal); }
+  .proxima-cita > :not(b) { grid-column:1; overflow-wrap:anywhere; }
+  .proxima-cita > span { color:#784541; font-size:.8rem; font-weight:700; }
+  .proxima-cita small { color:var(--mid); }
+  .proxima-cita b { grid-column:2; grid-row:1/4; align-self:center; font-size:1.45rem; color:#854b47; }
+  .tabs button { min-height:69px; justify-content:center; padding:7px 4px; }
+  .tabs button small { font-size:.68rem; line-height:1.1; color:var(--mid); }
 </style>
 </head>
 <body>
@@ -222,7 +230,6 @@
   <header>
     <div class="fila">
       <div class="hola" id="hola"></div>
-      <button class="recargar" id="btnRecargar" type="button" aria-label="Actualizar">↻</button>
       <button class="salir" id="btnSalir" type="button">Salir</button>
     </div>
     <div id="controlesAgenda">
@@ -250,7 +257,7 @@
 
   <nav class="tabs" id="tabs" aria-label="Secciones">
     <button type="button" data-tab="agenda" aria-pressed="true"><span aria-hidden="true">📅</span>Agenda</button>
-    <button type="button" data-tab="fichar" aria-pressed="false"><span aria-hidden="true">⏱</span>Fichar</button>
+    <button type="button" data-tab="fichar" aria-pressed="false"><span aria-hidden="true">⏱</span>Fichar<small id="estadoFichajeTab" hidden></small></button>
   </nav>
 </div>
 
@@ -385,6 +392,8 @@ function guardarVista() { escribir(LS_VISTA, { modo: vista.modo, filtro: vista.f
 
 // ── Entrada ──
 function mostrarLogin(mensaje) {
+  $('estadoFichajeTab').hidden = true;
+  $('estadoFichajeTab').textContent = '';
   $('pantallaApp').hidden = true;
   $('pantallaLogin').hidden = false;
   $('errorLogin').hidden = !mensaje;
@@ -424,6 +433,7 @@ async function empezar() {
   $('pantallaApp').hidden = false;
   cambiarTab('agenda');
   await cargar(true);
+  cargarEstadoFichaje();
 }
 
 function cambiarTab(tab) {
@@ -525,7 +535,7 @@ function pintar() {
   if (vista.filtro !== 'todas' && datos && !persona(vista.filtro)) vista.filtro = 'todas';
   $('chips').innerHTML = [`<button class="chip" type="button" data-filtro="todas" aria-pressed="${vista.filtro === 'todas'}">Todas</button>`]
     .concat(personal.map(p => `<button class="chip" type="button" data-filtro="${p.id}" aria-pressed="${vista.filtro === p.id}">` +
-      `<span class="punto" style="background:${esc(p.color)}"></span>${esc(p.nombre)}${p.id === yo?.trabajadora_id ? ' (tú)' : ''}</button>`)).join('');
+      `<span class="punto" style="background:${esc(p.color)}"></span>${p.id === yo?.trabajadora_id ? 'Mi agenda' : esc(p.nombre)}</button>`)).join('');
 
   if (!datos) { $('contenido').innerHTML = '<p class="vacio">No se ha podido cargar la agenda.</p>'; return; }
   $('contenido').innerHTML = vista.modo === 'dia' ? pintarDia(vista.fecha) : pintarSemana();
@@ -546,9 +556,35 @@ function tarjetaDia(fecha) {
     `</div>`;
 }
 
+function agendaDesactualizada() {
+  const publicada = Date.parse(datos?.publicada);
+  return !Number.isFinite(publicada) || Date.now() - publicada > 15 * 60000;
+}
+
+function proximaCitaPropia(fecha, citas) {
+  if (fecha !== hoy() || !yo?.trabajadora_id || vista.filtro !== yo.trabajadora_id || agendaDesactualizada()) return null;
+  const ahora = enMinutos(horaDe(new Date()));
+  return citas.find(cita => !anulada(cita) && enMinutos(cita.horas?.[0]) >= ahora) || null;
+}
+
+function tarjetaProxima(cita) {
+  const nombre = [cita.cliente_nombre, cita.cliente_apellido].filter(Boolean).join(' ') || 'Sin nombre';
+  return `<button class="proxima-cita" type="button" data-proxima="${esc(cita.id)}" aria-haspopup="dialog">
+    <span>Tu próxima cita</span>
+    <strong>${esc(hm(cita.horas[0]))} · ${esc(nombre)}</strong>
+    ${cita.servicios ? `<small>${esc(cita.servicios)}</small>` : ''}
+    <b aria-hidden="true">›</b>
+  </button>`;
+}
+
 function pintarDia(fecha) {
   const citas = citasDe(fecha);
-  return tarjetaDia(fecha) + (citas.length ? citas.map(tarjetaCita).join('') : '<p class="vacio">No hay citas.</p>');
+  const proxima = proximaCitaPropia(fecha, citas);
+  const mensaje = agendaDesactualizada() && !horarioDe(fecha)?.cerrado
+    ? 'No hay citas sincronizadas para este día.'
+    : 'No hay citas.';
+  return tarjetaDia(fecha) + (proxima ? tarjetaProxima(proxima) : '') +
+    (citas.length ? citas.map(tarjetaCita).join('') : `<p class="vacio">${mensaje}</p>`);
 }
 
 function textoPendiente(c) {
@@ -616,14 +652,13 @@ function pintarSemana() {
 // Cuándo envió datos el ordenador del salón por última vez (lo hace cada minuto si está encendido)
 function pintarPie() {
   const f = datos?.publicada ? new Date(datos.publicada) : null;
-  if (!f) { $('pie').textContent = 'El ordenador del salón todavía no ha enviado la agenda.'; return; }
-  const min = Math.round((Date.now() - f) / 60000);
+  if (!f || !Number.isFinite(f.getTime())) { $('pie').textContent = 'El ordenador del salón todavía no ha enviado la agenda.'; return; }
   const cuando = f.toDateString() === new Date().toDateString()
     ? `hoy a las ${horaDe(f)}`
     : f.toLocaleString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-  $('pie').innerHTML = min > 15
+  $('pie').innerHTML = agendaDesactualizada()
     ? `<span class="aviso">El ordenador del salón no envía cambios desde ${esc(cuando)}: puede que falten las citas más recientes, y lo que hagáis desde el móvil no llegará a su agenda hasta que se encienda.</span>`
-    : `Agenda al día (ordenador del salón: ${esc(cuando)}).`;
+    : `Agenda al día · Último envío del salón: ${esc(cuando)}.`;
 }
 
 // ══════════════════════════════════════════════════
@@ -910,6 +945,39 @@ function jornadas(lista) {
   });
 }
 
+let consultaEstadoFichaje = null;
+let versionEstadoFichaje = 0;
+
+function pintarEstadoFichaje(registros, dia = hoy()) {
+  const estado = $('estadoFichajeTab');
+  estado.hidden = !yo?.trabajadora_id;
+  if (estado.hidden) return;
+  const ultimo = jornadas(registros).find(jornada => jornada.dia === dia)?.validos
+    .filter(fichaje => fichaje.tipo === 'entrada' || fichaje.tipo === 'salida').at(-1);
+  estado.textContent = ultimo
+    ? (ultimo.tipo === 'entrada' ? 'Entrada' : 'Salida') + ' a las ' + horaDe(new Date(ultimo.momento))
+    : 'Sin fichar hoy';
+}
+
+function cargarEstadoFichaje() {
+  if (!yo?.trabajadora_id || !sesion) return;
+  const dia = hoy();
+  const usuario = yo;
+  if (consultaEstadoFichaje?.dia === dia && consultaEstadoFichaje.usuario === usuario) return;
+  const version = ++versionEstadoFichaje;
+  consultaEstadoFichaje = { dia, usuario };
+  rpc('mis_fichajes', { p_desde: dia, p_hasta: dia }).then(registros => {
+    if (yo === usuario && sesion && versionEstadoFichaje === version && hoy() === dia) pintarEstadoFichaje(registros, dia);
+  }).catch(() => {
+    if (yo === usuario && sesion && versionEstadoFichaje === version) {
+      $('estadoFichajeTab').hidden = false;
+      $('estadoFichajeTab').textContent = 'Sin confirmar';
+    }
+  }).finally(() => {
+    if (consultaEstadoFichaje?.dia === dia && consultaEstadoFichaje.usuario === usuario) consultaEstadoFichaje = null;
+  });
+}
+
 async function cargarFichajes() {
   // Cada fichaje va a nombre de una trabajadora: el usuario del salón no ficha
   if (!yo?.trabajadora_id) {
@@ -923,11 +991,19 @@ async function cargarFichajes() {
       </div>`;
     return;
   }
+  const usuario = yo;
   const [a, m] = mesFichajes.split('-').map(Number);
   const desde = `${mesFichajes}-01`, hasta = iso(new Date(a, m, 0));
   pintarFichar(true);
   try {
-    fichajes = await rpc('mis_fichajes', { p_desde: desde, p_hasta: hasta });
+    const registros = await rpc('mis_fichajes', { p_desde: desde, p_hasta: hasta });
+    if (yo !== usuario || mesFichajes !== desde.slice(0, 7) || !sesion) return;
+    fichajes = registros;
+    const dia = hoy();
+    if (desde <= dia && dia <= hasta) {
+      versionEstadoFichaje++;
+      pintarEstadoFichaje(fichajes, dia);
+    }
     pintarFichar();
   } catch (err) {
     if (err instanceof SinSesion) { mostrarLogin(textoError(err)); return; }
@@ -999,7 +1075,6 @@ document.querySelectorAll('[data-tab]').forEach(b => b.addEventListener('click',
 $('btnAntes').addEventListener('click', () => { vista.fecha = masDias(vista.fecha, vista.modo === 'dia' ? -1 : -7); cargar(); });
 $('btnDespues').addEventListener('click', () => { vista.fecha = masDias(vista.fecha, vista.modo === 'dia' ? 1 : 7); cargar(); });
 $('btnHoy').addEventListener('click', () => { vista.fecha = hoy(); cargar(); });
-$('btnRecargar').addEventListener('click', () => { vista.tab === 'agenda' ? cargar(true) : cargarFichajes(); });
 $('btnSalir').addEventListener('click', salir);
 $('btnNueva').addEventListener('click', () => { if (datos) abrirNuevaCita(); });
 $('chips').addEventListener('click', e => {
@@ -1011,6 +1086,17 @@ function tocarContenido(e) {
   if (e.target.closest('a')) return;   // el teléfono abre la llamada
   const d = e.target.closest('[data-dia]');
   if (d) { vista.fecha = d.dataset.dia; vista.modo = 'dia'; guardarVista(); pintar(); window.scrollTo(0, 0); return; }
+  const proxima = e.target.closest('[data-proxima]');
+  if (proxima) {
+    const cita = datos?.citas.find(x => String(x.id) === proxima.dataset.proxima);
+    if (cita && editable(cita)) abrirAcciones(cita);
+    else if (cita) abrirHoja('Cita', `<div class="ficha">
+      <strong>${esc([cita.cliente_nombre, cita.cliente_apellido].filter(Boolean).join(' ') || 'Sin nombre')}</strong>
+      <span>${esc(hm(cita.horas[0]))} – ${esc(finDe(cita.horas))}</span>
+      <span>${esc(cita.servicios || '')}</span>
+    </div>`);
+    return;
+  }
   const c = e.target.closest('[data-cita]');
   if (c) { const cita = datos?.citas.find(x => x.id === c.dataset.cita); if (cita) abrirAcciones(cita); }
 }
@@ -1020,9 +1106,16 @@ $('contenido').addEventListener('keydown', e => { if (e.key === 'Enter' && e.tar
 // Se pone al día al volver a la app y cada minuto mientras está abierta (no si hay un formulario abierto)
 function ponerAlDia() {
   if (document.hidden || !yo || !sesion || hojaAbierta) return;
-  vista.tab === 'agenda' ? cargar(true) : cargarFichajes();
+  if (vista.tab === 'agenda') {
+    cargar(true);
+    cargarEstadoFichaje();
+  } else {
+    cargarFichajes();
+    if (mesFichajes !== hoy().slice(0, 7)) cargarEstadoFichaje();
+  }
 }
 document.addEventListener('visibilitychange', ponerAlDia);
+window.addEventListener('online', ponerAlDia);
 setInterval(ponerAlDia, 60000);
 setInterval(() => { const r = $('relojAhora'); if (r) r.textContent = horaDe(new Date()); }, 10000);
 

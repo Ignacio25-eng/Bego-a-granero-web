@@ -674,14 +674,19 @@
   .agenda-cal-cabecera button:disabled { opacity: .45; cursor: default; }
   .agenda-cal-semana, .agenda-cal-dias { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: clamp(2px, .65vw, 6px); }
   .agenda-cal-semana { text-align: center; color: var(--light); font-size: clamp(.6rem, 1.5vw, .76rem); margin-bottom: .4rem; }
-  .agenda-cal-dias button { min-width: 0; min-height: clamp(35px, 6vw, 44px); padding: 0; border: 1px solid transparent; border-radius: 6px; font: 700 .83rem 'DM Sans', sans-serif; color: #231b1b; background: #fffaf4; cursor: pointer; scroll-margin-top: 100px; }
-  .agenda-cal-dias button:disabled { background: #353033; color: #b3a8ac; cursor: default; }
+  .agenda-cal-dias button { min-width: 0; min-height: clamp(35px, 6vw, 44px); padding: 0; border: 1px solid transparent; border-radius: 6px; font: 700 .83rem 'DM Sans', sans-serif; color: #231b1b; background: var(--agenda-disponible); cursor: pointer; scroll-margin-top: 100px; }
+  .agenda-calendario { --agenda-disponible: #fffaf4; --agenda-cerrado: #413b3f; --agenda-completo: #9d353f; }
+  .agenda-cal-dias button:disabled { background: transparent; color: #a99da3; cursor: default; }
+  .agenda-cal-dias button[data-estado="Cerrado"] { background: var(--agenda-cerrado); color: #e6dce0; }
+  .agenda-cal-dias button[data-estado="Completo"] { background: var(--agenda-completo); color: #fff4f3; }
   .agenda-cal-dias button[aria-pressed="true"] { background: var(--gold); color: var(--cta-ink); }
   .agenda-cal-dias button:not(:disabled):hover { border-color: #a66c32; }
   .agenda-cal-leyenda { display: flex; flex-wrap: wrap; gap: .25rem .8rem; margin: .7rem 0 .3rem; color: var(--mid); font-size: .73rem; }
   .agenda-cal-leyenda span { display: flex; align-items: center; gap: .3rem; }
-  .agenda-cal-leyenda i { width: .65rem; height: .65rem; background: #fffaf4; border-radius: 2px; }
-  .agenda-cal-leyenda span + span i { background: #777075; }
+  .agenda-cal-leyenda i { width: .65rem; height: .65rem; border: 1px solid #ffffff30; border-radius: 2px; }
+  .agenda-cal-muestra-disponible { background: var(--agenda-disponible); }
+  .agenda-cal-muestra-cerrado { background: var(--agenda-cerrado); }
+  .agenda-cal-muestra-completo { background: var(--agenda-completo); }
   .agenda-cal-ayuda { color: var(--light); font-size: .75rem; margin: 0; }
 
   #bookingForm .agenda-primera {
@@ -971,7 +976,11 @@
             </div>
             <div class="agenda-cal-semana" aria-hidden="true"><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span></div>
             <div class="agenda-cal-dias" id="agendaDias"></div>
-            <p class="agenda-cal-leyenda"><span><i aria-hidden="true"></i> Disponible</span><span><i aria-hidden="true"></i> Completo o cerrado</span></p>
+            <p class="agenda-cal-leyenda">
+              <span><i class="agenda-cal-muestra-disponible" aria-hidden="true"></i> Disponible</span>
+              <span><i class="agenda-cal-muestra-cerrado" aria-hidden="true"></i> Cerrado o festivo</span>
+              <span><i class="agenda-cal-muestra-completo" aria-hidden="true"></i> Completo</span>
+            </p>
             <p id="agendaCalAyuda" class="agenda-cal-ayuda" aria-live="polite"></p>
           </div>
         </div>

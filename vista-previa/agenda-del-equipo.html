@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Maqueta de la agenda · Begoña Granero</title>
+  <style>body{margin:0;background:#f8f5f0}</style>
+</head>
+<body>
+<style>
+#salon-agenda{--paper:#f8f5f0;--panel:#fffefa;--ink:#2b2320;--soft:#6d5f56;--line:#e5dbcf;--gold:#82511f;--gold-bg:#f4ddbc;--green:#376353;--rose:#f5e2e0;--sage:#e0ede8;--blue:#e4ecf4;background:var(--paper);color:var(--ink);font:14px/1.45 system-ui,sans-serif;color-scheme:light}
+#salon-agenda *{box-sizing:border-box}
+#salon-agenda [hidden]{display:none!important}
+#salon-agenda button,#salon-agenda select,#salon-agenda input{font:inherit;color:inherit}
+#salon-agenda button,#salon-agenda select{min-height:38px;padding:.4rem .7rem;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+#salon-agenda button:disabled{opacity:.55}
+#salon-agenda button[aria-pressed=true]{background:#322722;color:#fff;border-color:#322722}
+#salon-agenda .primary{background:var(--gold-bg);border-color:#d8a66e;color:#392416;font-weight:700}
+#salon-agenda .top,#salon-agenda .bottom{display:flex;align-items:center;justify-content:space-between;gap:.65rem;flex-wrap:wrap;padding:.65rem clamp(.75rem,3vw,1.6rem);background:var(--panel)}
+#salon-agenda .top{border-bottom:1px solid var(--line)}
+#salon-agenda .bottom{border-top:1px solid var(--line);justify-content:center}
+#salon-agenda .brand{font:1.2rem Georgia,serif}
+#salon-agenda .brand small{display:block;font:600 .65rem system-ui;color:var(--gold);letter-spacing:.12em;text-transform:uppercase}
+#salon-agenda .mock-control{display:flex;gap:.5rem;align-items:center;color:var(--soft);font-size:.75rem;flex-wrap:wrap}
+#salon-agenda main{padding:clamp(.75rem,3vw,1.6rem)}
+#salon-agenda .toolbar,#salon-agenda .tools,#salon-agenda .filters,#salon-agenda .sync{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap}
+#salon-agenda .toolbar{justify-content:space-between;gap:.8rem}
+#salon-agenda h2,#salon-agenda h3,#salon-agenda p{margin:0}
+#salon-agenda h2{font:clamp(1.5rem,3.5vw,2.1rem)/1.15 Georgia,serif}
+#salon-agenda h2:first-letter{text-transform:uppercase}
+#salon-agenda .hours{color:var(--soft);font-size:.82rem;margin-top:.2rem}
+#salon-agenda .filters{margin:.85rem 0}
+#salon-agenda .sync{justify-content:space-between;gap:.65rem;background:#ebf2ed;border:1px solid #cbded2;border-radius:9px;padding:.55rem .7rem;color:var(--green);margin:0 0 .9rem;font-size:.82rem}
+#salon-agenda .sync[data-tarde=true]{background:#fff0d9;border-color:#e9cf9f;color:#6e4216}
+#salon-agenda .sync strong{display:block}
+#salon-agenda .sync button{background:#ffffffa0}
+#salon-agenda .agenda{border:1px solid var(--line);border-radius:10px;background:var(--panel);overflow:hidden}
+#salon-agenda .dia-grid{display:grid;grid-template-columns:3.6rem repeat(var(--columnas),minmax(0,1fr));grid-template-rows:auto repeat(20,24px) auto}
+#salon-agenda .columna{grid-row:1;padding:.6rem .5rem;text-align:center;font-size:.82rem;font-weight:700;border-bottom:1px solid var(--line);border-left:1px solid var(--line)}
+#salon-agenda .hora-label{grid-column:1;padding:.15rem .35rem;font-size:.68rem;color:var(--soft);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+#salon-agenda .hora-linea{grid-column:2/-1;border-top:1px solid #eee7df;pointer-events:none}
+#salon-agenda .cita{z-index:1;align-self:stretch;margin:2px 4px;padding:.22rem .38rem;border-radius:5px;border-left:3px solid #9e665d;background:var(--rose);overflow-wrap:anywhere;font-size:.75rem;line-height:1.14}
+#salon-agenda .cita[data-equipo="1"]{background:var(--sage);border-color:#517b6a}
+#salon-agenda .cita[data-equipo="2"]{background:var(--blue);border-color:#587a9e}
+#salon-agenda .cita strong,#salon-agenda .cita b{display:block}
+#salon-agenda .cita small{font-size:.64rem;color:var(--soft)}
+#salon-agenda .lista-dia{display:none}
+#salon-agenda .semana{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+#salon-agenda .semana section{min-height:104px;padding:.5rem;border-right:1px solid var(--line)}
+#salon-agenda .semana section:last-child{border:0}
+#salon-agenda .semana h3{font-size:.8rem;margin-bottom:.4rem}
+#salon-agenda .semana .cita{margin:.25rem 0}
+#salon-agenda .vacio,#salon-agenda .fichaje{padding:1.35rem}
+#salon-agenda .vacio p,#salon-agenda .fichaje p{color:var(--soft);margin:.35rem 0}
+#salon-agenda dialog{width:min(410px,calc(100% - 24px));border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);padding:1rem}
+#salon-agenda dialog::backdrop{background:#2b232066}
+#salon-agenda dialog form,#salon-agenda dialog label{display:grid;gap:.45rem}
+#salon-agenda dialog form{gap:.8rem}
+#salon-agenda dialog input{min-width:0;padding:.4rem .6rem;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+#salon-agenda .dialog-actions{display:flex;justify-content:end;gap:.5rem}
+@media(max-width:660px){
+  #salon-agenda .dia-grid{display:none}
+  #salon-agenda .lista-dia{display:grid;gap:.4rem;padding:.55rem}
+  #salon-agenda .lista-dia .cita{padding:.5rem;font-size:.82rem}
+  #salon-agenda .semana{grid-template-columns:1fr}
+  #salon-agenda .semana section{min-height:0;border-right:0;border-bottom:1px solid var(--line)}
+  #salon-agenda button,#salon-agenda select{min-height:44px}
+}
+</style>
+<div id="salon-agenda" lang="es">
+  <header class="top">
+    <div class="brand">Begoña Granero<small>Agenda del equipo</small></div>
+    <label class="mock-control">Estado de ejemplo <select id="sa-estado"><option value="ok">Sincronizada</option><option value="tarde">Sin actualizar</option></select></label>
+  </header>
+  <main>
+    <div id="sa-agenda">
+      <div class="toolbar">
+        <div><h2 id="sa-fecha">Viernes, 27 de noviembre</h2><p class="hours" id="sa-horario">10:00–20:00</p></div>
+        <div class="tools">
+          <button id="sa-anterior" type="button" aria-label="Periodo anterior">‹</button>
+          <button id="sa-hoy" type="button">Hoy</button>
+          <button id="sa-siguiente" type="button" aria-label="Periodo siguiente">›</button>
+          <button id="sa-dia" type="button" aria-pressed="true">Día</button>
+          <button id="sa-semana" type="button" aria-pressed="false">Semana</button>
+          <button id="sa-nueva" class="primary" type="button">+ Nueva cita</button>
+        </div>
+      </div>
+      <div class="filters" aria-label="Filtrar la agenda">
+        <button id="sa-mia" type="button" aria-pressed="false">Mi agenda</button>
+        <button id="sa-todas" type="button" aria-pressed="true">Todas</button>
+        <select id="sa-profesional" aria-label="Filtrar por profesional"><option value="">Por profesional</option><option value="0">Alba (tú)</option><option value="1">Irene</option><option value="2">Clara</option></select>
+      </div>
+      <div class="sync" id="sa-sync"><div aria-live="polite"><strong id="sa-sync-titulo"></strong><p id="sa-sync-texto"></p></div><button id="sa-actualizar" type="button">Actualizar</button></div>
+      <div id="sa-vista" class="agenda" aria-label="Citas de ejemplo"></div>
+    </div>
+    <section id="sa-fichaje" class="agenda fichaje" hidden>
+      <h2>Fichar</h2><p id="sa-ficha-estado" aria-live="polite">Sin entrada registrada en la maqueta.</p>
+      <button id="sa-fichar" class="primary" type="button">Simular entrada</button>
+    </section>
+  </main>
+  <nav class="bottom" aria-label="Área de trabajo">
+    <button id="sa-nav-agenda" type="button" aria-pressed="true">Agenda</button>
+    <button id="sa-nav-fichar" type="button" aria-pressed="false">Fichar</button>
+  </nav>
+  <dialog id="sa-dialog" aria-labelledby="sa-dialog-titulo">
+    <form id="sa-form">
+      <h3 id="sa-dialog-titulo">Nueva cita de ejemplo</h3>
+      <label>Servicio<input id="sa-servicio" required maxlength="42" placeholder="Ej. Manicura"></label>
+      <label>Profesional<select id="sa-persona"><option value="0">Alba</option><option value="1">Irene</option><option value="2">Clara</option></select></label>
+      <label>Hora<input id="sa-hora" type="time" min="10:00" max="19:00" step="1800" value="12:00" required></label>
+      <div class="dialog-actions"><button id="sa-cancelar" type="button">Cancelar</button><button class="primary" type="submit">Añadir a la maqueta</button></div>
+    </form>
+  </dialog>
+</div>
+<script>
+(() => {
+  const root = document.getElementById('salon-agenda');
+  const el = id => root.querySelector('#sa-' + id);
+  const hoy = new Date(2026, 10, 27, 12);
+  const equipo = ['Alba', 'Irene', 'Clara'];
+  const citas = [
+    {offset: 0, equipo: 0, media: 0, duracion: 2, servicio: 'Corte y peinado'},
+    {offset: 0, equipo: 1, media: 2, duracion: 3, servicio: 'Color y lavado'},
+    {offset: 0, equipo: 2, media: 3, duracion: 2, servicio: 'Manicura'},
+    {offset: 0, equipo: 0, media: 10, duracion: 2, servicio: 'Tratamiento capilar'},
+    {offset: 0, equipo: 2, media: 13, duracion: 2, servicio: 'Bioterapia facial'},
+    {offset: -2, equipo: 1, media: 5, duracion: 2, servicio: 'Peinado'},
+    {offset: 1, equipo: 0, media: 1, duracion: 2, servicio: 'Corte'},
+    {offset: 4, equipo: 2, media: 12, duracion: 2, servicio: 'Pedicura'},
+  ];
+  const fechaLarga = new Intl.DateTimeFormat('es-ES', { weekday:'long', day:'numeric', month:'long' });
+  const fechaCorta = new Intl.DateTimeFormat('es-ES', { weekday:'short', day:'numeric' });
+  let offset = 0, vista = 'día', filtro = null, actualizado = false, registro = 'sin entrada';
+  const dia = n => new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + n, 12);
+  const reloj = media => (10 + Math.floor(media / 2)) + ':' + (media % 2 ? '30' : '00');
+  const abierto = n => ![0, 1].includes(dia(n).getDay());
+  const cierre = n => dia(n).getDay() === 6 ? 8 : 20;
+  function nodo(tag, clase, texto) {
+    const item = document.createElement(tag);
+    if (clase) item.className = clase;
+    if (texto) item.textContent = texto;
+    return item;
+  }
+  function citasDel(d) {
+    return citas.filter(c => c.offset === d && (filtro === null || c.equipo === filtro)).sort((a, b) => a.media - b.media);
+  }
+  function tarjeta(cita, listar) {
+    const card = nodo('article','cita');
+    card.dataset.equipo = cita.equipo;
+    card.append(nodo('small','',reloj(cita.media) + '–' + reloj(cita.media + cita.duracion)), nodo('strong','',cita.servicio));
+    if (listar) card.append(nodo('small','',equipo[cita.equipo]));
+    return card;
+  }
+  function pintarDia(contenido, lista) {
+    if (!lista.length) {
+      const empty = nodo('div','vacio');
+      const tarde = el('estado').value === 'tarde';
+      empty.append(nodo('strong','',!abierto(offset) ? 'Salón cerrado' : tarde ? 'No hay citas sincronizadas para este día.' : 'No hay citas programadas.'));
+      if (tarde && abierto(offset)) empty.append(nodo('p','','Puede haber cambios pendientes del ordenador del salón.'));
+      contenido.append(empty);
+      return;
+    }
+    const columnas = filtro === null ? [0, 1, 2] : [filtro];
+    const grid = nodo('div','dia-grid');
+    const mitad = cierre(offset);
+    grid.style.setProperty('--columnas', columnas.length);
+    grid.style.gridTemplateRows = 'auto repeat(' + mitad + ', 24px) auto';
+    columnas.forEach((i, j) => {
+      const h = nodo('div','columna',equipo[i] + (i === 0 ? ' (tú)' : ''));
+      h.style.gridColumn = j + 2;
+      grid.append(h);
+    });
+    for (let n = 0; n <= mitad; n += 2) {
+      const hora = nodo('div','hora-label',reloj(n));
+      const linea = nodo('div','hora-linea');
+      hora.style.gridRow = linea.style.gridRow = n + 2;
+      grid.append(hora, linea);
+    }
+    const movil = nodo('div','lista-dia');
+    lista.forEach(cita => {
+      const card = tarjeta(cita, false);
+      card.style.gridColumn = columnas.indexOf(cita.equipo) + 2;
+      card.style.gridRow = (cita.media + 2) + ' / span ' + cita.duracion;
+      grid.append(card);
+      movil.append(tarjeta(cita, true));
+    });
+    contenido.append(grid, movil);
+  }
+  function pintar() {
+    const tarde = el('estado').value === 'tarde';
+    el('sync').dataset.tarde = tarde;
+    el('sync-titulo').textContent = tarde ? 'Sin actualizar desde el ordenador del salón' : 'Agenda sincronizada';
+    el('sync-texto').textContent = tarde ? (actualizado ? 'Sin cambios. Último envío de ejemplo: 21 nov., 22:47.' : 'Último envío de ejemplo: 21 nov., 22:47. Algunas citas podrían faltar.') : (actualizado ? 'Última comprobación de ejemplo: ahora.' : 'Última actualización de ejemplo: hoy a las 09:42.');
+    el('nueva').disabled = !abierto(offset);
+    el('mia').setAttribute('aria-pressed', String(filtro === 0));
+    el('todas').setAttribute('aria-pressed', String(filtro === null));
+    el('dia').setAttribute('aria-pressed', String(vista === 'día'));
+    el('semana').setAttribute('aria-pressed', String(vista === 'semana'));
+    el('profesional').value = filtro === null ? '' : String(filtro);
+    el('horario').textContent = abierto(offset) ? 'Horario del salón · 10:00–' + reloj(cierre(offset)) : 'Salón cerrado';
+    const contenido = el('vista');
+    contenido.replaceChildren();
+    if (vista === 'día') {
+      el('fecha').textContent = fechaLarga.format(dia(offset));
+      pintarDia(contenido, tarde ? [] : citasDel(offset));
+      return;
+    }
+    const lunes = offset - (dia(offset).getDay() + 6) % 7;
+    el('fecha').textContent = 'Semana del ' + fechaLarga.format(dia(lunes));
+    el('horario').textContent = tarde ? 'No hay citas sincronizadas para esta semana.' : 'Vista semanal del equipo';
+    const semana = nodo('div','semana');
+    for (let n = lunes; n < lunes + 7; n++) {
+      const cell = nodo('section');
+      cell.append(nodo('h3','',fechaCorta.format(dia(n))));
+      const lista = tarde ? [] : citasDel(n);
+      if (!lista.length) cell.append(nodo('p','hours',!abierto(n) ? 'Cerrado' : tarde ? 'Sin sincronizar' : 'Sin citas'));
+      lista.forEach(cita => cell.append(tarjeta(cita, true)));
+      semana.append(cell);
+    }
+    contenido.append(semana);
+  }
+  function escuchar(id, evento, fn) { el(id).addEventListener(evento, fn); }
+  escuchar('estado','change',() => { actualizado = false; pintar(); });
+  escuchar('actualizar','click',() => { actualizado = true; pintar(); });
+  escuchar('anterior','click',() => { offset -= vista === 'día' ? 1 : 7; pintar(); });
+  escuchar('siguiente','click',() => { offset += vista === 'día' ? 1 : 7; pintar(); });
+  escuchar('hoy','click',() => { offset = 0; pintar(); });
+  escuchar('dia','click',() => { vista = 'día'; pintar(); });
+  escuchar('semana','click',() => { vista = 'semana'; pintar(); });
+  escuchar('mia','click',() => { filtro = 0; pintar(); });
+  escuchar('todas','click',() => { filtro = null; pintar(); });
+  escuchar('profesional','change',event => { filtro = event.target.value === '' ? null : Number(event.target.value); pintar(); });
+  escuchar('nueva','click',() => {
+    el('form').reset();
+    el('persona').value = String(filtro ?? 0);
+    el('hora').max = reloj(cierre(offset) - 2);
+    el('dialog').showModal();
+  });
+  escuchar('cancelar','click',() => el('dialog').close());
+  escuchar('form','submit',event => {
+    event.preventDefault();
+    const servicio = el('servicio').value.trim();
+    if (!servicio) return el('servicio').focus();
+    const [h, m] = el('hora').value.split(':').map(Number);
+    const equipo = Number(el('persona').value);
+    const media = (h - 10) * 2 + m / 30;
+    if (citas.some(cita => cita.offset === offset && cita.equipo === equipo && media < cita.media + cita.duracion && media + 2 > cita.media)) {
+      el('hora').setCustomValidity('Esta hora se solapa con otra cita de ejemplo.');
+      el('hora').reportValidity();
+      el('hora').setCustomValidity('');
+      return;
+    }
+    citas.push({ offset, equipo, media, duracion: 2, servicio });
+    el('estado').value = 'ok';
+    el('dialog').close();
+    pintar();
+  });
+  function mostrarFichaje(ver) {
+    el('agenda').hidden = ver;
+    el('fichaje').hidden = !ver;
+    el('nav-agenda').setAttribute('aria-pressed', String(!ver));
+    el('nav-fichar').setAttribute('aria-pressed', String(ver));
+  }
+  escuchar('nav-agenda','click',() => mostrarFichaje(false));
+  escuchar('nav-fichar','click',() => mostrarFichaje(true));
+  escuchar('fichar','click',() => {
+    registro = registro === 'entrada' ? 'salida' : 'entrada';
+    el('ficha-estado').textContent = (registro === 'entrada' ? 'Entrada' : 'Salida') + ' registrada en la maqueta.';
+    el('fichar').textContent = registro === 'entrada' ? 'Simular salida' : 'Simular entrada';
+  });
+  pintar();
+})();
+</script>
+</body>
+</html>

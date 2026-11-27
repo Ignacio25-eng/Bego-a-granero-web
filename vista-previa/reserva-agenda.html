@@ -735,7 +735,6 @@
     .agenda-resumen-movil button { min-height: 44px; border: 0; padding: 0 .2rem; background: transparent; color: var(--gold); text-decoration: underline; cursor: pointer; }
   }
 
-  #agendaSelector label { display: block; margin-bottom: .3rem; }
   .agenda-categorias { display: flex; flex-wrap: wrap; gap: .4rem; margin: .75rem 0; }
   .agenda-categorias button { border: 1px solid var(--gold-light); border-radius: 999px; min-height: 34px; padding: .25rem .65rem; background: var(--cream); color: var(--charcoal); font: inherit; font-size: .78rem; cursor: pointer; }
   .agenda-categorias button[aria-pressed="true"] { background: var(--gold); color: var(--cta-ink); border-color: var(--gold); }
@@ -976,8 +975,6 @@
           <p id="agendaLimiteServicios" tabindex="-1" hidden>Has elegido 3 servicios.</p>
           <button type="button" class="btn-secondary agenda-anadir" id="btnOtroServicio" aria-controls="agendaSelector" hidden>+ Añadir otro servicio</button>
           <div id="agendaSelector">
-            <label for="agendaBuscarServicio">Buscar servicio</label>
-            <input type="search" id="agendaBuscarServicio" placeholder="Escribe corte, uñas, láser…" autocomplete="off" disabled>
             <div id="agendaCategorias" class="agenda-categorias" role="group" aria-label="Filtrar por categoría"></div>
             <p id="agendaResultadosEstado" class="agenda-resultados-estado" aria-live="polite">Cargando servicios…</p>
             <ul id="agendaResultados" class="agenda-resultados" aria-label="Resultados de servicios" hidden></ul>
@@ -1531,23 +1528,13 @@ function mensajeHoras(texto, error) {
 
 let categoriaAgenda = '';
 let seleccionAgendaPreparada = false;
-const buscadorAgenda = document.getElementById('agendaBuscarServicio');
 const selectorAgenda = document.getElementById('agendaSelector');
 const agendaCategorias = document.getElementById('agendaCategorias');
 const agendaResultados = document.getElementById('agendaResultados');
 const agendaEstado = document.getElementById('agendaResultadosEstado');
 const botonOtroServicio = document.getElementById('btnOtroServicio');
-const normalizarBusquedaAgenda = texto => texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-const palabrasAgenda = {
-  'Peinado': 'peluqueria pelo cabello',
-  'Color y Protección': 'tinte coloracion peluqueria',
-  'Bioterapia Manos': 'uñas manicura',
-  'Bioterapia Pies': 'uñas pedicura',
-};
-
 function abrirSelectorAgenda(categoria = '', enfocar = true) {
   categoriaAgenda = categoria;
-  buscadorAgenda.value = '';
   if (filasServicio().length >= MAX_SERVICIOS) {
     document.getElementById('agendaLimiteServicios').focus();
     return;
@@ -1555,19 +1542,18 @@ function abrirSelectorAgenda(categoria = '', enfocar = true) {
   selectorAgenda.hidden = false;
   botonOtroServicio.hidden = true;
   pintarResultadosAgenda();
-  if (enfocar) buscadorAgenda.focus();
+  if (enfocar) (agendaCategorias.querySelector('[aria-pressed="true"]') || agendaCategorias.querySelector('button'))?.focus();
 }
 
 function pintarCategoriasAgenda() {
   agendaCategorias.replaceChildren();
-  [{ seccion: '', menu: 'Todas' }, ...CATALOGO].forEach(({ seccion, menu }) => {
+  CATALOGO.forEach(({ seccion, menu }) => {
     const boton = document.createElement('button');
     boton.type = 'button';
     boton.textContent = menu;
     boton.dataset.categoriaAgenda = seccion;
     boton.addEventListener('click', () => {
       categoriaAgenda = seccion;
-      buscadorAgenda.value = '';
       pintarResultadosAgenda();
     });
     agendaCategorias.append(boton);
@@ -1576,14 +1562,9 @@ function pintarCategoriasAgenda() {
 
 function pintarResultadosAgenda() {
   if (!seleccionAgendaPreparada) return;
-  const consulta = normalizarBusquedaAgenda(buscadorAgenda.value.trim()).split(/\s+/).filter(Boolean);
-  const activos = CATALOGO.filter(categoria => !categoriaAgenda || categoria.seccion === categoriaAgenda);
+  const categoria = CATALOGO.find(item => item.seccion === categoriaAgenda);
   const usados = new Set(serviciosElegidos().map(({ servicio }) => servicio.id));
-  const opciones = consulta.length || categoriaAgenda
-    ? activos.flatMap(categoria => reservables(categoria)
-      .filter(([nombre, , id]) => !usados.has(id) && consulta.every(palabra =>
-        normalizarBusquedaAgenda([nombre, categoria.menu, palabrasAgenda[categoria.seccion] || ''].join(' ')).includes(palabra))))
-    : [];
+  const opciones = categoria ? reservables(categoria).filter(([, , id]) => !usados.has(id)) : [];
   agendaCategorias.querySelectorAll('button').forEach(boton => {
     boton.setAttribute('aria-pressed', String(boton.dataset.categoriaAgenda === categoriaAgenda));
   });
@@ -1591,9 +1572,7 @@ function pintarResultadosAgenda() {
   agendaResultados.hidden = !opciones.length;
   agendaEstado.textContent = opciones.length
     ? opciones.length + (opciones.length === 1 ? ' servicio encontrado' : ' servicios encontrados')
-    : consulta.length || categoriaAgenda
-      ? 'No hay servicios que coincidan. Prueba otro nombre o categoría.'
-      : 'Busca por nombre o elige una categoría.';
+    : categoria ? 'No quedan servicios por añadir en esta categoría.' : 'Elige una categoría para ver sus servicios.';
   for (const [nombre, precio, id, duracion] of opciones) {
     const item = document.createElement('li');
     const llamada = porTelefono(nombre);
@@ -1615,10 +1594,6 @@ function pintarResultadosAgenda() {
   }
 }
 
-buscadorAgenda.addEventListener('input', () => {
-  categoriaAgenda = '';
-  pintarResultadosAgenda();
-});
 botonOtroServicio.addEventListener('click', () => abrirSelectorAgenda());
 
 function anadirServicio(id) {
@@ -1645,7 +1620,7 @@ function anadirServicio(id) {
     alCambiarServicios();
     if (filasServicio().length === 0) abrirSelectorAgenda();
     else if (selectorAgenda.hidden) botonOtroServicio.focus();
-    else buscadorAgenda.focus();
+    else (agendaCategorias.querySelector('[aria-pressed="true"]') || agendaCategorias.querySelector('button'))?.focus();
   });
   fila.append(nombre, quien, quitar);
   document.getElementById('serviciosElegidos').append(fila);
@@ -1664,7 +1639,6 @@ function prepararFormulario() {
     });
   }
   seleccionAgendaPreparada = true;
-  buscadorAgenda.disabled = false;
   pintarCategoriasAgenda();
   pintarResultadosAgenda();
   alCambiarServicios();

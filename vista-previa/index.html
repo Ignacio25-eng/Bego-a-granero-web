@@ -602,6 +602,15 @@
     cursor: pointer;
   }
   @media (max-width: 768px) { #cartaTabs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+  /* El catálogo aprovecha todo el ancho disponible, con márgenes laterales. */
+  #servicios { padding-inline: clamp(.85rem, 2.8vw, 3rem); }
+  #servicios > .section-inner { width: 100%; max-width: none; }
+  #cartaTabs .carta-tab { min-height: clamp(120px, 16vw, 245px); }
+  #cartaTabs .carta-tab::before {
+    background: linear-gradient(180deg, #130e0f0d 25%, #130e0fe8 88%);
+  }
+  .carta-fotos-nota { margin: .9rem 0 0; color: var(--light); text-align: center; font-size: .8rem; }
 </style>
 </head>
 <body>
@@ -677,6 +686,7 @@
     <div class="carta-tabs" id="cartaTabs" role="group" aria-label="Categorías de servicios">
       <div id="cartaPanel" role="region" hidden></div>
     </div>
+    <p class="carta-fotos-nota">Las fotos de algunos servicios son ilustrativas.</p>
   </div>
 </section>
 
@@ -1192,10 +1202,20 @@ function renderCarta(i) {
   });
 }
 
-const fotosCarta = {
-  'Color y Protección': 'mechas-ondas.jpg',
-  'Bioterapia Manos': 'unas-francesa.jpg',
-};
+const fotosCarta = new Map([
+  ['Peinado', 8834077],
+  ['Color y Protección', 'mechas-ondas.jpg'],
+  ['Tratamientos Capilares', 3993444],
+  ['Bioterapia Manos', 'unas-francesa.jpg'],
+  ['Bioterapia Pies', 34930117],
+  ['Depilación', 6763618],
+  ['Láser', 36930874],
+  ['Pestañas', 33723106],
+  ['Bioterapia Facial', 29908196],
+  ['Tratamientos Faciales', 32117490],
+  ['Tratamientos Corporales', 11982069],
+  ['Corposhape', 27659257],
+]);
 
 function colocarPanelCarta() {
   const grid = document.getElementById('cartaTabs');
@@ -1220,10 +1240,13 @@ function pintarCarta() {
     button.id = `tab-${i}`;
     button.dataset.categoria = categoria.seccion;
     button.setAttribute('aria-controls', 'cartaPanel');
-    const foto = fotosCarta[categoria.seccion];
+    const foto = fotosCarta.get(categoria.seccion);
     if (foto) {
       const image = document.createElement('img');
-      image.src = `https://ignacio25-eng.github.io/Web-Peluqueria-Alpedrete/fotos/${foto}`;
+      image.src = typeof foto === 'number'
+        ? `https://images.pexels.com/photos/${foto}/pexels-photo-${foto}.jpeg?auto=compress&cs=tinysrgb&w=640`
+        : `https://ignacio25-eng.github.io/Web-Peluqueria-Alpedrete/fotos/${foto}`;
+      image.addEventListener('error', () => image.remove(), { once: true });
       image.alt = '';
       image.loading = 'lazy';
       button.appendChild(image);
